@@ -184,7 +184,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
   <div class="brand">
     <div class="logo">IB</div>
     <div>
-      <h1>IB티처스 <span class="ver">IB 수업설계 스튜디오 · DP 수학 · v0.5</span></h1>
+      <h1>IB티처스 <span class="ver" id="verLabel">IB 수업설계 스튜디오 · DP 수학 · v0.5</span></h1>
     </div>
   </div>
   <div class="top-controls">
@@ -691,16 +691,19 @@ function toast(msg){const t=$('#toast'); t.textContent=msg; t.classList.add('sho
 let uidSeq=1; const uid=()=>'u'+(uidSeq++);
 
 let state={
-  meta:{course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
+  meta:{subject:'math',course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
   outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},
   plans:{}, lessons:[]
 };
 let lastSnapshot=null;
 function snapshot(){ lastSnapshot=JSON.parse(JSON.stringify(state)); const b=$('#btnUndo'); if(b) b.style.display='inline-flex'; }
-const CUR=()=>SYLLABUS[state.meta.course];
-const topicByN=n=> n==='T'? TOOLKIT : CUR().topics.find(t=>t.n===Number(n));
-const topicName=n=> n==='T'? TOOLKIT.name : (topicByN(n)? `토픽 ${n}. ${topicByN(n).name}` : '(토픽 미지정)');
-const targetHours=()=> state.meta.level==='SL'?150:240;
+/* 과목 팩 접근자 — SUBJECTS 레지스트리는 스크립트 하단에 정의(호출 시점에는 항상 존재) */
+const SUBJ=()=>SUBJECTS[state.meta.subject]||SUBJECTS.math;
+const TK=()=>SUBJ().toolkit;
+const CUR=()=>SUBJ().courses[state.meta.course]||SUBJ().courses[SUBJ().defaultCourse];
+const topicByN=n=> n==='T'? TK() : CUR().topics.find(t=>t.n===Number(n));
+const topicName=n=> n==='T'? (TK()?TK().name:'(토픽 미지정)') : (topicByN(n)? `토픽 ${n}. ${topicByN(n).name}` : '(토픽 미지정)');
+const targetHours=()=> SUBJ().targetHours[state.meta.level]||150;
 const hourFactor=()=> (state.meta.hoursUnit==='교시')? (Number(state.meta.lessonMin)||50)/60 : 1;
 const hoursSuffix=()=> (state.meta.hoursUnit==='교시')?'교시':'시간';
 const unitLessons=u=> (state.meta.hoursUnit==='교시')? (Number(u.hours)||0) : Math.max(1,Math.ceil((Number(u.hours)||0)*60/(Number(state.meta.lessonMin)||50)));
@@ -734,19 +737,19 @@ $('#segCourse').addEventListener('click',e=>{if(e.target.dataset.c) setCourse(e.
 $('#segLevel').addEventListener('click',e=>{if(e.target.dataset.l) setLevel(e.target.dataset.l);});
 
 function renderCourseInfo(){
-  const c=CUR(), lv=state.meta.level;
-  const rows=ASSESS[c.code][lv].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td class="num-cell">${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+  const c=CUR(), lv=state.meta.level, pk=SUBJ();
+  const rows=(pk.assess[c.code]&&pk.assess[c.code][lv]||[]).map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td class="num-cell">${r[3]}</td><td>${r[4]}</td></tr>`).join('');
   $('#courseInfoBox').innerHTML=`<b>${c.name} ${lv}</b> <span class="eng">${c.eng}</span> — ${c.desc}<br>
   <table class="tbl" style="margin-top:8px; background:#fff; border-radius:8px; overflow:hidden">
-  <tr><th>평가</th><th>시간/분량</th><th>계산기</th><th>비중</th><th>구성</th></tr>${rows}</table>
-  <div style="margin-top:6px; font-size:12px">IA 준거: ${IA_CRIT.map(x=>`${x[0]} ${x[1]}점`).join(' · ')} = 20점 ${lv==='HL'?'<b>(준거 E는 HL에서 정교함·엄밀성을 추가 요구)</b>':''}</div>`;
+  <tr><th>평가</th><th>시간/분량</th><th>${pk.toolCol||'계산기'}</th><th>비중</th><th>구성</th></tr>${rows}</table>
+  ${pk.iaCrit?`<div style="margin-top:6px; font-size:12px">IA 준거: ${pk.iaCrit.map(x=>`${x[0]} ${x[1]}점`).join(' · ')} = ${pk.iaCrit.reduce((a,x)=>a+x[1],0)}점 ${lv==='HL'&&pk.id==='math'?'<b>(준거 E는 HL에서 정교함·엄밀성을 추가 요구)</b>':''}</div>`:''}`;
 }
 
 /* ═══════════════ 시수 대시보드 ═══════════════ */
 function assignedByTopic(){const m={}; state.outline.units.forEach(u=>{const k=u.topic||'?'; m[k]=(m[k]||0)+(Number(u.hours)||0);}); return m;}
 function renderHours(){
   const lv=state.meta.level.toLowerCase(); const asg=assignedByTopic(); const f=hourFactor(); const isP=state.meta.hoursUnit==='교시';
-  const rows=[...CUR().topics.map(t=>({key:String(t.n),name:`토픽 ${t.n}. ${t.name}`,rec:t[lv]})),{key:'T',name:TOOLKIT.name,rec:TOOLKIT[lv]}];
+  const rows=[...CUR().topics.map(t=>({key:String(t.n),name:`토픽 ${t.n}. ${t.name}`,rec:t[lv]})),...(TK()?[{key:'T',name:TK().name,rec:TK()[lv]}]:[])];
   let total=0; Object.values(asg).forEach(v=>total+=v);
   const totalH=total*f;
   const html=[`<tr><th>영역</th><th style="text-align:right">권장(h)</th><th style="text-align:right">배정${isP?'(교시)':''}</th><th>상태</th></tr>`];
@@ -770,13 +773,13 @@ function renderUnitList(){
   if(!units.length){wrap.innerHTML='<div class="empty-note">아직 단원이 없습니다. <b>「공식 토픽으로 단원 자동 구성」</b>을 눌러 시작하세요.</div>'; renderHours(); refreshUnitSelects(); return;}
   wrap.innerHTML=units.map((u,i)=>{
     const t=topicByN(u.topic);
-    const slItems=(u.topic==='T'? TOOLKIT.items : (t?t.slItems:[]));
+    const slItems=(u.topic==='T'? (TK()?TK().items:[]) : (t?t.slItems:[]));
     const hlItems=(u.topic==='T'? [] : (t?t.hlItems:[]));
     const subChecks=[...slItems.map(s=>({s,hl:false})),...(lv==='HL'?hlItems.map(s=>({s,hl:true})):[])];
     const officialSet=new Set(subChecks.map(o=>o.s));
     const customSubs=u.subs.filter(s=>!officialSet.has(s));
-    const customAssess=u.assess.filter(a=>!ASSESS_TOOLS.includes(a));
-    const topicOpts=[...CUR().topics.map(tp=>`<option value="${tp.n}" ${String(u.topic)===String(tp.n)?'selected':''}>토픽 ${tp.n}. ${tp.name}</option>`),`<option value="T" ${u.topic==='T'?'selected':''}>${TOOLKIT.name}</option>`].join('');
+    const customAssess=u.assess.filter(a=>!SUBJ().assessTools.includes(a));
+    const topicOpts=[...CUR().topics.map(tp=>`<option value="${tp.n}" ${String(u.topic)===String(tp.n)?'selected':''}>토픽 ${tp.n}. ${tp.name}</option>`),...(TK()?[`<option value="T" ${u.topic==='T'?'selected':''}>${TK().name}</option>`]:[])].join('');
     return `<div class="unit-card" data-uid="${u.id}">
       <div class="uc-head">
         <span class="year-tag ${u.year===2?'y2':''}">Year ${u.year}</span>
@@ -802,7 +805,7 @@ function renderUnitList(){
       </details>
       <details class="sub-picker">
         <summary>평가 도구 — ${u.assess.length}개 선택됨</summary>
-        <div class="chips" style="margin-top:8px">${ASSESS_TOOLS.map(a=>`<label><input type="checkbox" data-assess="${esc(a)}" ${u.assess.includes(a)?'checked':''}> ${esc(a)}</label>`).join('')}</div>
+        <div class="chips" style="margin-top:8px">${SUBJ().assessTools.map(a=>`<label><input type="checkbox" data-assess="${esc(a)}" ${u.assess.includes(a)?'checked':''}> ${esc(a)}</label>`).join('')}</div>
         ${customAssess.length?`<div style="margin-top:8px"><div class="hint" style="margin-bottom:4px">가져온 문서의 자체 평가도구 (체크 해제 시 제외)</div><div class="sub-list">${customAssess.map(a=>`<label style="color:#0e7f8c"><input type="checkbox" data-assess="${esc(a)}" checked><span>${esc(a)}</span></label>`).join('')}</div></div>`:''}
       </details>
       <div class="field" style="margin-top:8px"><label class="f-label">자료 (Resources)</label><input data-f="res" value="${esc(u.res||'')}" placeholder="예: 교과서 3단원, GeoGebra 시뮬레이션, 기출 문항 세트"></div>
@@ -834,16 +837,17 @@ $('#unitList').addEventListener('click',e=>{
 });
 function makeUnit(topic,year,title,hours,subs){return {id:uid(),year,term:'1',title,topic,hours,subs:subs||[],extra:'',assess:[],res:''};}
 $('#btnPreset').onclick=()=>{
-  if(state.outline.units.length && !confirm(`현재 ${state.outline.units.length}개 단원 구성을 모두 지우고, 공식 5개 토픽+수학 툴킷의 기본 골격(권장 시수·기본 Year 배치)으로 새로 만듭니다.\n\n실수로 눌렀다면 상단 '되돌리기'로 복구할 수 있습니다. 계속할까요?`)) return;
+  const tk=TK(); const nTop=CUR().topics.length;
+  if(state.outline.units.length && !confirm(`현재 ${state.outline.units.length}개 단원 구성을 모두 지우고, 공식 ${nTop}개 토픽${tk?'+'+tk.name:''}의 기본 골격(권장 시수·기본 Year 배치)으로 새로 만듭니다.\n\n실수로 눌렀다면 상단 '되돌리기'로 복구할 수 있습니다. 계속할까요?`)) return;
   snapshot();
   state.meta.hoursUnit='시간'; refreshStaticFields();
   const lv=state.meta.level.toLowerCase(); const c=CUR();
   state.plans={};
   state.outline.units=[
-    ...c.topics.map(t=>makeUnit(t.n, t.n<=3?1:2, `단원 ${t.n}. ${t.name}`, t[lv], [...t.slItems,...(state.meta.level==='HL'?t.hlItems:[])])),
-    makeUnit('T',2,TOOLKIT.name,TOOLKIT[lv],[...TOOLKIT.items])
+    ...c.topics.map((t,i)=>makeUnit(t.n, (i+1)<=Math.ceil(nTop/2)?1:2, `단원 ${t.n}. ${t.name}`, t[lv], [...t.slItems,...(state.meta.level==='HL'?t.hlItems:[])])),
+    ...(tk?[makeUnit('T',2,tk.name,tk[lv],[...tk.items])]:[])
   ];
-  renderUnitList(); toast('공식 토픽 6개 영역으로 단원을 구성했습니다. 학교 일정에 맞게 Year·시수를 조정하세요.');
+  renderUnitList(); toast(`공식 토픽 ${nTop+(tk?1:0)}개 영역으로 단원을 구성했습니다. 학교 일정에 맞게 Year·시수를 조정하세요.`);
 };
 $('#btnAddUnit').onclick=()=>{state.outline.units.push(makeUnit(1,1,'',0,[])); renderUnitList();};
 $('#btnClearUnits').onclick=()=>{if(confirm('모든 단원을 삭제할까요? (상단 되돌리기로 복구 가능)')){snapshot();state.outline.units=[]; state.plans={}; renderUnitList();}};
@@ -940,7 +944,7 @@ $('#btnUpDraft').onclick=()=>{
   if(state.meta.docLang==='English'){
     const tnEng=u.topic==='T'? TOOLKIT.eng : ((topicByN(u.topic)||{}).eng||'this topic');
     fill('desc',`Unit "${u.title||tnEng}" — ${c.eng} ${lv}, covering ${tnEng}. ${u.hours||0} teaching hours (about ${les} lessons). Core resources: textbook chapter, GDC, Desmos/GeoGebra tasks.`);
-    fill('dpAssess', u.topic==='T' ? `Internal assessment (mathematical exploration) — criteria A-E, 20 marks, 20% of the final grade.` : 'External assessment: this unit is examined in '+ASSESS[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')+'. Design the summative task in the matching format.');
+    fill('dpAssess', u.topic==='T' ? `Internal assessment (mathematical exploration) — criteria A-E, 20 marks, 20% of the final grade.` : 'External assessment: this unit is examined in '+SUBJ().assess[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')+'. Design the summative task in the matching format.');
     fill('transfer',ET.transfer(tnEng));
     fill('formative',ET.formative); fill('summative',ET.summative);
     fill('diffDetail',ET.diffDetail); fill('langDetail',ET.langDetail); fill('resources',ET.resources);
@@ -954,7 +958,7 @@ $('#btnUpDraft').onclick=()=>{
     return;
   }
   fill('desc',`『${u.title||tn}』 단원. ${c.name} ${lv}의 ${tn} 영역을 다룬다. 총 ${u.hours||0}시간(약 ${les}교시). 주 교재: 교과서 해당 단원, GDC, Desmos/GeoGebra 활동 자료.`);
-  fill('dpAssess', u.topic==='T' ? `내부평가(IA) 수학적 탐구 — 준거 A~E(20점), 총점의 20%. ${lv} 기준 유의: 준거 E(수학의 활용)${lv==='HL'?'는 정교함·엄밀성 추가 요구':'는 과정 수준에 상응하면 만점 가능'}.` : `외부평가 출제 영역: ${ASSESS[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')} — 본 단원 내용 포함. 총괄평가는 해당 Paper 형식(단답+서술)을 반영해 설계.`);
+  fill('dpAssess', u.topic==='T' ? `내부평가(IA) 수학적 탐구 — 준거 A~E(20점), 총점의 20%. ${lv} 기준 유의: 준거 E(수학의 활용)${lv==='HL'?'는 정교함·엄밀성 추가 요구':'는 과정 수준에 상응하면 만점 가능'}.` : `외부평가 출제 영역: ${SUBJ().assess[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')} — 본 단원 내용 포함. 총괄평가는 해당 Paper 형식(단답+서술)을 반영해 설계.`);
   fill('transfer',`· 학생들은 ${tn.replace(/^토픽 \d+\. /,'')}의 핵심 아이디어를 처음 보는 실생활 맥락에 적용하여 문제를 수학적으로 모델링하고 해결할 수 있다.\n· 학생들은 자신의 풀이와 결론을 근거를 들어 정당화하고, 수학적 표기 규범에 맞게 의사소통할 수 있다.`);
   fill('essential',ES[u.topic]||ES[1]);
   fill('miscon','· '+bk.mis.join('\n· '));
@@ -998,7 +1002,7 @@ function lessonDraft(u,type,sub,note,seed){
    practice:`· (10분) 예제 1 함께 풀기(교사 시범 → 사고 구술)\n· (15분) 수준별 문제 세트(기본 4·표준 3·도전 1) 개별/짝 풀이 — 교사 순회 피드백\n· (5분) 자주 나온 오류 공개 첨삭: "${mis}" 유형 집중`,
    modeling:`· (8분) 모델링 사이클 소개(현실 문제 → 수학화 → 풀이 → 해석·검증)\n· (18분) 모둠 활동: ${act||'실측·데이터 기반 과제'} — 역할 분담(측정/기록/계산/발표)\n· (4분) 중간 점검: 모델의 가정과 한계 1가지씩 발표`,
    gdc:`· (7분) GDC 기능 시범(교사 화면 미러링): 이번 차시 필수 기능 절차 카드 배부\n· (18분) 짝 활동: 동일 문제를 손계산 vs GDC로 나눠 풀고 결과 비교·검증\n· (5분) 시험 유의점: ${state.meta.course==='AA'?'Paper 1(비계산기)과 Paper 2(계산기)의 접근 차이':'전 시험 GDC 필수 — 입력·해석 오류 주의'} 정리`,
-   ia:`· (10분) 준거 하나 집중 해설(오늘: ${pick(IA_CRIT.map(x=>x[0]),seed)}) — 우수/미흡 사례 비교\n· (15분) 개인 작업: 자기 탐구에 해당 준거 자가 체크리스트 적용, 수정 계획 메모\n· (5분) 짝 피드백: 체크리스트 근거로 상호 코멘트 1가지씩`,
+   ia:`· (10분) 준거 하나 집중 해설(오늘: ${pick((SUBJ().iaCrit||[]).map(x=>x[0]),seed)}) — 우수/미흡 사례 비교\n· (15분) 개인 작업: 자기 탐구에 해당 준거 자가 체크리스트 적용, 수정 계획 메모\n· (5분) 짝 피드백: 체크리스트 근거로 상호 코멘트 1가지씩`,
    review:`· (10분) 단원 개념 지도(마인드맵) 모둠 완성 — 빈칸 버전 배부\n· (15분) 모의 Paper 미니 세트(단답 3+서술 1) 실전 조건 풀이\n· (5분) 자기 채점·마킹 스킴 읽는 법 안내`};
   const intro={
    intro:`· (3분) 전시 학습 1문항 미니 점검\n· (7분) 훅: "${inq}" 질문 게시 → 예상 답 포스트잇 부착(수업 끝에 재방문)`,
@@ -1083,7 +1087,7 @@ function buildPrompt(){
     return `${head}\n\n## 과제\n아래 단원의 차시별 수업안을 한국어로 상세 설계해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시, 1교시 ${state.meta.lessonMin}분)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n- 유닛 플래너 요약:\n${planSummary(uid2)}\n${extra?`- 추가 조건: ${extra}`:''}\n\n## 각 차시에 반드시 포함\n① 학습 목표(도달 가능하고 관찰 가능하게)  ② 이 차시의 탐구 질문  ③ 도입(분 단위, 훅 포함)  ④ 전개(분 단위, 활동·발문 예시·예상 오답과 대응)  ⑤ 정리(성찰·출구티켓)  ⑥ 형성평가와 과제  ⑦ ATL 초점  ⑧ GDC/자료 활용  ⑨ 판서 계획 개요\n\n${QUALITY}\n${LANGLINE()}\n\n## 출력 형식\n차시별로 구분된 마크다운. 먼저 전체 차시 흐름표(1행=1차시)를 제시한 뒤, 각 차시 상세안을 작성.`;
   }
   if(type==='outline'){
-    return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족, 툴킷 30시간 확보 여부(검산 포함)\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course==='AA'?'AA':'AI'} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${ASSESS[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
+    return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족, 툴킷 30시간 확보 여부(검산 포함)\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course==='AA'?'AA':'AI'} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${SUBJ().assess[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
   }
   /* ia */
   return `${head}\n${u?`- 참고 단원: ${u.title} (${topicName(u.topic)})`:''}${extra?`\n- 학생 관심 분야: ${extra}`:''}\n\n## 과제\n${CUR().name} ${state.meta.level} 학생을 위한 IA(수학적 탐구) 주제 아이디어 15개를 제안해 주세요.\n\n## 각 주제마다 포함\n① 주제명(한 줄)  ② 탐구 질문 형태로 정제한 버전  ③ 사용될 핵심 수학(실라버스 토픽 연결)  ④ 데이터/자료 확보 방법  ⑤ 준거 E(수학의 활용) 관점 위험도: 수학이 과정 수준에 못 미치거나(너무 얕음) 감당 불가(너무 깊음)할 위험 평가  ⑥ 한국 학생이 접근하기 좋은 현지화 포인트\n\n## 조건\n- '너무 흔한 주제'(BMI, 피보나치와 황금비 등)는 피하거나 참신한 변형으로만.\n- 개인적 참여(준거 C)를 살릴 수 있는 주제 위주로.\n- 12~20쪽 분량으로 완결 가능한 범위로.\n\n## 출력 형식\n표(주제/질문/핵심 수학/데이터/위험도/현지화) + 상위 추천 3개에 대한 상세 코멘트.\n${LANGLINE()}`;
@@ -1152,7 +1156,7 @@ function buildOutlineDocHTML(){
   P.push(`<p class="pmeta"><b>총 배정 시수: ${tot} / ${targetHours()}시간</b> (공식 권장: SL 150 · HL 240, 툴킷 30시간 포함)</p>`);
   P.push(`<h2>2. 내부평가(IA) 계획</h2><p><b>첫 소개:</b> ${esc(state.outline.iaIntro||'')}<br><b>최종 마감:</b> ${esc(state.outline.iaDue||'')}</p><p>${esc(state.outline.iaStages||'')}</p>`);
   P.push(`<h2>3. TOK 연계</h2><p>${esc(state.outline.tok||'')}</p><h2>4. 학습접근방법(ATL)</h2><p>${esc(state.outline.atl||'')}</p><h2>5. 국제적 소양</h2><p>${esc(state.outline.im||'')}</p><h2>6. IB 학습자상</h2><p><b>초점:</b> ${esc((state.outline.lpChecks||[]).join(', '))}</p><p>${esc(state.outline.lp||'')}</p><h2>7. 자료</h2><p>${esc(state.outline.resources||'')}</p>`);
-  P.push(`<h2>평가 구조 (참고)</h2><table><tr><th>평가</th><th>시간/분량</th><th>계산기</th><th>비중</th><th>구성</th></tr>${ASSESS[m.course][m.level].map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table><p class="pmeta">IA 준거: ${IA_CRIT.map(x=>x[0]+' '+x[1]+'점').join(' · ')} = 20점</p>`);
+  P.push(`<h2>평가 구조 (참고)</h2><table><tr><th>평가</th><th>시간/분량</th><th>${esc(SUBJ().toolCol||'계산기')}</th><th>비중</th><th>구성</th></tr>${(SUBJ().assess[m.course]&&SUBJ().assess[m.course][m.level]||[]).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>${SUBJ().iaCrit?`<p class="pmeta">IA 준거: ${SUBJ().iaCrit.map(x=>x[0]+' '+x[1]+'점').join(' · ')} = ${SUBJ().iaCrit.reduce((a,x)=>a+x[1],0)}점</p>`:''}`);
   P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오 v0.3으로 작성된 초안 · 제출 전 최신 공식 가이드와 대조 필요 · 본 도구는 IBO와 무관하며 IBO의 승인·보증을 받지 않았습니다.</div>`);
   return P.join('');
 }
@@ -1192,12 +1196,15 @@ function saveJson(){
 }
 function applyState(d){
   state=d; state.plans=state.plans||{}; state.lessons=state.lessons||[];
+  /* 하위호환: 구 파일에는 subject 필드가 없음 → 수학으로 간주 */
+  state.meta.subject=(state.meta.subject && SUBJECTS[state.meta.subject])? state.meta.subject : 'math';
   state.meta.docLang=state.meta.docLang||'한국어';
   state.meta.hoursUnit=['시간','교시'].includes(state.meta.hoursUnit)?state.meta.hoursUnit:'시간';
   state.outline={units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:'',...state.outline};
   state.outline.lpChecks=state.outline.lpChecks||[];
   let maxSeq=1; (state.outline.units||[]).forEach(u=>{const n=parseInt(String(u.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;}); (state.lessons||[]).forEach(l=>{const n=parseInt(String(l.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;}); uidSeq=maxSeq;
-  setCourse(state.meta.course||'AA'); setLevel(state.meta.level||'SL');
+  renderSubjectUI();
+  setCourse(SUBJ().courses[state.meta.course]? state.meta.course : SUBJ().defaultCourse); setLevel(state.meta.level||'SL');
   refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist();
 }
 function loadJsonFile(file){
@@ -1520,13 +1527,15 @@ function promptDocReview(){
 }
 function parseJsonLoose(s){s=String(s||'').trim(); const m=s.match(/```(?:json)?\s*([\s\S]*?)```/); if(m)s=m[1].trim(); const i=s.indexOf('{'), j=s.lastIndexOf('}'); if(i<0||j<=i) throw new Error('JSON 객체가 없습니다'); return JSON.parse(s.slice(i,j+1));}
 function normalizeImported(d){
-  const base={meta:{course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어'},outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},plans:{},lessons:[]};
+  const base={meta:{subject:'math',course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어'},outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},plans:{},lessons:[]};
   const out={...base, meta:{...base.meta,...(d.meta||{})}, outline:{...base.outline,...(d.outline||{})}, plans:d.plans||{}, lessons:Array.isArray(d.lessons)?d.lessons:[]};
-  if(!['AA','AI'].includes(out.meta.course)) out.meta.course='AA';
+  if(!SUBJECTS[out.meta.subject]) out.meta.subject='math';
+  const pk=SUBJECTS[out.meta.subject];
+  if(!pk.courses[out.meta.course]) out.meta.course=pk.defaultCourse;
   if(!['SL','HL'].includes(out.meta.level)) out.meta.level='SL';
   out.meta.lessonMin=Number(out.meta.lessonMin)||50; out.meta.perWeek=Number(out.meta.perWeek)||4;
   if(!['시간','교시'].includes(out.meta.hoursUnit)) out.meta.hoursUnit='시간';
-  out.outline.units=(out.outline.units||[]).map(u=>({id:(typeof u.id==='string'&&u.id)?u.id:uid(), year:(Number(u.year)===2?2:1), term:'1', title:String(u.title||''), topic:(u.topic==='T'?'T':([1,2,3,4,5].includes(Number(u.topic))?Number(u.topic):1)), hours:Number(u.hours)||0, subs:Array.isArray(u.subs)?u.subs.map(String):[], extra:String(u.extra||''), assess:Array.isArray(u.assess)?u.assess.map(String):[], res:String(u.res||'')}));
+  out.outline.units=(out.outline.units||[]).map(u=>({id:(typeof u.id==='string'&&u.id)?u.id:uid(), year:(Number(u.year)===2?2:1), term:'1', title:String(u.title||''), topic:((u.topic==='T'&&pk.toolkit)?'T':(pk.topicDomain.includes(Number(u.topic))?Number(u.topic):pk.topicDomain[0])), hours:Number(u.hours)||0, subs:Array.isArray(u.subs)?u.subs.map(String):[], extra:String(u.extra||''), assess:Array.isArray(u.assess)?u.assess.map(String):[], res:String(u.res||'')}));
   out.outline.lpChecks=Array.isArray(out.outline.lpChecks)?out.outline.lpChecks:[];
   return out;
 }
@@ -1567,7 +1576,7 @@ function renderChecklist(){
     ['Year 1·2 모두 배치', o.units.some(u=>u.year===1)&&o.units.some(u=>u.year===2), '2개년 계획이 양식 요구사항'],
     ['모든 단원에 학습 내용', o.units.length>0&&o.units.every(u=>u.subs.length>0||(u.extra||'').trim()), ''],
     ['모든 단원에 평가 도구', o.units.length>0&&o.units.every(u=>u.assess.length>0), ''],
-    ['수학 툴킷·IA 30시간 배정', (assignedByTopic()['T']||0)*hourFactor()>=29, '공식 요구: 30시간(IA 10~15시간 포함) — 별도 단원 또는 분산 배정'],
+    ...(TK()?[['수학 툴킷·IA 30시간 배정', (assignedByTopic()['T']||0)*hourFactor()>=(TK().sl-1), '공식 요구: 30시간(IA 10~15시간 포함) — 별도 단원 또는 분산 배정']]:[]),
     ['IA 일정(소개·단계·마감) 작성', !!(o.iaIntro.trim()&&o.iaDue.trim()&&o.iaStages.trim()), ''],
     ['TOK 연계 서술', !!o.tok.trim(), '토픽 1개를 골라 구체적으로'],
     ['ATL 서술', !!o.atl.trim(), ''],
@@ -1588,7 +1597,7 @@ $('#btnSample').onclick=()=>{
   if(state.outline.units.length&&!confirm('현재 내용을 지우고 샘플을 불러올까요? (상단 되돌리기로 복구 가능)'))return;
   snapshot();
   uidSeq=1;
-  state={meta:{course:'AA',level:'SL',school:'한국IB고등학교(샘플)',code:'0000',teacher:'김영우',years:'2027.3 ~ 2029.2',training:'DP Mathematics: AA Cat.1 / 2026.01',date:'2026.08.07',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
+  state={meta:{subject:'math',course:'AA',level:'SL',school:'한국IB고등학교(샘플)',code:'0000',teacher:'김영우',years:'2027.3 ~ 2029.2',training:'DP Mathematics: AA Cat.1 / 2026.01',date:'2026.08.07',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
    outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:OUTLINE_EX.tok.replace('예: ',''),atl:OUTLINE_EX.atl.replace('예: ',''),im:OUTLINE_EX.im.replace('예: ',''),lp:'탐구하는 사람: 모든 단원을 탐구 질문으로 열고 닫는다. 사고하는 사람: 풀이 전략 비교 토론을 정례화한다. 도전하는 사람: 도전 문제와 IA에서 안전지대를 벗어난 시도를 격려하고 실패를 성찰로 연결한다.',lpChecks:['탐구하는 사람','사고하는 사람','도전하는 사람'],resources:'Haese Mathematics AA SL 교과서, 공학용 그래픽 계산기(TI-Nspire) 1인 1대, Desmos·GeoGebra, 토픽별 기출 문항 세트, 교육청 IB 자료실 번역 자료, 학교 수학탐구실'},
    plans:{}, lessons:[]};
   const c=SYLLABUS.AA;
@@ -1629,6 +1638,29 @@ $('#btnUndo').onclick=()=>{
   applyState(lastSnapshot); lastSnapshot=cur;
   toast('되돌렸습니다. 한 번 더 누르면 다시 복원됩니다.');
 };
+/* ═══════════════ 과목 팩 레지스트리 ═══════════════ */
+/* 새 과목 추가 방법: 아래에 팩 객체를 등록하면 과정 버튼·시수 대시보드·검증·내보내기가 자동 반영됩니다.
+   필드: id, short(헤더 표기), courses(과정별 실라버스), defaultCourse, courseShort(과정 버튼 라벨),
+   toolkit(필수 시간블록, 없으면 null), targetHours{SL,HL}, assess(시험 구조), iaCrit(IA 준거, 없으면 null),
+   toolCol(평가표 3열 제목: 수학='계산기', 타 과목='허용 자료' 등), bank(예시은행), conceptCore, es(핵심 이해),
+   skills(기능), assessTools(평가 도구 목록), topicDomain(허용 토픽 번호 배열)
+   ※ 수업안 생성기·AI 프롬프트의 과목 고정 문구는 다음 단계(국어 팩 연결)에서 팩 필드로 이동 예정 */
+const SUBJECTS={
+ math:{ id:'math', short:'DP 수학',
+  courses:SYLLABUS, defaultCourse:'AA',
+  courseShort:{AA:'AA 분석과 접근', AI:'AI 응용과 해석'},
+  toolkit:TOOLKIT, targetHours:{SL:150,HL:240},
+  assess:ASSESS, iaCrit:IA_CRIT, toolCol:'계산기',
+  bank:BANK, conceptCore:CONCEPT_CORE, es:ES, skills:SKILLS,
+  assessTools:ASSESS_TOOLS, topicDomain:[1,2,3,4,5] }
+};
+function renderSubjectUI(){
+  const p=SUBJ();
+  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.5`;
+  const seg=$('#segCourse'); if(seg) seg.innerHTML=Object.keys(p.courses).map(k=>`<button data-c="${k}" class="${state.meta.course===k?'on':''}">${esc(p.courseShort[k]||k)}</button>`).join('');
+}
+
+renderSubjectUI();
 bindStaticFields();
 renderCourseInfo();
 renderUnitList();

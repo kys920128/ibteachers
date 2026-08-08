@@ -1179,7 +1179,16 @@ function renderLessonList(){
   renderRail();
   const el=$('#lessonList'); $('#lsCount').textContent=state.lessons.length? `총 ${state.lessons.length}차시`:'';
   if(!state.lessons.length){el.innerHTML='<div class="empty-note">아직 저장된 차시가 없습니다. 위에서 수업안을 생성한 뒤 저장해 보세요.</div>'; return;}
-  el.innerHTML=state.lessons.map(l=>`<div class="lesson-item" data-lid="${l.id}"><span class="badge b-blue">${esc(l.no)}</span><b>${esc(l.unitTitle)}</b><span style="color:#64748b; font-size:12.5px">${LT(l.type)}${l.sub?' · '+esc(l.sub):''}</span><span style="margin-left:auto; display:flex; gap:5px"><button class="btn btn-ghost btn-sm" data-lact="copy">복사</button><button class="btn btn-danger btn-sm" data-lact="del">삭제</button></span></div>`).join('');
+  const item=l=>`<div class="lesson-item" data-lid="${l.id}"><span class="badge b-blue">${esc(l.no)}</span><b>${esc(l.unitTitle)}</b><span style="color:#64748b; font-size:12.5px">${LT(l.type)}${l.sub?' · '+esc(l.sub):''}</span><span style="margin-left:auto; display:flex; gap:5px"><button class="btn btn-ghost btn-sm" data-lact="copy">복사</button><button class="btn btn-danger btn-sm" data-lact="del">삭제</button></span></div>`;
+  const byNo=(a,b)=>(parseInt(a.no)||999)-(parseInt(b.no)||999);
+  const groups=[];
+  state.outline.units.forEach(u=>{ const ls=state.lessons.filter(l=>l.unitId===u.id).sort(byNo); if(ls.length) groups.push({title:u.title||'무제 단원', target:unitLessons(u), ls}); });
+  const orphan=state.lessons.filter(l=>!state.outline.units.some(u=>u.id===l.unitId)).sort(byNo);
+  if(orphan.length) groups.push({title:'단원 미지정', target:0, ls:orphan});
+  el.innerHTML=groups.map(g=>{
+    const pct=g.target? Math.min(100,Math.round(g.ls.length/g.target*100)) : 0;
+    return `<div style="margin:12px 0 6px; display:flex; align-items:center; gap:10px"><span style="font-size:12.5px; font-weight:800; color:var(--navy)">${esc(g.title)}</span><span style="font-size:11.5px; color:#94a3b8">${g.ls.length}차시${g.target?` / 약 ${g.target}교시`:''}</span>${g.target?`<span class="pbar" style="flex:0 0 90px; height:5px"><span style="display:block; height:100%; width:${pct}%; background:var(--blue); border-radius:99px"></span></span>`:''}</div>`+g.ls.map(item).join('');
+  }).join('');
 }
 $('#lessonList').addEventListener('click',e=>{
   const item=e.target.closest('.lesson-item'); if(!item)return;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.6)</title>
+<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.7)</title>
 <meta name="description" content="IB DP 코스아웃라인·유닛플래너·차시 수업안을 브라우저에서 바로 작성하고 Word·PDF로 내보내는 도구. 설치·가입 없이 무료.">
 <link rel="canonical" href="https://ibteachers.kr/studio.html">
 <meta property="og:title" content="IB티처스 스튜디오 — IB 수업설계 도구">
@@ -74,6 +74,27 @@ main{flex:1; padding:22px 26px 80px; max-width:1080px; margin:0 auto; width:100%
 .page-head{margin-bottom:16px}
 .page-head h2{font-size:21px; font-weight:800; letter-spacing:-.02em; color:var(--navy)}
 .page-head p{color:var(--ink2); font-size:13.5px; margin-top:3px}
+
+/* ── 단계 내부 탭 ── */
+.tabbar{display:flex; gap:4px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:4px; margin-bottom:14px; overflow-x:auto; position:sticky; top:54px; z-index:20; box-shadow:var(--shadow)}
+.tab-btn{border:0; background:transparent; color:var(--ink2); font-size:13.5px; font-weight:700; padding:8px 14px; border-radius:9px; white-space:nowrap; flex:0 0 auto; cursor:pointer}
+.tab-btn.on{background:var(--blue-soft); color:var(--blue)}
+.tab-btn .miss{display:inline-block; min-width:16px; height:16px; border-radius:8px; background:var(--amber-soft); color:var(--amber); font-size:10.5px; font-weight:800; line-height:16px; text-align:center; margin-left:5px; padding:0 4px}
+.tab-panel{display:none}
+.tab-panel.on{display:block}
+
+/* ── 사이드바 그룹·파이프라인 ── */
+.side-group{font-size:11px; font-weight:800; color:#94a3b8; letter-spacing:.08em; padding:8px 10px 4px}
+.side-divider{border-top:1px solid var(--line); margin:10px 6px}
+.step-btn .sub{display:block; font-size:10.5px; font-weight:600; color:#94a3b8; margin-top:1px}
+.step-btn.flow{position:relative}
+.step-btn.flow:not(.last)::after{content:''; position:absolute; left:21px; bottom:-9px; width:2px; height:9px; background:#dbe3ec}
+.step-btn.flow.dashed:not(.last)::after{background:repeating-linear-gradient(180deg,#dbe3ec 0 3px,transparent 3px 6px)}
+.step-btn.flow{margin-bottom:9px}
+.step-btn.soon .num{background:#f1f5f9; color:#b6c2d1}
+.step-btn.soon{color:#9aa8b8}
+.next-band{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:6px; padding:14px 16px; background:#f2f6fd; border:1px solid var(--line); border-radius:12px}
+.next-band .hint{margin:0; flex:1; min-width:180px}
 
 .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; margin-bottom:16px}
 .card>h3{font-size:15.5px; font-weight:800; color:var(--navy); display:flex; align-items:center; gap:8px; margin-bottom:12px}
@@ -172,6 +193,11 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
   .sidebar{width:100%; flex:none; position:static; height:auto; display:flex; overflow-x:auto; padding:8px; gap:4px; border-right:0; border-bottom:1px solid var(--line)}
   .step-btn{width:auto; white-space:nowrap; padding:8px 10px}
   .side-note{display:none}
+  .side-group{display:none}
+  .side-divider{border-top:0; border-left:1px solid var(--line); margin:4px 4px; align-self:stretch}
+  .step-btn .sub{display:none}
+  .step-btn.flow::after{display:none}
+  .tabbar{position:static}
   .grid2,.grid3,.grid4,.two-col,.sub-list{grid-template-columns:1fr}
   main{padding:16px 14px 60px}
 }
@@ -184,7 +210,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
   <div class="brand">
     <div class="logo">IB</div>
     <div>
-      <h1>IB티처스 <span class="ver" id="verLabel">IB 수업설계 스튜디오 · DP 수학 · v0.5</span></h1>
+      <h1>IB티처스 <span class="ver" id="verLabel">IB 수업설계 스튜디오 · v0.7</span></h1>
     </div>
   </div>
   <div class="top-controls">
@@ -207,11 +233,16 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
 
 <div class="app">
   <nav class="sidebar">
-    <button class="step-btn on" data-step="course"><span class="num">1</span> 코스 아웃라인</button>
-    <button class="step-btn" data-step="unit"><span class="num">2</span> 유닛 플래너</button>
-    <button class="step-btn" data-step="lesson"><span class="num">3</span> 차시 수업안</button>
-    <button class="step-btn" data-step="ai"><span class="num">4</span> AI 초안 만들기</button>
-    <button class="step-btn" data-step="export"><span class="num">5</span> 가져오기·내보내기</button>
+    <div class="side-group">설계 흐름</div>
+    <button class="step-btn flow on" data-step="course"><span class="num">1</span> <span>코스 아웃라인<span class="sub" data-rail="course"></span></span></button>
+    <button class="step-btn flow" data-step="unit"><span class="num">2</span> <span>유닛 플래너<span class="sub" data-rail="unit"></span></span></button>
+    <button class="step-btn flow" data-step="lesson"><span class="num">3</span> <span>차시 수업안<span class="sub" data-rail="lesson"></span></span></button>
+    <button class="step-btn flow dashed" data-step="assess"><span class="num">4</span> <span>평가 설계<span class="sub" data-rail="assess"></span></span></button>
+    <button class="step-btn flow last soon" data-step="grading"><span class="num">5</span> <span>채점·피드백<span class="sub">준비 중</span></span></button>
+    <div class="side-divider"></div>
+    <div class="side-group">도구</div>
+    <button class="step-btn" data-step="ai"><span class="num">🤖</span> AI 초안 만들기</button>
+    <button class="step-btn" data-step="export"><span class="num">📂</span> 가져오기·내보내기</button>
     <button class="step-btn" data-step="help"><span class="num">?</span> 도움말·용어</button>
     <div class="side-note">
       ⚠️ 데이터는 브라우저 화면에만 있습니다. 작업 후 <b>저장(JSON)</b> 버튼으로 파일을 내려받아 보관하세요.<br><br>
@@ -221,13 +252,27 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
 
   <main>
 
+  <div id="unitCtx" style="display:none; position:sticky; top:54px; z-index:21; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:8px 14px; margin-bottom:12px; font-size:13px; align-items:center; gap:10px; flex-wrap:wrap">
+    <b style="color:var(--navy)">현재 단원</b>
+    <select id="unitCtxSel" style="width:auto; min-width:200px; max-width:340px"></select>
+    <span class="hint" style="margin:0">②유닛 → ③차시 → ④평가를 오가도 이 단원을 계속 따라갑니다</span>
+  </div>
+
   <!-- ═══════════ STEP 1 : 코스 아웃라인 ═══════════ -->
   <section class="step-panel on" id="panel-course">
     <div class="page-head">
-      <h2>① 코스 아웃라인 <span class="eng">Course Outline</span></h2>
-      <p>IB 인증 시 제출하는 공식 「Diploma Programme course outline」 양식의 구조를 그대로 따릅니다. 위에서부터 차례로 채우면 제출용 초안이 완성됩니다.</p>
+      <h2>① 코스 아웃라인 <span class="eng">Course Outline</span> <button class="btn btn-soft btn-sm" style="float:right" onclick="goAI('outline')">🤖 AI 검토 프롬프트</button></h2>
+      <p>IB 인증 시 제출하는 공식 「Diploma Programme course outline」 양식의 구조를 그대로 따릅니다. 탭을 오가며 채우세요 — 순서는 자유입니다. 주황 숫자는 아직 못 채운 곳의 개수입니다.</p>
     </div>
 
+    <div class="tabbar" data-tabs="course">
+      <button class="tab-btn" data-tab="basic">기본 정보<span class="miss" style="display:none"></span></button>
+      <button class="tab-btn" data-tab="units">1. 단원 구성<span class="miss" style="display:none"></span></button>
+      <button class="tab-btn" data-tab="ia">2. IA 계획<span class="miss" style="display:none"></span></button>
+      <button class="tab-btn" data-tab="links">3~7. 연계·자료<span class="miss" style="display:none"></span></button>
+    </div>
+
+    <div class="tab-panel" data-tabs="course" data-tab="basic">
     <div class="card">
       <h3><span class="chip">기본 정보</span>양식 머리말 <span class="eng">Header</span></h3>
       <div class="grid3">
@@ -256,6 +301,9 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <p class="hint" id="hoursHint">권장 시수는 IB 공식 subject brief 기준(툴킷 30시간 포함, SL 150 · HL 240). 배정 시수는 아래 단원 구성의 합계입니다.</p>
     </div>
 
+    </div>
+
+    <div class="tab-panel" data-tabs="course" data-tab="units">
     <div class="card">
       <h3><span class="chip">1. Course outline</span>단원(토픽) 구성 — Year 1 / Year 2 <span class="eng">Topic · Contents · Time · Assessment · Resources</span></h3>
       <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap">
@@ -267,6 +315,9 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div id="unitList"></div>
     </div>
 
+    </div>
+
+    <div class="tab-panel" data-tabs="course" data-tab="ia">
     <div class="card">
       <h3 id="iaCardTitle"><span class="chip">2. IA</span>내부평가 계획 — 수학적 탐구 <span class="eng">Internal assessment: mathematical exploration</span></h3>
       <div class="callout info" id="iaCardInfo">IB 양식 원문: IA를 <b>언제 처음 소개하고, 어떤 단계로 진행하며, 언제 마감하는지</b> 서술해야 합니다. IA는 총점의 20%, 준거 A~E 합계 20점, 권장 분량 12~20쪽입니다.</div>
@@ -278,6 +329,9 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div class="field"><label class="f-label">단계별 일정 (도입 → 주제 탐색 → 초안 → 피드백 → 최종)</label><textarea id="f-iaStages" data-outline="iaStages" rows="5"></textarea></div>
     </div>
 
+    </div>
+
+    <div class="tab-panel" data-tabs="course" data-tab="links">
     <div class="card">
       <h3><span class="chip">3~6. 연계</span>TOK · ATL · 국제적 소양 · 학습자상</h3>
       <div class="sec-block" style="border-top:0; padding-top:0; margin-top:0">
@@ -306,12 +360,15 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
         <textarea id="f-resources" data-outline="resources" rows="4" placeholder="예: 공학용 그래픽 계산기(TI-84/nspire) 1인 1대, GeoGebra·Desmos, Haese Mathematics AA SL 교과서, 교육청 IB 자료실…"></textarea>
       </div>
     </div>
+    </div>
+
+    <div class="next-band"><span class="hint">여기서 만든 단원들이 ② 유닛 플래너의 재료가 됩니다. 언제든 돌아와 고칠 수 있어요.</span><button class="btn btn-primary" onclick="showStep('unit')">다음 단계: 유닛 플래너 →</button></div>
   </section>
 
   <!-- ═══════════ STEP 2 : 유닛 플래너 ═══════════ -->
   <section class="step-panel" id="panel-unit">
     <div class="page-head">
-      <h2>② 유닛 플래너 <span class="eng">DP Unit Planner</span></h2>
+      <h2>② 유닛 플래너 <span class="eng">DP Unit Planner</span> <button class="btn btn-soft btn-sm" style="float:right" onclick="goAI('unitplan')">🤖 AI로 정교화</button></h2>
       <p>IB 공식 「DP unit planner」 템플릿 구조입니다. 단원을 선택하고 <b>초안 자동 생성</b>을 누르면 예시은행을 바탕으로 빈칸을 채워줍니다 — 이후 우리 반에 맞게 다듬으세요.</p>
     </div>
 
@@ -328,6 +385,12 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
 
     <div id="upFormWrap">
+    <div class="tabbar" data-tabs="unit">
+      <button class="tab-btn" data-tab="inquiry">탐구 INQUIRY</button>
+      <button class="tab-btn" data-tab="action">실행 ACTION</button>
+      <button class="tab-btn" data-tab="reflection">성찰 REFLECTION</button>
+    </div>
+    <div class="tab-panel" data-tabs="unit" data-tab="inquiry">
     <div class="card">
       <h3><span class="chip">탐구 INQUIRY</span>단원의 목적 설정</h3>
       <div class="field"><label class="f-label">단원 개요와 사용 텍스트 <span class="eng">Unit description and texts</span></label><textarea data-plan="desc" rows="3"></textarea></div>
@@ -345,6 +408,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       </div>
     </div>
 
+    </div>
+    <div class="tab-panel" data-tabs="unit" data-tab="action">
     <div class="card">
       <h3><span class="chip">실행 ACTION</span>탐구를 통한 교수·학습</h3>
       <div class="grid3">
@@ -388,6 +453,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div class="field sec-block"><label class="f-label">자료 <span class="eng">Resources</span></label><textarea data-plan="resources" rows="3"></textarea></div>
     </div>
 
+    </div>
+    <div class="tab-panel" data-tabs="unit" data-tab="reflection">
     <div class="card">
       <h3><span class="chip">성찰 REFLECTION</span>계획·과정·영향에 대한 성찰</h3>
       <div class="grid3">
@@ -397,12 +464,14 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       </div>
     </div>
     </div>
+    </div>
+    <div class="next-band"><span class="hint">플래너의 탐구질문·ATL이 ③ 차시 수업안에 자동으로 연결됩니다.</span><button class="btn btn-ghost btn-sm" onclick="showStep('course')">← 아웃라인에서 시수 고치기</button><button class="btn btn-primary" onclick="showStep('lesson')">다음 단계: 차시 수업안 →</button></div>
   </section>
 
   <!-- ═══════════ STEP 3 : 차시 수업안 ═══════════ -->
   <section class="step-panel" id="panel-lesson">
     <div class="page-head">
-      <h2>③ 차시 수업안 <span class="eng">Lesson Plan</span></h2>
+      <h2>③ 차시 수업안 <span class="eng">Lesson Plan</span> <button class="btn btn-soft btn-sm" style="float:right" onclick="goAI('lesson')">🤖 AI로 상세 설계</button></h2>
       <p>단원과 수업 유형을 고르면 도입–전개–정리 흐름의 수업안 초안을 만들어줍니다. 유닛 플래너의 탐구질문·ATL과 자동으로 연결됩니다.</p>
     </div>
 
@@ -449,6 +518,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <h3><span class="chip">저장된 차시</span><span id="lsCount"></span></h3>
       <div id="lessonList"><div class="empty-note">아직 저장된 차시가 없습니다. 위에서 수업안을 생성한 뒤 저장해 보세요.</div></div>
     </div>
+    <div class="next-band"><span class="hint">단원·플래너·차시의 평가 정보가 ④ 평가 설계에 모입니다.</span><button class="btn btn-primary" onclick="showStep('assess')">다음 단계: 평가 설계 →</button></div>
   </section>
 
   <!-- ═══════════ STEP 4 : AI 프롬프트 ═══════════ -->
@@ -487,6 +557,13 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <p>이미 작성해 둔 문서(Word 등)를 가져와 분석·변환하고, 완성본은 Word·PDF·마크다운으로 내보냅니다.</p>
     </div>
 
+    <div class="tabbar" data-tabs="export">
+      <button class="tab-btn" data-tab="import">가져오기</button>
+      <button class="tab-btn" data-tab="check">제출 전 점검</button>
+      <button class="tab-btn" data-tab="out">내보내기·저장</button>
+    </div>
+
+    <div class="tab-panel" data-tabs="export" data-tab="import">
     <div class="card">
       <h3><span class="chip">가져오기</span>기존 코스아웃라인 불러오기 — Word(.docx)·텍스트 <span class="eng">Import</span></h3>
       <div class="callout info"><b>파일을 선택하거나 이 창에 끌어다 놓으면 자동으로 분석됩니다</b> — 공식 IB 코스아웃라인 양식(영어/한국어)은 단원·시수·평가·연계 섹션까지 정밀 인식하고, 일반 표 형식 문서도 최대한 인식합니다. 인식 결과를 확인하고 <b>「이대로 불러오기」</b> 한 번이면 끝. AI 프롬프트는 인식이 어긋날 때 쓰는 보조 수단입니다.<span id="im-frameNote"></span></div>
@@ -512,11 +589,16 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       </details>
     </div>
 
+    </div>
+
+    <div class="tab-panel" data-tabs="export" data-tab="check">
     <div class="card">
       <h3><span class="chip">제출 전 점검</span>자동 체크리스트</h3>
       <div id="chkList"></div>
     </div>
+    </div>
 
+    <div class="tab-panel" data-tabs="export" data-tab="out">
     <div class="card">
       <h3><span class="chip">문서로 내보내기</span>Word / 인쇄·PDF</h3>
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
@@ -544,6 +626,45 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
         <button class="btn btn-primary" id="btnSaveJson2">💾 JSON으로 저장</button>
         <button class="btn btn-ghost" id="btnLoadJson2">📂 JSON 불러오기</button>
       </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STEP 4 : 평가 설계 ═══════════ -->
+  <section class="step-panel" id="panel-assess">
+    <div class="page-head">
+      <h2>④ 평가 설계 <span class="eng">Assessment</span></h2>
+      <p>코스 전체의 평가를 한눈에 봅니다 — 시험 구조, 단원별 평가 도구, 유닛 플래너의 형성·총괄평가, IA 일정이 여기에 모입니다.</p>
+    </div>
+    <div class="card">
+      <h3><span class="chip">평가 지도</span>단원 × 평가 한눈에 보기</h3>
+      <div id="assessMap"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">시험 구조</span>외부·내부 평가 (공식 기준)</h3>
+      <div id="assessStructure"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">준비 중</span>평가 도구 만들기 · 루브릭 생성기</h3>
+      <div class="callout info">문항 틀 생성과 준거 루브릭 도우미가 이 자리에 들어옵니다. 개발 순서는 파일럿 의견을 반영해 정합니다 — 필요한 기능을 <a href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener" style="color:var(--blue); font-weight:700">파일럿 설문</a>으로 알려주세요.</div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STEP 5 : 채점·피드백 (준비 중) ═══════════ -->
+  <section class="step-panel" id="panel-grading">
+    <div class="page-head">
+      <h2>⑤ 채점·피드백 <span class="eng">Marking & Feedback</span></h2>
+      <p>교사용 채점 도우미가 이 자리에 들어옵니다.</p>
+    </div>
+    <div class="card" style="border-style:dashed; text-align:center; padding:40px 20px">
+      <div style="font-size:34px; margin-bottom:10px">🧮</div>
+      <h3 style="font-size:17px; margin-bottom:12px">준비 중 — 교사용 채점 도우미</h3>
+      <p style="color:var(--ink2); font-size:14px; max-width:560px; margin:0 auto 16px; text-align:left; line-height:1.8">
+      · 준거(수학 IA · 국어 개별 구술 평가 등)별 점수 입력과 근거 메모<br>
+      · 학급 전체 준거 프로파일 — 우리 반이 어느 준거에서 약한지 한눈에<br>
+      · 준거 기반 피드백 문장 초안 → Word 피드백지 출력<br><br>
+      모든 계산은 지금처럼 <b>선생님 브라우저 안에서만</b> 처리됩니다(학생 정보 서버 전송 없음). ④ 평가 설계의 준거표와 ③ 차시 기록이 여기로 이어집니다.</p>
+      <a class="btn btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener">이 기능이 필요하신가요? 파일럿 의견 보내기</a>
     </div>
   </section>
 
@@ -726,8 +847,8 @@ const toggleArr=(arr,v,on)=>{const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if(
 
 /* ═══════════════ 메타·아웃라인 필드 바인딩 ═══════════════ */
 function bindStaticFields(){
-  $$('[data-meta]').forEach(el=>{el.oninput=()=>{state.meta[el.getAttribute('data-meta')]=el.value; if(['f-lessonMin','f-perWeek','f-hoursUnit'].includes(el.id)){renderHours(); renderUnitList();}};});
-  $$('[data-outline]').forEach(el=>{el.oninput=()=>{state.outline[el.getAttribute('data-outline')]=el.value;};});
+  $$('[data-meta]').forEach(el=>{el.oninput=()=>{state.meta[el.getAttribute('data-meta')]=el.value; if(['f-lessonMin','f-perWeek','f-hoursUnit'].includes(el.id)){renderHours(); renderUnitList();} updateTabBadges();};});
+  $$('[data-outline]').forEach(el=>{el.oninput=()=>{state.outline[el.getAttribute('data-outline')]=el.value; updateTabBadges();};});
 }
 function refreshStaticFields(){
   $$('[data-meta]').forEach(el=>{el.value=state.meta[el.getAttribute('data-meta')]??'';});
@@ -816,7 +937,7 @@ function renderUnitList(){
       <div class="field" style="margin-top:8px"><label class="f-label">자료 (Resources)</label><input data-f="res" value="${esc(u.res||'')}" placeholder="예: 교과서 3단원, GeoGebra 시뮬레이션, 기출 문항 세트"></div>
     </div>`;
   }).join('');
-  renderHours(); refreshUnitSelects();
+  renderHours(); refreshUnitSelects(); renderRail(); updateTabBadges();
 }
 $('#unitList').addEventListener('input',e=>{
   const card=e.target.closest('.unit-card'); if(!card)return;
@@ -913,7 +1034,7 @@ function atlFromBank(bk){const map={'사고':'사고 기능','의사소통':'의
 
 function refreshUnitSelects(){
   const opts=state.outline.units.map((u,i)=>`<option value="${u.id}">${esc(u.title||('단원 '+(i+1)))} (Y${u.year}·${u.hours||0}h)</option>`).join('');
-  ['#up-unitSel','#ls-unitSel','#ai-unitSel','#pr-unitSel'].forEach(sel=>{
+  ['#up-unitSel','#ls-unitSel','#ai-unitSel','#pr-unitSel','#unitCtxSel'].forEach(sel=>{
     const el=$(sel); if(!el)return; const prev=el.value;
     el.innerHTML=opts||'<option value="">(단원 없음 — ① 코스 아웃라인에서 먼저 구성하세요)</option>';
     if(prev&&[...el.options].some(o=>o.value===prev)) el.value=prev;
@@ -1043,7 +1164,7 @@ $('#btnLsGen').onclick=()=>{
   $('#lsResultCard').style.display='block';
   $('#lsResultTitle').textContent=`${u.title||'단원'} · ${$('#ls-no').value||'?차시'} · ${LT(type)}`;
   $('#ls-obj').value=d.obj; $('#ls-inq').value=d.inq; $('#ls-intro').value=d.intro; $('#ls-dev').value=d.dev; $('#ls-wrap').value=d.wrap; $('#ls-assess').value=d.assess; $('#ls-atl').value=d.atl; $('#ls-prep').value=d.prep;
-  $('#lsResultCard').scrollIntoView({behavior:'smooth',block:'start'});
+  revealAndScroll($('#lsResultCard'));
   toast('수업안 초안을 만들었습니다. 우리 반에 맞게 다듬으세요.');
 };
 function lessonText(l){return `[${l.unitTitle}] ${l.no} · ${LT(l.type)}${l.sub?' · '+l.sub:''}\n\n■ 학습 목표\n${l.obj}\n\n■ 탐구 질문\n${l.inq}\n\n■ 도입 (${'약 10분'})\n${l.intro}\n\n■ 전개 (약 30분)\n${l.dev}\n\n■ 정리 (약 10분)\n${l.wrap}\n\n■ 형성평가·과제\n${l.assess}\n\n■ ATL 초점\n${l.atl}\n\n■ 준비물\n${l.prep}`;}
@@ -1055,6 +1176,7 @@ function collectLessonForm(){
 $('#btnLsSave').onclick=()=>{state.lessons.push(collectLessonForm()); renderLessonList(); toast('차시를 저장했습니다.');};
 $('#btnLsCopy').onclick=()=>{copyText(lessonText(collectLessonForm())); };
 function renderLessonList(){
+  renderRail();
   const el=$('#lessonList'); $('#lsCount').textContent=state.lessons.length? `총 ${state.lessons.length}차시`:'';
   if(!state.lessons.length){el.innerHTML='<div class="empty-note">아직 저장된 차시가 없습니다. 위에서 수업안을 생성한 뒤 저장해 보세요.</div>'; return;}
   el.innerHTML=state.lessons.map(l=>`<div class="lesson-item" data-lid="${l.id}"><span class="badge b-blue">${esc(l.no)}</span><b>${esc(l.unitTitle)}</b><span style="color:#64748b; font-size:12.5px">${LT(l.type)}${l.sub?' · '+esc(l.sub):''}</span><span style="margin-left:auto; display:flex; gap:5px"><button class="btn btn-ghost btn-sm" data-lact="copy">복사</button><button class="btn btn-danger btn-sm" data-lact="del">삭제</button></span></div>`).join('');
@@ -1119,7 +1241,7 @@ $('#btnAiGen').onclick=()=>{
   const p=buildPrompt();
   if(p===null){toast('대상 단원을 먼저 선택하세요 (① 코스 아웃라인에서 단원 구성 필요).'); return;}
   $('#aiResultCard').style.display='block'; $('#aiPromptBox').textContent=p;
-  $('#aiResultCard').scrollIntoView({behavior:'smooth'});
+  revealAndScroll($('#aiResultCard'));
 };
 $('#btnAiCopy').onclick=()=>copyText($('#aiPromptBox').textContent);
 function copyText(t){
@@ -1503,7 +1625,7 @@ function showParsePreview(parsed,srcName){
     toast('가져오기 완료! 인식된 내용을 확인·수정하세요.');
   };
   $('#im-btnDiscard').onclick=()=>{box.style.display='none'; pendingImport=null;};
-  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  revealAndScroll(box);
 }
 
 function setImported(text,srcName){
@@ -1513,7 +1635,7 @@ function setImported(text,srcName){
 async function handleImportFile(file){
   const ext=(file.name.split('.').pop()||'').toLowerCase();
   if(ext==='json'){loadJsonFile(file); return;}
-  showStep('export');
+  showStep('export','import');
   $('#im-parseBox').style.display='none';
   $('#im-status').innerHTML='<span class="badge b-blue">읽는 중…</span> '+esc(file.name);
   try{
@@ -1643,11 +1765,100 @@ $('#btnSample').onclick=()=>{
 };
 
 /* ═══════════════ 용어집·내비게이션·초기화 ═══════════════ */
-function showStep(name){
+/* ═══════════════ 단계 내부 탭 (UI 상태 — 저장 파일에 넣지 않음) ═══════════════ */
+const uiTab={};
+function showTab(group,tab){
+  const bar=document.querySelector(`.tabbar[data-tabs="${group}"]`); if(!bar) return;
+  if(!tab){ const first=bar.querySelector('.tab-btn'); tab=uiTab[group]||(first&&first.dataset.tab); }
+  if(!tab) return;
+  uiTab[group]=tab;
+  bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  $$(`.tab-panel[data-tabs="${group}"]`).forEach(p=>p.classList.toggle('on',p.dataset.tab===tab));
+  if(group==='export'&&tab==='check') renderChecklist();
+  updateTabBadges();
+}
+document.addEventListener('click',e=>{
+  const tb=e.target.closest('.tab-btn'); if(!tb) return;
+  const bar=tb.closest('.tabbar'); if(!bar) return;
+  showTab(bar.dataset.tabs, tb.dataset.tab);
+});
+function revealAndScroll(el){ if(!el) return; const p=el.closest('.tab-panel'); if(p&&!p.classList.contains('on')) showTab(p.dataset.tabs,p.dataset.tab); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+function initTabs(){ showTab('course', state.outline.units.length?'units':'basic'); showTab('unit','inquiry'); showTab('export','import'); }
+/* 탭 라벨 미작성 배지 (코스 아웃라인) */
+function updateTabBadges(){
+  const o=state.outline, m=state.meta;
+  const miss={
+    basic:[m.school,m.teacher,m.training,m.date].filter(v=>!String(v||'').trim()).length,
+    units:o.units.length? o.units.filter(u=>!u.assess.length||(!u.subs.length&&!(u.extra||'').trim())).length : 1,
+    ia:[o.iaIntro,o.iaDue,o.iaStages].filter(v=>!String(v||'').trim()).length,
+    links:[o.tok,o.atl,o.im,o.lp,o.resources].filter(v=>!String(v||'').trim()).length+((o.lpChecks||[]).length?0:1)
+  };
+  document.querySelectorAll('.tabbar[data-tabs="course"] .tab-btn').forEach(b=>{
+    const el=b.querySelector('.miss'); if(!el) return;
+    const n=miss[b.dataset.tab]||0;
+    el.style.display=n?'inline-block':'none'; el.textContent=n;
+  });
+}
+/* 사이드바 파이프라인 요약 */
+function renderRail(){
+  const u=state.outline.units, tot=Object.values(assignedByTopic()).reduce((a,b)=>a+b,0);
+  const filled=u.filter(x=>{const p=state.plans[x.id]; return p&&Object.values(p).some(v=>Array.isArray(v)?v.length:String(v||'').trim());}).length;
+  const withAssess=u.filter(x=>x.assess.length).length;
+  const set=(k,t)=>{const el=document.querySelector(`[data-rail="${k}"]`); if(el) el.textContent=t;};
+  set('course', u.length? `단원 ${u.length}개 · ${Math.round(tot*hourFactor())}/${targetHours()}h`:'시작 전');
+  set('unit', u.length? `${u.length}개 중 ${filled}개 작성`:'—');
+  set('lesson', state.lessons.length? `${state.lessons.length}차시 저장`:'—');
+  set('assess', u.length? `평가도구 ${withAssess}/${u.length} 단원`:'—');
+}
+/* 전역 단원 컨텍스트 (②③④ 공유) */
+function syncUnitCtx(){
+  const c=$('#unitCtxSel'), up=$('#up-unitSel'); if(!c||!up) return;
+  if(up.value&&[...c.options].some(o=>o.value===up.value)) c.value=up.value;
+}
+/* ④ 평가 설계 렌더 */
+function renderAssessMap(){
+  const map=$('#assessMap'), st=$('#assessStructure'); if(!map) return;
+  const u=state.outline.units;
+  if(!u.length){
+    map.innerHTML='<div class="empty-note">아직 단원이 없습니다. ① 코스 아웃라인에서 단원을 구성하면 여기에 코스 전체의 평가 지도가 그려집니다.<br><br><button class="btn btn-primary btn-sm" onclick="showStep(\'course\')">① 코스 아웃라인으로 →</button></div>';
+  } else {
+    const cell=(v,uid2)=> String(v||'').trim()? `<span class="badge b-green" title="${esc(String(v).slice(0,120))}">✓</span>` : `<a href="#" style="color:#b45309; font-size:12px; font-weight:700" onclick="event.preventDefault(); $('#up-unitSel').value='${uid2}'; loadPlanForm(); showStep('unit','action')">미작성 →</a>`;
+    map.innerHTML=`<table class="tbl"><tr><th>단원</th><th>평가 도구(아웃라인)</th><th>형성평가</th><th>총괄평가</th><th>DP 평가 연계</th></tr>`+
+      u.map(x=>{const p=state.plans[x.id]||{};
+        return `<tr><td><b>${esc(x.title||'무제')}</b><br><span style="color:#94a3b8; font-size:11.5px">Y${x.year} · ${x.hours||0}${hoursSuffix()}</span></td>
+        <td>${x.assess.length? esc(x.assess.join(', ')) : `<a href="#" style="color:#b45309; font-size:12px; font-weight:700" onclick="event.preventDefault(); showStep('course','units')">미선택 →</a>`}</td>
+        <td>${cell(p.formative,x.id)}</td><td>${cell(p.summative,x.id)}</td><td>${cell(p.dpAssess,x.id)}</td></tr>`;}).join('')+
+      `</table><p class="hint" style="margin-top:8px">✓에 마우스를 올리면 내용 미리보기가 보입니다. 미작성 칸을 누르면 해당 단원의 유닛 플래너로 이동합니다.</p>`;
+  }
+  if(st){
+    const pk=SUBJ(), c=CUR(), lv=state.meta.level;
+    const rows=(pk.assess[c.code]&&pk.assess[c.code][lv]||[]).map(r=>`<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td class="num-cell">${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join('');
+    st.innerHTML=`<p class="hint" style="margin-bottom:6px">${esc(c.name)} ${lv} 기준${c.verified===false?' — ※ 이 과정 데이터는 공식 가이드 대조 전 초안입니다':''}</p>
+    <table class="tbl"><tr><th>평가</th><th>시간/분량</th><th>${esc(pk.toolCol||'계산기')}</th><th>비중</th><th>구성</th></tr>${rows}</table>
+    ${pk.iaCrit?`<div style="margin-top:8px; font-size:12.5px"><b>${esc(pk.iaCritLabel||'IA 준거')}:</b> ${pk.iaCrit.map(x=>`${esc(x[0])} ${x[1]}점`).join(' · ')} = ${pk.iaCrit.reduce((a,x)=>a+x[1],0)}점</div>`:''}
+    <div style="margin-top:10px; padding:10px 12px; background:var(--bg); border-radius:10px; font-size:13px">
+      <b>내부평가 일정</b> — 첫 소개: ${esc(state.outline.iaIntro||'(미작성)')} · 마감: ${esc(state.outline.iaDue||'(미작성)')}
+      <button class="btn btn-soft btn-sm" style="margin-left:8px" onclick="showStep('course','ia')">① IA 계획에서 편집 ›</button>
+    </div>`;
+  }
+}
+/* 단계별 AI 진입점 */
+function goAI(type){
+  $('#ai-type').value=type; $('#ai-type').onchange();
+  const up=$('#up-unitSel'); const ai=$('#ai-unitSel');
+  if(up&&ai&&up.value&&[...ai.options].some(o=>o.value===up.value)) ai.value=up.value;
+  showStep('ai');
+}
+function showStep(name,tab){
   $$('.step-btn').forEach(b=>b.classList.toggle('on',b.dataset.step===name));
   $$('.step-panel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+name));
   if(name==='unit') loadPlanForm();
   if(name==='export') renderChecklist();
+  if(name==='assess') renderAssessMap();
+  if(tab) showTab(name,tab); else if(document.querySelector(`.tabbar[data-tabs="${name}"]`)) showTab(name);
+  const ctx=$('#unitCtx');
+  if(ctx){ const show=['unit','lesson','assess'].includes(name)&&state.outline.units.length; ctx.style.display=show?'flex':'none'; if(show) syncUnitCtx(); }
+  renderRail();
   window.scrollTo({top:0});
 }
 $$('.step-btn').forEach(b=>{b.onclick=()=>showStep(b.dataset.step);});
@@ -1882,7 +2093,7 @@ const SUBJECTS={
 };
 function renderSubjectUI(){
   const p=SUBJ();
-  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.6`;
+  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.7`;
   const sel=$('#subjectSel');
   if(sel){ const keys=Object.keys(SUBJECTS);
     sel.style.display=keys.length>1?'':'none';
@@ -1914,6 +2125,14 @@ renderUnitList();
 refreshStaticFields();
 renderLessonList();
 $('#ai-type').onchange();
+$('#unitCtxSel').addEventListener('change',e=>{
+  const v=e.target.value; if(!v) return;
+  ['#up-unitSel','#ls-unitSel','#ai-unitSel','#pr-unitSel'].forEach(s=>{const el=$(s); if(el&&[...el.options].some(o=>o.value===v)) el.value=v;});
+  loadPlanForm();
+  if($('#panel-assess').classList.contains('on')) renderAssessMap();
+});
+initTabs();
+renderRail();
 </script>
 </body>
 </html>

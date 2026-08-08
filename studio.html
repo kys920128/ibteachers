@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.7)</title>
+<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.8)</title>
 <meta name="description" content="IB DP 코스아웃라인·유닛플래너·차시 수업안을 브라우저에서 바로 작성하고 Word·PDF로 내보내는 도구. 설치·가입 없이 무료.">
 <link rel="canonical" href="https://ibteachers.kr/studio.html">
 <meta property="og:title" content="IB티처스 스튜디오 — IB 수업설계 도구">
@@ -233,6 +233,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
 
 <div class="app">
   <nav class="sidebar">
+    <button class="step-btn" data-step="home"><span class="num">🏠</span> 진행 현황</button>
     <div class="side-group">설계 흐름</div>
     <button class="step-btn flow on" data-step="course"><span class="num">1</span> <span>코스 아웃라인<span class="sub" data-rail="course"></span></span></button>
     <button class="step-btn flow" data-step="unit"><span class="num">2</span> <span>유닛 플래너<span class="sub" data-rail="unit"></span></span></button>
@@ -257,6 +258,22 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     <select id="unitCtxSel" style="width:auto; min-width:200px; max-width:340px"></select>
     <span class="hint" style="margin:0">②유닛 → ③차시 → ④평가를 오가도 이 단원을 계속 따라갑니다</span>
   </div>
+
+  <!-- ═══════════ 홈 : 진행 현황판 ═══════════ -->
+  <section class="step-panel" id="panel-home">
+    <div class="page-head">
+      <h2>🏠 진행 현황 <span class="eng">Progress Board</span></h2>
+      <p>단원마다 ①아웃라인 → ②플래너 → ③차시 → ④평가가 어디까지 왔는지 한눈에 봅니다. 칸을 누르면 바로 그 자리로 이동합니다.</p>
+    </div>
+    <div class="card">
+      <h3><span class="chip">단원 × 단계</span>진행 격자</h3>
+      <div id="homeBoard"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">코스 공통</span>단원 밖의 할 일</h3>
+      <div id="homeCommon"></div>
+    </div>
+  </section>
 
   <!-- ═══════════ STEP 1 : 코스 아웃라인 ═══════════ -->
   <section class="step-panel on" id="panel-course">
@@ -1851,6 +1868,47 @@ function renderAssessMap(){
     </div>`;
   }
 }
+/* 홈 진행 현황판 */
+function goUnitStep(uid2,step,tab){
+  ['#up-unitSel','#ls-unitSel','#ai-unitSel','#pr-unitSel','#unitCtxSel'].forEach(s=>{const el=$(s); if(el&&[...el.options].some(o=>o.value===uid2)) el.value=uid2;});
+  loadPlanForm(); showStep(step,tab);
+}
+function renderHomeBoard(){
+  const el=$('#homeBoard'); if(!el) return;
+  const u=state.outline.units;
+  if(!u.length){
+    el.innerHTML=`<div class="empty-note">아직 단원이 없습니다. ① 코스 아웃라인에서 「공식 토픽으로 단원 자동 구성」을 누르면 이 격자가 채워집니다.<br><br><button class="btn btn-primary btn-sm" onclick="showStep('course')">① 코스 아웃라인으로 →</button> <button class="btn btn-ghost btn-sm" onclick="document.getElementById('btnSample').onclick()">✨ 샘플로 구경하기</button></div>`;
+  } else {
+    const D=(st,uid2,step,tab,label)=>{
+      const cls=st==='full'?'b-green':st==='part'?'b-amber':'b-gray';
+      const mark=st==='full'?'●':st==='part'?'◐':'○';
+      return `<td style="text-align:center; cursor:pointer" onclick="goUnitStep('${uid2}','${step}'${tab?`,'${tab}'`:''})" title="${esc(label)}"><span class="badge ${cls}">${mark}</span></td>`;
+    };
+    const rows=u.map(x=>{
+      const p=state.plans[x.id]||{};
+      const s1=((x.subs.length||String(x.extra||'').trim())&&x.assess.length&&x.hours>0)?'full':((x.subs.length||x.assess.length||x.hours>0)?'part':'none');
+      const filled=Object.values(p).filter(v=>Array.isArray(v)?v.length:String(v||'').trim()).length;
+      const s2=filled>=12?'full':filled>0?'part':'none';
+      const ls=state.lessons.filter(l=>l.unitId===x.id).length; const tgt=unitLessons(x);
+      const s3=(tgt>0&&ls>=tgt)?'full':ls>0?'part':'none';
+      const s4=(String(p.formative||'').trim()&&String(p.summative||'').trim())?'full':(String(p.formative||'').trim()||String(p.summative||'').trim())?'part':'none';
+      return `<tr><td><b>${esc(x.title||'무제')}</b><br><span style="color:#94a3b8; font-size:11px">Y${x.year} · ${x.hours||0}${hoursSuffix()}</span></td>${D(s1,x.id,'course','units','내용·평가·시수 입력')}${D(s2,x.id,'unit','inquiry','플래너 '+filled+'칸 작성됨')}${D(s3,x.id,'lesson',null,ls+'/'+tgt+'차시')}${D(s4,x.id,'assess',null,'형성·총괄평가')}<td style="text-align:center"><span class="badge b-gray" title="준비 중">🔒</span></td></tr>`;
+    }).join('');
+    el.innerHTML=`<table class="tbl"><tr><th>단원</th><th style="text-align:center">①아웃라인</th><th style="text-align:center">②플래너</th><th style="text-align:center">③차시</th><th style="text-align:center">④평가</th><th style="text-align:center">⑤채점</th></tr>${rows}</table>
+    <p class="hint" style="margin-top:8px">● 충족 · ◐ 진행 중 · ○ 시작 전 — 칸을 누르면 해당 단원·단계로 바로 이동합니다.</p>`;
+  }
+  const hc=$('#homeCommon');
+  if(hc){
+    const o=state.outline,m=state.meta;
+    const items=[
+      ['기본 정보(학교·교사·연수·작성일)',[m.school,m.teacher,m.training,m.date].filter(v=>!String(v||'').trim()).length,'basic'],
+      ['내부평가 일정(소개·단계·마감)',[o.iaIntro,o.iaDue,o.iaStages].filter(v=>!String(v||'').trim()).length,'ia'],
+      ['연계·자료(TOK·ATL·국제적 소양·학습자상·자료)',[o.tok,o.atl,o.im,o.lp,o.resources].filter(v=>!String(v||'').trim()).length+((o.lpChecks||[]).length?0:1),'links']
+    ];
+    hc.innerHTML=items.map(it=>`<div style="display:flex; align-items:center; gap:8px; padding:6px 2px; font-size:13.5px"><span>${it[1]?'⬜':'✅'}</span><span style="${it[1]?'font-weight:700; color:#b45309':''}">${esc(it[0])}</span><span class="hint" style="margin:0">${it[1]?'미작성 '+it[1]+'곳':''}</span><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="showStep('course','${it[2]}')">열기 ›</button></div>`).join('')+
+    `<div style="margin-top:8px"><button class="btn btn-soft btn-sm" onclick="showStep('export','check')">제출 전 13항목 점검 전체 보기 ›</button></div>`;
+  }
+}
 /* 단계별 AI 진입점 */
 function goAI(type){
   $('#ai-type').value=type; $('#ai-type').onchange();
@@ -1864,6 +1922,7 @@ function showStep(name,tab){
   if(name==='unit') loadPlanForm();
   if(name==='export') renderChecklist();
   if(name==='assess') renderAssessMap();
+  if(name==='home') renderHomeBoard();
   if(tab) showTab(name,tab); else if(document.querySelector(`.tabbar[data-tabs="${name}"]`)) showTab(name);
   const ctx=$('#unitCtx');
   if(ctx){ const show=['unit','lesson','assess'].includes(name)&&state.outline.units.length; ctx.style.display=show?'flex':'none'; if(show) syncUnitCtx(); }
@@ -2668,7 +2727,7 @@ const SUBJECTS={
 };
 function renderSubjectUI(){
   const p=SUBJ();
-  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.7`;
+  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.8`;
   const sel=$('#subjectSel');
   if(sel){ const keys=Object.keys(SUBJECTS);
     sel.style.display=keys.length>1?'':'none';

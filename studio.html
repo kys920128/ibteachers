@@ -676,7 +676,7 @@ const GLOSSARY = [
  ['ATL (Approaches to Learning, 학습접근방법)','IB가 모든 과목에서 기르도록 요구하는 5가지 범용 학습 기능: 사고, 의사소통, 사회성, 자기관리, 조사.'],
  ['TOK (Theory of Knowledge, 지식이론)','DP 필수 핵심과정. 각 과목은 "이 지식은 어떻게 정당화되는가?" 같은 질문으로 TOK와 연계해야 한다. 수학은 증명·공리의 본성, 언어 A는 해석의 다양성과 언어의 힘이 단골 소재.'],
  ['CAS (Creativity, Activity, Service)','창의·신체활동·봉사로 구성된 DP 핵심과정. 교과 수업과의 연계 지점을 유닛 플래너에 기록한다.'],
- ['IA (Internal Assessment, 내부평가)','교사가 채점하고 IB가 조정(moderation)하는 내부평가. 과목마다 형태가 다르다 — 수학은 수학적 탐구(12~20쪽 보고서), 언어 A는 개인 구술(IO). 자세한 구조는 과목별 평가 구조 표 참조.'],
+ ['IA (Internal Assessment, 내부평가)','교사가 채점하고 IB가 조정(moderation)하는 내부평가. 과목마다 형태가 다르다 — 수학은 수학적 탐구(12~20쪽 보고서), 언어 A는 개별 구술 평가. 자세한 구조는 과목별 평가 구조 표 참조.'],
  ['국제적 소양 (International mindedness)','다른 문화·관점에 대한 이해와 존중. 과목 내용과 연계해 다룬다 — 수학은 수학사·국제 데이터 비교, 언어 A는 번역 문학과 문화 간 관점 비교 등.'],
  ['학습자상 (Learner profile)','IB가 기르고자 하는 10가지 인간상(탐구하는 사람, 사고하는 사람, 도전하는 사람 등). 단원별로 초점 특성을 정해 활동과 연결한다.'],
  ['형성평가 / 총괄평가','형성평가는 배우는 중간에 이해를 점검해 수업을 조정하는 평가(퀴즈·관찰·출구티켓), 총괄평가는 단원이 끝난 뒤 도달도를 판정하는 평가(단원평가·모의 Paper·IA).'],
@@ -736,7 +736,7 @@ function refreshStaticFields(){
 }
 
 /* ═══════════════ 과정·레벨 선택 ═══════════════ */
-function setCourse(c){state.meta.course=c; $$('#segCourse button').forEach(b=>b.classList.toggle('on',b.dataset.c===c)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
+function setCourse(c){state.meta.course=c; renderSubjectUI(); $$('#segCourse button').forEach(b=>b.classList.toggle('on',b.dataset.c===c)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
 function setLevel(l){state.meta.level=l; $$('#segLevel button').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
 $('#segCourse').addEventListener('click',e=>{if(e.target.dataset.c) setCourse(e.target.dataset.c);});
 $('#segLevel').addEventListener('click',e=>{if(e.target.dataset.l) setLevel(e.target.dataset.l);});
@@ -1658,7 +1658,7 @@ $('#btnUndo').onclick=()=>{
   applyState(lastSnapshot); lastSnapshot=cur;
   toast('되돌렸습니다. 한 번 더 누르면 다시 복원됩니다.');
 };
-/* ═══════════════ 과목 팩 레지스트리 ═══════════════ */
+/* ═══════════════ 국어 A 팩 데이터 (언어와 문학: 공식 한국어판 가이드 대조 완료 · 문학: 대조 대기) ═══════════════ */
 /* 새 과목 추가 방법: 아래에 팩 객체를 등록하면 과정 버튼·시수 대시보드·검증·내보내기가 자동 반영됩니다.
    필드: id, short(헤더 표기), courses(과정별 실라버스), defaultCourse, courseShort(과정 버튼 라벨),
    toolkit(필수 시간블록, 없으면 null), targetHours{SL,HL}, assess(시험 구조), iaCrit(IA 준거, 없으면 null),
@@ -1668,49 +1668,49 @@ $('#btnUndo').onclick=()=>{
 /* ═══════════════ 국어 A 팩 데이터 (자체 정리 초안 — PRC 원문 대조 전) ═══════════════ */
 const KO_SYLLABUS={
  LIT:{ code:'LIT', name:'국어 A: 문학', eng:'Korean A: Literature',
-  desc:'문학 작품의 깊이 있는 읽기·해석·비교 중심. 작품 수 요건: SL 9편 / HL 13편(번역 문학·시대·장소 요건 포함 — 최신 공식 가이드와 반드시 대조). ※ 본 과목 데이터는 자체 정리 초안입니다.',
+  desc:'문학 작품의 깊이 있는 읽기·해석·비교 중심. 작품 수 요건: SL 9편 / HL 13편(번역 문학·시대·장소 요건 포함). ※ 이 과정은 「언어 A: 문학 가이드」와 아직 대조하지 못한 자체 정리 초안입니다 — 사용 전 공식 가이드로 확인하세요.', verified:false,
   topics:[
-   {n:1,name:'독자, 작가, 텍스트',eng:'Readers, writers and texts',sl:50,hl:80,
+   {n:1,name:'독자, 작가 및 텍스트',eng:'Readers, writers and texts',sl:50,hl:80,
     slItems:['작가의 선택(구성·문체·어조·기법)이 의미와 효과를 만드는 방식 분석','꼼꼼히 읽기(close reading)로 해석의 근거 세우기 — 인용과 분석의 연결','갈래(시·소설·희곡·수필)별 관습과 표현 방식의 이해','독자 반응의 다양성과 타당한 해석의 조건 토론','분석적 문단·에세이 쓰기의 기초(주장-근거-분석)','학습자 포트폴리오에 읽기 기록·해석 변화 축적'],
     hlItems:['문학 비평 용어·이론적 관점을 활용한 심화 해석','HL 에세이 대비: 독자적 탐구 질문 수립과 장문 논증(1,200~1,500단어) 연습']},
    {n:2,name:'시간과 공간',eng:'Time and space',sl:50,hl:80,
     slItems:['작품이 생산된 시대·사회·문화적 맥락이 의미에 미치는 영향 탐구','수용 맥락의 변화 — 오늘의 독자가 고전을 읽을 때 달라지는 의미','작품 속 정체성·권력·역사 재현의 분석','한국 문학사의 흐름 속에서 학습 작품 위치 짓기','번역 문학 읽기 — 문화 간 관점 비교와 번역의 한계 인식'],
     hlItems:['동일 작품의 시대별 비평적 수용사 비교','맥락 논증을 HL 에세이·Paper 2에 통합하는 전략']},
-   {n:3,name:'상호텍스트성: 텍스트 잇기',eng:'Intertextuality: connecting texts',sl:50,hl:80,
+   {n:3,name:'상호텍스트성: 텍스트의 연결',eng:'Intertextuality: connecting texts',sl:50,hl:80,
     slItems:['작품 간 주제·모티프·인물형·기법의 비교 분석','갈래 전통의 계승과 변주(패러디·재해석) 탐구','개념(정체성·문화·창의성·의사소통·관점·변형·재현) 중심의 작품 연결','Paper 2 대비: 두 작품 비교 에세이의 논증 구조 연습','작품 간 대화를 통한 새로운 해석 생성'],
     hlItems:['세 작품 이상을 관통하는 통합 논증 구성','비평 이론 렌즈(여성주의·탈식민주의 등)를 적용한 재독해']}
   ]},
  LL:{ code:'LL', name:'국어 A: 언어와 문학', eng:'Korean A: Language and Literature',
-  desc:'문학 작품과 비문학·미디어 텍스트를 함께 다룸. 작품 수 요건: SL 4편 / HL 6편(번역 문학 요건 포함 — 최신 공식 가이드와 반드시 대조). ※ 본 과목 데이터는 자체 정리 초안입니다.',
+  desc:'문학 작품과 비문학·미디어 텍스트를 함께 다룸. 문학 작품 수 요건: SL 최소 4편 / HL 최소 6편(추천 작가 목록·번역 작품·문학적 형태·시대·장소·대륙 요건 포함). ✓ 「언어 A: 언어와 문학 가이드」 한국어판(2020년 8월 발행·2023년 5월 개정, 2021년 시험 응시자부터 적용) 대조 완료.', verified:true,
   topics:[
-   {n:1,name:'독자, 작가, 텍스트',eng:'Readers, writers and texts',sl:50,hl:80,
+   {n:1,name:'독자, 작가 및 텍스트',eng:'Readers, writers and texts',sl:50,hl:80,
     slItems:['텍스트 유형(기사·광고·연설·사설·블로그 등)별 관습·목적·청중 분석','언어 선택(어휘·문체·수사)이 태도와 효과를 만드는 방식','문학 작품에서 작가의 선택과 그 효과 분석','복합양식 텍스트(이미지+글)의 시각 문법 읽기','분석적 글쓰기 기초(주장-근거-분석)와 용어 사용'],
     hlItems:['HL 에세이 대비: 언어·문학 쟁점에 대한 독자적 탐구','비판적 담화 분석의 기초 개념 활용']},
    {n:2,name:'시간과 공간',eng:'Time and space',sl:50,hl:80,
     slItems:['텍스트 생산·수용의 시대적·문화적 맥락 분석','미디어 담론이 정체성·권력 인식에 미치는 영향','동일 사건에 대한 상이한 보도·재현 비교','광고·대중문화 텍스트 속 가치관의 시대 변화','번역·세계 문학을 통한 문화 간 관점 비교'],
     hlItems:['담론의 역사적 변화 심화 연구','맥락 논증의 HL 에세이 통합']},
-   {n:3,name:'상호텍스트성: 텍스트 잇기',eng:'Intertextuality: connecting texts',sl:50,hl:80,
+   {n:3,name:'상호텍스트성: 텍스트의 연결',eng:'Intertextuality: connecting texts',sl:50,hl:80,
     slItems:['문학·비문학 텍스트를 관통하는 주제·재현 방식 비교','장르 관습의 차용과 변형(패러디·리믹스) 분석','개념 중심(재현·변형·관점 등) 텍스트 묶음 탐구','Paper 2 대비: 학습 작품 비교 에세이 연습','미디어 간 각색(소설→영화 등)의 선택과 효과'],
     hlItems:['세 텍스트 이상을 잇는 통합 논증','비평 이론을 적용한 재독해']}
   ]}
 };
 const KO_ASSESS={
- LIT:{SL:[['Paper 1 문학 분석','1시간 15분','자료 반입 불가','35%','보지 않은 문학 지문 1편, 안내 질문에 따른 분석'],
-          ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','35%','학습 작품 2편 비교(택1 문항)'],
-          ['개인 구술 IO','15분(발표10+질의5)','개요 메모 1장','30%','글로벌 이슈 중심, 작품 2편(번역작 포함) 발췌 분석']],
-      HL:[['Paper 1 문학 분석','2시간 15분','자료 반입 불가','35%','보지 않은 문학 지문 2편 각각 분석'],
-          ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','25%','학습 작품 2편 비교'],
-          ['HL 에세이','1,200~1,500단어','-','20%','작품 1편 자율 탐구 에세이(외부 채점)'],
-          ['개인 구술 IO','15분','개요 메모 1장','20%','글로벌 이슈 중심 발췌 분석']]},
- LL:{SL:[['Paper 1 텍스트 분석','1시간 15분','자료 반입 불가','35%','보지 않은 비문학 텍스트 1편, 안내 질문에 따른 분석'],
-         ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','35%','학습 작품 2편 비교(택1 문항)'],
-         ['개인 구술 IO','15분(발표10+질의5)','개요 메모 1장','30%','글로벌 이슈 중심, 문학·비문학 텍스트 발췌 분석']],
-     HL:[['Paper 1 텍스트 분석','2시간 15분','자료 반입 불가','35%','보지 않은 비문학 텍스트 2편 각각 분석'],
-         ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','25%','학습 작품 2편 비교'],
-         ['HL 에세이','1,200~1,500단어','-','20%','텍스트·작품·쟁점 자율 탐구 에세이(외부 채점)'],
-         ['개인 구술 IO','15분','개요 메모 1장','20%','글로벌 이슈 중심 발췌 분석']]}
+ LIT:{SL:[['시험 1: 제시된 방향에 따른 문학 분석','1시간 15분','20점','35%','처음 접하는 문학 지문 2편 중 1편 선택, 안내 질문에 따른 분석'],
+          ['시험 2: 비교 에세이','1시간 45분','30점','35%','일반 질문 4개 중 1개 선택, 학습 작품 2편 비교'],
+          ['개별 구술 평가','15분(발표 10 + 교사 질문 5)','40점','30%','세계적 이슈 중심, 학습 작품 2편의 발췌문(각 40줄 이내) 분석']],
+      HL:[['시험 1: 제시된 방향에 따른 문학 분석','2시간 15분','40점','35%','처음 접하는 문학 지문 2편을 각각 분석'],
+          ['시험 2: 비교 에세이','1시간 45분','30점','25%','일반 질문 4개 중 1개 선택, 학습 작품 2편 비교'],
+          ['HL 에세이','1,200~1,500단어','20점','20%','학습 작품 1편에 대한 자율 탐구 에세이(외부 채점)'],
+          ['개별 구술 평가','15분(발표 10 + 교사 질문 5)','40점','20%','세계적 이슈 중심, 학습 작품 2편의 발췌문 분석']]},
+ LL:{SL:[['시험 1: 제시된 방향에 따른 텍스트 분석','1시간 15분','20점','35%','처음 접하는 비문학 지문 2편 중 1편 선택, 안내 질문에 따른 분석'],
+         ['시험 2: 비교 에세이','1시간 45분','30점','35%','일반 질문 4개 중 1개 선택, 학습한 문학 작품 2편 비교'],
+         ['개별 구술 평가','15분(발표 10 + 교사 질문 5)','40점','30%','세계적 이슈 중심, 비문학 작품 모음집 1편 + 문학 작품 1편의 발췌문(각 40줄 이내) 분석']],
+     HL:[['시험 1: 제시된 방향에 따른 텍스트 분석','2시간 15분','40점','35%','처음 접하는 비문학 지문 2편을 각각 분석'],
+         ['시험 2: 비교 에세이','1시간 45분','30점','25%','일반 질문 4개 중 1개 선택, 학습한 문학 작품 2편 비교'],
+         ['HL 에세이','1,200~1,500단어','20점','20%','학습한 비문학 작품 모음집 또는 문학 작품 1편에 대한 자율 탐구 에세이(외부 채점)'],
+         ['개별 구술 평가','15분(발표 10 + 교사 질문 5)','40점','20%','세계적 이슈 중심, 비문학 작품 모음집 1편 + 문학 작품 1편의 발췌문 분석']]}
 };
-const KO_IO_CRIT=[['A 지식·이해·해석',10],['B 분석·평가',10],['C 초점·구성',10],['D 언어',10]];
+const KO_IO_CRIT=[['기준 A 지식, 이해, 해석',10],['기준 B 분석 및 평가',10],['기준 C 초점, 구성, 전개',10],['기준 D 언어',10]];
 const KO_BANK={
  1:{inqF:['작가의 어조와 문체는 어떤 언어적 선택으로 만들어지는가?','이 텍스트의 갈래 관습은 무엇이며 어디서 변형되는가?'],
     inqC:['텍스트의 의미는 작가와 독자 중 누가 만드는가?','형식은 어떻게 그 자체로 의미가 되는가?'],
@@ -1746,22 +1746,25 @@ const KO_SKILLS={1:'꼼꼼히 읽기, 문체·기법 분석, 근거 기반 해�
 const KO_CONCEPT={1:'창의성, 재현, 의사소통',2:'문화, 관점, 정체성',3:'변형, 관점, 창의성'};
 const KO_TYPES={intro:'작품·개념 도입',close:'꼼꼼히 읽기·분석',discussion:'토론·세미나',writing:'분석적 글쓰기',io:'IO·구술 준비',review:'복습·평가'};
 const KO_OUTLINE_EX={
- tok:'예: 영역 1(독자, 작가, 텍스트)을 TOK와 연계한다. "문학 해석에서 증거란 무엇인가?"를 중심으로, 같은 시에 대한 상반된 해석 두 편을 비교하며 해석의 정당화 방식을 토론한다. 학생들은 문학적 앎과 과학적 앎의 정당화 방식을 비교하는 짧은 글을 쓴다.',
+ tok:'예: 영역 1(독자, 작가 및 텍스트)을 TOK와 연계한다. "문학 해석에서 증거란 무엇인가?"를 중심으로, 같은 시에 대한 상반된 해석 두 편을 비교하며 해석의 정당화 방식을 토론한다. 학생들은 문학적 앎과 과학적 앎의 정당화 방식을 비교하는 짧은 글을 쓴다.',
  atl:'예: 영역 3(상호텍스트성)에서 사고 기능을 집중 개발한다. 비교 매트릭스(논점×기법×효과)로 두 작품의 논증을 조직하는 훈련을 하고, Paper 2 개요 짜기에서 자기 점검 체크리스트로 자기관리 기능을 함께 기른다.',
  im:'예: 영역 2(시간과 공간)를 선택한다. 한국 현대소설과 번역 문학을 나란히 읽으며 같은 주제(전쟁·이주)가 문화권마다 어떻게 재현되는지 비교하고, 한국 문학의 번역·국제 수용 사례를 토론한다. 자료: 대역본, 국외 서평 발췌.'};
 const KO_IA_PRESET={
- ko:{intro:'DP 1년차 1학기: 글로벌 이슈 개념 소개, 작품마다 이슈 연결 메모를 학습자 포트폴리오에 축적',
+ ko:{intro:'DP 1년차 1학기: 세계적 이슈 개념 소개, 작품마다 이슈 연결 메모를 학습자 포트폴리오에 축적',
      due:'DP 2년차 2학기 초(학교 일정에 따라 10~11월): 본 IO 실시·녹음',
-     stages:'① 1년차 1학기 — 글로벌 이슈 영역 소개, 포트폴리오 기록 습관 만들기\n② 1년차 2학기 — 작품·텍스트별 이슈 연결 토론, 발췌 고르기 연습\n③ 2년차 1학기 — IO 구조(발표 10분+질의 5분) 학습, 연습 IO 1회+피드백\n④ 2년차 9월 — 작품·발췌·글로벌 이슈 확정, 개요 작성(10개 항목 이내)\n⑤ 2년차 10~11월 — 본 IO 실시·녹음, 진위 확인(academic integrity)\n⑥ 이후 — 채점·표본 제출(moderation)'},
+     stages:'① 1년차 1학기 — 세계적 이슈 영역 소개, 포트폴리오 기록 습관 만들기\n② 1년차 2학기 — 작품·텍스트별 이슈 연결 토론, 발췌 고르기 연습\n③ 2년차 1학기 — IO 구조(발표 10분+질의 5분) 학습, 연습 IO 1회+피드백\n④ 2년차 9월 — 작품·발췌·세계적 이슈 확정, 개요 작성(10개 항목 이내)\n⑤ 2년차 10~11월 — 본 IO 실시·녹음, 진위 확인(academic integrity)\n⑥ 이후 — 채점·표본 제출(moderation)'},
  en:{intro:'DP Year 1: introduce the concept of global issues; build learner portfolio entries for each work',
      due:'DP Year 2 (Oct-Nov, per school calendar): final individual oral, recorded',
      stages:'1) Y1 S1 - introduce global issue fields and portfolio habits\n2) Y1 S2 - connect each work/text to global issues; practise choosing extracts\n3) Y2 S1 - learn the IO structure (10 min + 5 min); one practice IO with feedback\n4) Y2 Sep - confirm works, extracts and global issue; outline (max 10 bullets)\n5) Y2 Oct-Nov - final IO, recorded; academic integrity check\n6) marking and sample submission for moderation'}};
 const KO_GLOSSARY=[
- ['개인 구술 (IO, Individual oral)','글로벌 이슈를 중심으로 학습 작품·텍스트의 발췌를 분석하는 15분 구술 내부평가(발표 10분+교사 질의 5분). 준거 A~D 합계 40점. ※ 자체 정리 초안 — 공식 가이드 대조 필요.'],
- ['글로벌 이슈 (Global issue)','국경을 넘어 널리 영향을 미치고 여러 텍스트에서 다뤄질 수 있는 중요한 쟁점(문화·정체성·공동체·권력 등). IO의 중심축.'],
- ['HL 에세이 (HL essay)','HL 전용 외부평가. 학습 작품·텍스트 하나에 대해 학생이 탐구 질문을 세워 쓰는 1,200~1,500단어 에세이.'],
- ['학습자 포트폴리오 (Learner portfolio)','읽기 기록·해석 변화·글로벌 이슈 연결 메모를 축적하는 필수 기록물. 직접 평가 대상은 아니지만 IO·에세이 준비의 토대.'],
- ['작품 선정 요건','문학: SL 9편/HL 13편, 언어와 문학: SL 4편/HL 6편 (번역 문학·시대·장소 요건 포함) — 반드시 최신 공식 가이드와 대조해 확정할 것.']];
+ ['개별 구술 평가 (Individual oral)','학생이 선택한 세계적 이슈가 두 발췌문의 형식과 내용을 통해 어떻게 제시되었는지 분석하는 15분 구술 내부평가(발표 10분 + 교사 질문 5분). 기준 A~D 각 10점, 총 40점. 비중은 SL 30%, HL 20%. 교사가 채점한 뒤 IB가 평가 조정(moderation)합니다.'],
+ ['세계적 이슈 (Global issue)','개별 구술 평가의 중심축이 되는 쟁점. 세 가지 요건을 모두 갖춰야 합니다 — ① 넓고 큰 범위에서 중대성을 가질 것 ② 국가를 초월할 것 ③ 지역적 맥락의 일상에 영향을 미칠 것. 공식 가이드는 출발점으로 다섯 개 탐구 분야(문화·정체성·공동체 / 신념·가치·교육 / 정치·권력·정의 / 예술·창의성·상상력 / 과학·기술·환경)를 제시합니다.'],
+ ['시험 1: 제시된 방향에 따른 텍스트 분석 (Paper 1)','처음 접하는 지문에 안내 질문이 딸려 나오는 외부평가. SL은 두 지문 중 하나를 골라 분석(1시간 15분·20점), HL은 두 지문을 각각 분석(2시간 15분·40점). 비중 35%.'],
+ ['시험 2: 비교 에세이 (Paper 2)','네 개의 일반 질문 중 하나를 골라 수업에서 학습한 문학 작품 2편을 비교하는 에세이(1시간 45분·30점). 비중 SL 35%·HL 25%. 다른 평가에 사용한 작품은 쓸 수 없습니다.'],
+ ['HL 에세이 (HL essay)','HL 전용 외부평가. 학습한 작품 또는 비문학 작품 모음집 하나에 대해 학생이 탐구 주제를 세워 쓰는 1,200~1,500단어 에세이(20점, 비중 20%).'],
+ ['학습자 포트폴리오 (Learner portfolio)','읽기 기록·탐색 과정·세계적 이슈 연결을 축적하는 필수 기록물. 직접 채점 대상은 아니지만 개별 구술 평가와 HL 에세이 준비의 토대가 됩니다.'],
+ ['작품 (Work)','하나의 문학적 텍스트 단위. 소설·자서전 같은 단일 작품 1편, 중편 소설 2편 이상, 단편 소설 5~10편, 수필 5~8편, 편지 10~15통, 장편시(최소 600행)의 상당 부분, 또는 단편시 15~20편 등이 각각 "1편"으로 셉니다.'],
+ ['작품 선정 요건','언어와 문학: SL 최소 4편 / HL 최소 6편. 각 탐구 영역별 최소 편수, 추천 작가 목록에서의 선정, 번역 작품 포함, 문학적 형태·시대·장소의 다양성, 최소 두 대륙 요건이 함께 적용됩니다. 문학 과정은 요건이 다르므로 해당 가이드를 확인하세요.']];
 const KO_QUALITY=`## 품질 기준 (반드시 지킬 것)
 - 개념 기반 설계: 작품 줄거리 나열이 아니라 개념적 이해(일반화 문장)가 중심이 되게 할 것.
 - 백워드 설계: 총괄평가(Paper·IO)를 먼저 확정하고 학습 경험을 그 평가에 정렬할 것.
@@ -1775,7 +1778,7 @@ function koUnitDraft(u,p){
   const fill=(k,v)=>{if(!String(p[k]||'').trim()) p[k]=v;};
   const les=unitLessons(u);
   fill('desc',`『${u.title||tn}』 단원. ${c.name} ${lv}의 ${tn} 영역을 다룬다. 총 ${u.hours||0}시간(약 ${les}교시). 주 자료: 학습 작품·텍스트, 학습자 포트폴리오.`);
-  fill('dpAssess',`외부평가: ${KO_ASSESS[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')} — 본 영역의 기능과 직결. 내부평가: 개인 구술(IO)${lv==='HL'?' · HL 에세이':''} 대비 활동을 단원에 포함.`);
+  fill('dpAssess',`외부평가: ${KO_ASSESS[c.code][lv].filter(r=>r[0].startsWith('시험')).map(r=>r[0]).join(', ')} — 본 영역의 기능과 직결. 내부평가: 개별 구술 평가${lv==='HL'?' · HL 에세이':''} 대비 활동을 단원에 포함.`);
   fill('transfer',`· 학생들은 처음 보는 텍스트에서도 ${tn.replace(/^토픽 \d+\. /,'')}의 관점으로 의미를 구성하고 텍스트 근거로 정당화할 수 있다.\n· 학생들은 자신의 해석을 분석적 글과 구술로 설득력 있게 전달할 수 있다.`);
   fill('essential',KO_ES[u.topic]||KO_ES[1]);
   fill('miscon','· '+bk.mis.join('\n· '));
@@ -1815,7 +1818,7 @@ function koLessonDraft(u,type,sub,note,seed){
    close:`· (10분) 시범 분석(교사 사고 구술): 한 문장을 함께 뜯어 읽기\n· (15분) 짝 활동: 지정 발췌에서 표현 선택→효과 분석 표 채우기\n· (5분) 결과 비교: 같은 표현의 다른 해석 살펴보기 — 어느 근거가 더 강한가`,
    discussion:`· (8분) 논제 제시와 입장 정리(포스트잇 스펙트럼)\n· (18분) 세미나: 발언 규칙(근거 인용 필수)에 따른 토론 — ${act||'논쟁적 질문 활용'}\n· (4분) 정리: 입장 변화와 그 이유 한 줄 쓰기`,
    writing:`· (8분) 우수/미흡 문단 비교 — 무엇이 "분석"을 만드는가\n· (18분) 개별 쓰기: ${t} 관련 분석 문단(주장-근거-분석) 작성\n· (4분) 동료 피드백: 체크리스트(근거 인용? 효과 설명?) 기반 상호 코멘트`,
-   io:`· (10분) IO 준거 하나 집중 해설(오늘: ${pick(KO_IO_CRIT.map(x=>x[0]),seed)}) — 우수/미흡 사례 비교\n· (15분) 개인 연습: 발췌 1개로 2분 미니 구술 → 짝 피드백\n· (5분) 글로벌 이슈 연결 메모를 포트폴리오에 기록`,
+   io:`· (10분) IO 준거 하나 집중 해설(오늘: ${pick(KO_IO_CRIT.map(x=>x[0]),seed)}) — 우수/미흡 사례 비교\n· (15분) 개인 연습: 발췌 1개로 2분 미니 구술 → 짝 피드백\n· (5분) 세계적 이슈 연결 메모를 포트폴리오에 기록`,
    review:`· (10분) 단원 개념 지도(작품×개념×기법) 모둠 완성\n· (15분) 모의 Paper 미니 세트(발췌 분석 1문항) 실전 조건 풀이\n· (5분) 채점 기준 함께 읽기 — 스스로 별점 매기기`};
   const intro={
    intro:`· (3분) 전시 학습 확인: 지난 텍스트 핵심 1문답\n· (7분) 훅: "${inq}" 질문 게시 → 예상 답 포스트잇 부착(수업 끝에 재방문)`,
@@ -1835,7 +1838,8 @@ function koLessonDraft(u,type,sub,note,seed){
    inq:base.inq, intro:intro[type]||intro.intro, dev:dev[type]||dev.intro, wrap:wrap[type]||wrap.intro, assess: type==='io'? '· 개선 계획 메모 제출(다음 면담 자료)\n· 포트폴리오 기록 확인':''+base.assess, atl:base.atl, prep:base.prep};
 }
 function koIaPrompt(head,u,extra){
-  return `${head}\n${u?`- 참고 단원: ${u.title} (${topicName(u.topic)})`:''}${extra?`\n- 학생 관심 분야: ${extra}`:''}\n\n## 과제\n${CUR().name} ${state.meta.level} 학생의 개인 구술(IO)을 위한 "글로벌 이슈 × 작품/텍스트 발췌" 아이디어 15개를 제안해 주세요.\n\n## 각 아이디어마다 포함\n① 글로벌 이슈(구체화된 한 줄)  ② 어울리는 작품/텍스트 짝과 발췌 후보(각 40행 이내)  ③ 발표 논점 개요 3~4개  ④ 준거 B(분석·평가) 관점의 깊이 확보 전략  ⑤ 흔한 실패 요인(이슈가 너무 넓음, 발췌와 이슈의 헐거운 연결 등) 점검  ⑥ 한국 학생이 접근하기 좋은 현지화 포인트\n\n## 조건\n- 이슈는 "전쟁 일반"처럼 넓은 주제가 아니라 구체화된 형태로.\n- 학습 작품 목록이 달라도 대체 가능한 유연한 짝 구성 포함.\n- 15분(발표 10+질의 5) 분량으로 완결 가능한 범위로.\n\n## 출력 형식\n표(이슈/텍스트 짝/발췌/논점/전략) + 상위 추천 3개에 대한 상세 코멘트.\n${LANGLINE()}`;
+  const n=String.fromCharCode(10);
+  return `${head}${u?n+`- 참고 단원: ${u.title} (${topicName(u.topic)})`:''}${extra?n+`- 학생 관심 분야: ${extra}`:''}${n}${n}## 과제${n}${CUR().name} ${state.meta.level} 학생의 개별 구술 평가를 위한 "세계적 이슈 x 발췌문" 아이디어 15개를 제안해 주세요.${n}${n}## 세계적 이슈의 요건 (공식 가이드 기준 — 반드시 충족)${n}- 넓고 큰 범위에서 중대성을 가질 것${n}- 국가를 초월할 것${n}- 지역적 맥락의 일상에 영향을 미칠 것${n}${n}## 탐구 분야 (공식 가이드가 제시한 출발점 — 이 중 하나 이상에서 구체화)${n}① 문화, 정체성, 공동체  ② 신념, 가치, 교육  ③ 정치, 권력, 정의  ④ 예술, 창의성, 상상력  ⑤ 과학, 기술, 환경${n}${n}## 각 아이디어마다 포함${n}① 구체화된 세계적 이슈(한 줄)  ② 해당 탐구 분야  ③ 어울리는 ${CUR().code==='LL'?'비문학 작품 모음집 1편 + 문학 작품 1편':'문학 작품 2편'}과 발췌문 후보(각 40줄 이내)  ④ 발표 논점 개요 3~4개  ⑤ 기준 B(분석 및 평가)에서 깊이를 확보할 전략  ⑥ 흔한 실패 요인 점검(이슈가 너무 넓음, 발췌문과 이슈의 연결이 헐거움, 줄거리 요약에 그침)  ⑦ 한국 학생이 접근하기 좋은 현지화 포인트${n}${n}## 조건${n}- "전쟁", "환경 오염"처럼 넓은 주제가 아니라 구체화된 형태로 제시할 것.${n}- 학교마다 학습 작품 목록이 다르므로 대체 가능한 유연한 짝 구성을 함께 제시할 것.${n}- 15분(발표 10분 + 교사 질문 5분) 분량으로 완결 가능한 범위로.${n}${n}## 출력 형식${n}표(세계적 이슈/탐구 분야/텍스트 짝/발췌문/논점/전략) + 상위 추천 3개에 대한 상세 코멘트.${n}${LANGLINE()}`;
 }
 /* ═══════════════ 과목 팩 레지스트리 ═══════════════ */
 const SUBJECTS={
@@ -1856,16 +1860,16 @@ const SUBJECTS={
   topicPat:TOPIC_PAT, detectCourse:(s,f)=>/응용과?\s*해석|applications|interpretation/i.test(s+f.slice(0,400))?'AI':'AA',
   bank:BANK, conceptCore:CONCEPT_CORE, es:ES, skills:SKILLS,
   assessTools:ASSESS_TOOLS, topicDomain:[1,2,3,4,5], subPlaceholder:'예: 등비수열의 합' },
- korean:{ id:'korean', short:'DP 국어 A', draft:true,
+ korean:{ id:'korean', short:'DP 국어 A',
   courses:KO_SYLLABUS, defaultCourse:'LL',
   courseShort:{LL:'언어와 문학', LIT:'문학'},
   toolkit:null, targetHours:{SL:150,HL:240},
-  assess:KO_ASSESS, iaCrit:KO_IO_CRIT, iaCritLabel:'IO 준거', toolCol:'허용 자료',
-  iaTitle:'내부평가 계획 — 개인 구술(IO)', iaTitleEng:'Internal assessment: individual oral',
-  iaInfo:'IO는 <b>글로벌 이슈</b>를 중심으로 학습 작품·텍스트의 발췌를 분석하는 15분 구술 평가입니다(준거 A~D 합계 40점, SL 30%·HL 20%). 글로벌 이슈를 언제 소개하고, 발췌 선정·연습을 어떤 단계로 진행하며, 언제 실시하는지 서술하세요. <b>※ 국어 팩은 자체 정리 초안 — 공식 가이드(PRC) 대조 후 사용하세요.</b>',
+  assess:KO_ASSESS, iaCrit:KO_IO_CRIT, iaCritLabel:'개별 구술 평가 기준', toolCol:'배점',
+  iaTitle:'내부평가 계획 — 개별 구술 평가', iaTitleEng:'Internal assessment: individual oral',
+  iaInfo:'<b>개별 구술 평가</b>는 학생이 선택한 <b>세계적 이슈</b>가 두 발췌문의 형식과 내용을 통해 어떻게 제시되었는지 분석하는 15분 구술 평가입니다(발표 10분 + 교사 질문 5분, 기준 A~D 합계 40점, SL 30%·HL 20%). 세계적 이슈를 언제 소개하고, 발췌문 선정·연습을 어떤 단계로 진행하며, 언제 실시하는지 서술하세요.',
   persona:'당신은 IB DP 언어 A: 한국어(문학, 언어와 문학)를 20년 이상 가르치고 IB 교사 워크숍을 이끌어 온 수업 설계 전문가입니다. 한국 공교육 IB 학교의 국어 교사를 돕고 있습니다.',
   quality:KO_QUALITY, resourceLine:'자료·매체 활용',
-  convertTopicRule:'1. topic 값: 1=독자, 작가, 텍스트(Readers, writers and texts), 2=시간과 공간(Time and space), 3=상호텍스트성(Intertextuality: connecting texts). 여러 영역에 걸치면 비중이 가장 큰 영역으로.',
+  convertTopicRule:'1. topic 값: 1=독자, 작가 및 텍스트(Readers, writers and texts), 2=시간과 공간(Time and space), 3=상호텍스트성(Intertextuality: connecting texts). 여러 영역에 걸치면 비중이 가장 큰 영역으로.',
   convertCourseRule:'5. 과정·레벨: "LIT"=문학(Literature), "LL"=언어와 문학(Language and literature). 문서 내용으로 판단하되 불명확하면 "LL","SL".',
   iaPreset:KO_IA_PRESET,
   outlineEx:KO_OUTLINE_EX, lessonTypes:KO_TYPES, lessonDraft:koLessonDraft, unitDraft:koUnitDraft, iaIdeasPrompt:koIaPrompt,
@@ -1882,9 +1886,9 @@ function renderSubjectUI(){
   const sel=$('#subjectSel');
   if(sel){ const keys=Object.keys(SUBJECTS);
     sel.style.display=keys.length>1?'':'none';
-    sel.innerHTML=keys.map(k=>`<option value="${k}" ${state.meta.subject===k?'selected':''}>${esc(SUBJECTS[k].short)}${SUBJECTS[k].draft?' (초안)':''}</option>`).join(''); }
+    sel.innerHTML=keys.map(k=>{const pk=SUBJECTS[k]; const anyV=Object.values(pk.courses).some(c=>c.verified!==false); return `<option value="${k}" ${state.meta.subject===k?'selected':''}>${esc(pk.short)}${anyV?'':' (초안)'}</option>`;}).join(''); }
   const seg=$('#segCourse'); if(seg) seg.innerHTML=Object.keys(p.courses).map(k=>`<button data-c="${k}" class="${state.meta.course===k?'on':''}">${esc(p.courseShort[k]||k)}</button>`).join('');
-  const hint=$('#hoursHint'); if(hint) hint.textContent=`권장 시수는 IB 공식 subject brief 기준(${TK()?`${TK().name} ${TK().sl}시간 포함, `:''}SL ${p.targetHours.SL} · HL ${p.targetHours.HL}). 배정 시수는 아래 단원 구성의 합계입니다.${p.draft?' ※ 이 과목 데이터는 자체 정리 초안입니다 — 반드시 공식 가이드와 대조하세요.':''}`;
+  const hint=$('#hoursHint'); if(hint) hint.textContent=`권장 시수는 IB 공식 subject brief 기준(${TK()?`${TK().name} ${TK().sl}시간 포함, `:''}SL ${p.targetHours.SL} · HL ${p.targetHours.HL}). 배정 시수는 아래 단원 구성의 합계입니다.${CUR().verified===false?' ※ 이 과정 데이터는 공식 가이드와 아직 대조하지 못한 자체 정리 초안입니다.':''}`;
   const iaT=$('#iaCardTitle'); if(iaT) iaT.innerHTML=`<span class="chip">2. IA</span>${esc(p.iaTitle||'내부평가 계획')} <span class="eng">${esc(p.iaTitleEng||'Internal assessment')}</span>`;
   const iaI=$('#iaCardInfo'); if(iaI) iaI.innerHTML=p.iaInfo||'';
   const lt=$('#ls-type'); if(lt){ const cur=lt.value; lt.innerHTML=Object.entries(p.lessonTypes||LTYPE).map(([k,vv])=>`<option value="${k}">${esc(vv)}</option>`).join(''); if((p.lessonTypes||LTYPE)[cur]) lt.value=cur; }
@@ -1900,7 +1904,7 @@ $('#subjectSel').onchange=e=>{
   state.outline.iaIntro=''; state.outline.iaDue=''; state.outline.iaStages='';
   renderSubjectUI(); setCourse(state.meta.course); setLevel(state.meta.level);
   refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist();
-  toast(`${SUBJ().short} 모드로 전환했습니다.${SUBJ().draft?' ※ 자체 정리 초안 — 공식 가이드와 대조하세요.':''}`);
+  toast(`${SUBJ().short} 모드로 전환했습니다.${CUR().verified===false?' ※ 이 과정은 자체 정리 초안 — 공식 가이드와 대조하세요.':''}`);
 };
 
 renderSubjectUI();

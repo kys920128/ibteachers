@@ -662,8 +662,12 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div id="assessStructure"></div>
     </div>
     <div class="card">
-      <h3><span class="chip">준비 중</span>평가 도구 만들기 · 루브릭 생성기</h3>
-      <div class="callout info">문항 틀 생성과 준거 루브릭 도우미가 이 자리에 들어옵니다. 개발 순서는 파일럿 의견을 반영해 정합니다 — 필요한 기능을 <a href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener" style="color:var(--blue); font-weight:700">파일럿 설문</a>으로 알려주세요.</div>
+      <h3><span class="chip">루브릭</span>채점 기준표 틀 만들기 <span class="eng">Rubric frame</span></h3>
+      <div id="rubricBox"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">준비 중</span>평가 문항 틀 생성기</h3>
+      <div class="callout info">단원별 형성평가 문항 세트·모의 시험 틀 생성기가 이 자리에 들어옵니다. 개발 순서는 파일럿 의견을 반영해 정합니다 — 필요한 기능을 <a href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener" style="color:var(--blue); font-weight:700">파일럿 설문</a>으로 알려주세요.</div>
     </div>
   </section>
 
@@ -1867,6 +1871,29 @@ function renderAssessMap(){
       <button class="btn btn-soft btn-sm" style="margin-left:8px" onclick="showStep('course','ia')">① IA 계획에서 편집 ›</button>
     </div>`;
   }
+  const rb=$('#rubricBox');
+  if(rb){
+    const pk2=SUBJ();
+    if(pk2.iaCrit){
+      rb.innerHTML=`<p class="hint" style="margin-bottom:8px">${esc(pk2.iaCritLabel||'IA 준거')} 기반의 채점표 틀입니다. <b>수준 기술은 빈칸</b>으로 나갑니다 — 공식 가이드의 채점 기준과 대조해 선생님이 직접 채우세요(원문 복제 금지 원칙).</p>
+      <table class="tbl"><tr><th>기준</th><th style="width:10%">만점</th><th>수준 기술 (직접 작성)</th><th style="width:10%">점수</th></tr>${pk2.iaCrit.map(x=>`<tr><td><b>${esc(x[0])}</b></td><td class="num-cell">${x[1]}</td><td style="color:#cbd5e1">(공식 가이드 대조 후 작성)</td><td></td></tr>`).join('')}<tr><td><b>합계</b></td><td class="num-cell"><b>${pk2.iaCrit.reduce((a,x)=>a+x[1],0)}</b></td><td></td><td></td></tr></table>
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="exportRubricDoc()">📝 루브릭 틀 → Word</button>`;
+    } else {
+      rb.innerHTML=`<p class="hint" style="margin-bottom:8px">이 과목의 내부평가는 준거표 없이 <b>총체적 채점</b>입니다(${esc(CUR().name)} — 10점). 총점 기준의 기록표 틀을 내보낼 수 있습니다.</p>
+      <button class="btn btn-primary btn-sm" onclick="exportRubricDoc()">📝 채점 기록표 틀 → Word</button>`;
+    }
+  }
+}
+function exportRubricDoc(){
+  const pk=SUBJ(), c=CUR(), lv=state.meta.level;
+  const P=[`<h1>${esc(c.name)} ${esc(lv)} — ${esc(pk.iaCritLabel||'내부평가')} 루브릭 틀</h1><p class="pmeta">교사: ${esc(state.meta.teacher||'')} · 학교: ${esc(state.meta.school||'')} · 작성일: ${esc(state.meta.date||'')}</p>`];
+  if(pk.iaCrit){
+    P.push(`<table><tr><th style="width:24%">기준</th><th style="width:8%">만점</th><th>수준 기술 (공식 가이드와 대조해 직접 작성)</th><th style="width:8%">점수</th><th style="width:20%">코멘트</th></tr>${pk.iaCrit.map(x=>`<tr><td><b>${esc(x[0])}</b></td><td>${x[1]}</td><td><br><br><br></td><td></td><td></td></tr>`).join('')}<tr><td><b>합계</b></td><td><b>${pk.iaCrit.reduce((a,x)=>a+x[1],0)}</b></td><td></td><td></td><td></td></tr></table>`);
+  } else {
+    P.push(`<table><tr><th style="width:30%">학생(번호·익명 라벨)</th><th style="width:10%">점수 (/10)</th><th>근거 메모</th><th style="width:22%">피드백 요점</th></tr>${Array.from({length:12},()=>'<tr><td><br></td><td></td><td></td><td></td></tr>').join('')}</table>`);
+  }
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 작성된 틀 · 수준 기술·채점 세부는 반드시 최신 공식 가이드와 대조하세요 · 학생 이름 대신 번호·익명 라벨 사용을 권장합니다 · 본 도구는 IBO와 무관합니다.</div>`);
+  downloadDoc(P.join(''),`루브릭틀_${c.code}${lv}.doc`);
 }
 /* 홈 진행 현황판 */
 function goUnitStep(uid2,step,tab){

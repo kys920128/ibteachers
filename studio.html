@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.5)</title>
+<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.6)</title>
 <meta name="description" content="IB DP 코스아웃라인·유닛플래너·차시 수업안을 브라우저에서 바로 작성하고 Word·PDF로 내보내는 도구. 설치·가입 없이 무료.">
 <link rel="canonical" href="https://ibteachers.kr/studio.html">
 <meta property="og:title" content="IB티처스 스튜디오 — IB 수업설계 도구">
@@ -188,6 +188,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
   </div>
   <div class="top-controls">
+    <select id="subjectSel" style="display:none; background:#1d4368; color:#fff; border:1px solid rgba(255,255,255,.25); border-radius:9px; padding:7px 10px; font-size:13px; font-weight:700; width:auto; cursor:pointer"></select>
     <div class="seg" id="segCourse">
       <button data-c="AA" class="on">AA 분석과 접근</button>
       <button data-c="AI">AI 응용과 해석</button>
@@ -252,7 +253,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
         <div style="font-size:13.5px; font-weight:800; color:var(--navy)" id="hoursText">0 / 150시간</div>
       </div>
       <table class="tbl" id="hoursTable"></table>
-      <p class="hint">권장 시수는 IB 공식 subject brief 기준(툴킷 30시간 포함, SL 150 · HL 240). 배정 시수는 아래 단원 구성의 합계입니다.</p>
+      <p class="hint" id="hoursHint">권장 시수는 IB 공식 subject brief 기준(툴킷 30시간 포함, SL 150 · HL 240). 배정 시수는 아래 단원 구성의 합계입니다.</p>
     </div>
 
     <div class="card">
@@ -267,8 +268,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
 
     <div class="card">
-      <h3><span class="chip">2. IA</span>내부평가 계획 — 수학적 탐구 <span class="eng">Internal assessment: mathematical exploration</span></h3>
-      <div class="callout info">IB 양식 원문: IA를 <b>언제 처음 소개하고, 어떤 단계로 진행하며, 언제 마감하는지</b> 서술해야 합니다. IA는 총점의 20%, 준거 A~E 합계 20점, 권장 분량 12~20쪽입니다.</div>
+      <h3 id="iaCardTitle"><span class="chip">2. IA</span>내부평가 계획 — 수학적 탐구 <span class="eng">Internal assessment: mathematical exploration</span></h3>
+      <div class="callout info" id="iaCardInfo">IB 양식 원문: IA를 <b>언제 처음 소개하고, 어떤 단계로 진행하며, 언제 마감하는지</b> 서술해야 합니다. IA는 총점의 20%, 준거 A~E 합계 20점, 권장 분량 12~20쪽입니다.</div>
       <button class="btn btn-soft btn-sm" id="btnIaPreset" style="margin-bottom:10px">📋 표준 일정 초안 채우기</button>
       <div class="grid2">
         <div class="field"><label class="f-label">IA 첫 소개 시점</label><input id="f-iaIntro" data-outline="iaIntro" placeholder="예: DP 1년차 2학기 시작(9월)"></div>
@@ -673,15 +674,19 @@ const GLOSSARY = [
  ['전이 목표 (Transfer goals)','단원이 끝난 뒤에도 학생이 새로운 상황에서 스스로 해낼 수 있어야 하는 장기 목표. "시험 범위"가 아니라 "삶으로 가져가는 능력"으로 서술한다.'],
  ['핵심 이해 (Essential understandings)','학생이 단원을 통해 도달해야 할 개념적 이해. 지식 나열이 아니라 "~은 ~이다/~하다" 형태의 일반화 문장으로 쓴다.'],
  ['ATL (Approaches to Learning, 학습접근방법)','IB가 모든 과목에서 기르도록 요구하는 5가지 범용 학습 기능: 사고, 의사소통, 사회성, 자기관리, 조사.'],
- ['TOK (Theory of Knowledge, 지식이론)','DP 필수 핵심과정. 각 과목은 "이 지식은 어떻게 정당화되는가?" 같은 질문으로 TOK와 연계해야 한다. 수학은 증명·공리·모델의 본성이 단골 소재.'],
+ ['TOK (Theory of Knowledge, 지식이론)','DP 필수 핵심과정. 각 과목은 "이 지식은 어떻게 정당화되는가?" 같은 질문으로 TOK와 연계해야 한다. 수학은 증명·공리의 본성, 언어 A는 해석의 다양성과 언어의 힘이 단골 소재.'],
  ['CAS (Creativity, Activity, Service)','창의·신체활동·봉사로 구성된 DP 핵심과정. 교과 수업과의 연계 지점을 유닛 플래너에 기록한다.'],
- ['IA (Internal Assessment, 내부평가)','수학에서는 "수학적 탐구(mathematical exploration)" — 학생이 스스로 주제를 정해 쓰는 12~20쪽 보고서. 총점의 20%, 준거 A~E 합계 20점. 교사가 채점하고 IB가 조정(moderation)한다.'],
- ['수학 툴킷 (Mathematical toolkit)','탐구·모델링·조사 기능을 기르는 30시간의 필수 활동 시간(IA 작성 10~15시간 포함). 진도와 별개로 시수표에 반드시 배정해야 한다.'],
- ['국제적 소양 (International mindedness)','다른 문화·관점에 대한 이해와 존중. 수학에서는 수학사(여러 문명의 기여), 국제 데이터 비교, 표기법의 다양성 등으로 연계한다.'],
+ ['IA (Internal Assessment, 내부평가)','교사가 채점하고 IB가 조정(moderation)하는 내부평가. 과목마다 형태가 다르다 — 수학은 수학적 탐구(12~20쪽 보고서), 언어 A는 개인 구술(IO). 자세한 구조는 과목별 평가 구조 표 참조.'],
+ ['국제적 소양 (International mindedness)','다른 문화·관점에 대한 이해와 존중. 과목 내용과 연계해 다룬다 — 수학은 수학사·국제 데이터 비교, 언어 A는 번역 문학과 문화 간 관점 비교 등.'],
  ['학습자상 (Learner profile)','IB가 기르고자 하는 10가지 인간상(탐구하는 사람, 사고하는 사람, 도전하는 사람 등). 단원별로 초점 특성을 정해 활동과 연결한다.'],
- ['GDC (Graphic Display Calculator)','그래픽 계산기. AA는 Paper 1에서 금지·Paper 2에서 필수, AI는 전 시험 필수라 수업 중 상시 훈련이 필요하다.'],
  ['형성평가 / 총괄평가','형성평가는 배우는 중간에 이해를 점검해 수업을 조정하는 평가(퀴즈·관찰·출구티켓), 총괄평가는 단원이 끝난 뒤 도달도를 판정하는 평가(단원평가·모의 Paper·IA).'],
  ['SOI·글로벌 맥락 (MYP 용어)','탐구명제(Statement of Inquiry)·글로벌 맥락은 MYP 유닛플래너 요소로, DP 플래너에는 없다. MYP 확장 버전에서 지원 예정.']
+];
+/* 과목 전용 용어 — 각 과목 팩의 glossary 필드로 등록 */
+const MATH_GLOSSARY=[
+ ['수학 툴킷 (Mathematical toolkit)','탐구·모델링·조사 기능을 기르는 30시간의 필수 활동 시간(IA 작성 10~15시간 포함). 진도와 별개로 시수표에 반드시 배정해야 한다.'],
+ ['GDC (Graphic Display Calculator)','그래픽 계산기. AA는 Paper 1에서 금지·Paper 2에서 필수, AI는 전 시험 필수라 수업 중 상시 훈련이 필요하다.'],
+ ['수학적 탐구 (Mathematical exploration)','수학 IA — 학생이 스스로 주제를 정해 쓰는 12~20쪽 보고서. 총점의 20%, 준거 A~E 합계 20점.']
 ];
 
 /* ═══════════════ 상태·헬퍼 ═══════════════ */
@@ -742,7 +747,7 @@ function renderCourseInfo(){
   $('#courseInfoBox').innerHTML=`<b>${c.name} ${lv}</b> <span class="eng">${c.eng}</span> — ${c.desc}<br>
   <table class="tbl" style="margin-top:8px; background:#fff; border-radius:8px; overflow:hidden">
   <tr><th>평가</th><th>시간/분량</th><th>${pk.toolCol||'계산기'}</th><th>비중</th><th>구성</th></tr>${rows}</table>
-  ${pk.iaCrit?`<div style="margin-top:6px; font-size:12px">IA 준거: ${pk.iaCrit.map(x=>`${x[0]} ${x[1]}점`).join(' · ')} = ${pk.iaCrit.reduce((a,x)=>a+x[1],0)}점 ${lv==='HL'&&pk.id==='math'?'<b>(준거 E는 HL에서 정교함·엄밀성을 추가 요구)</b>':''}</div>`:''}`;
+  ${pk.iaCrit?`<div style="margin-top:6px; font-size:12px">${pk.iaCritLabel||'IA 준거'}: ${pk.iaCrit.map(x=>`${x[0]} ${x[1]}점`).join(' · ')} = ${pk.iaCrit.reduce((a,x)=>a+x[1],0)}점 ${lv==='HL'&&pk.id==='math'?'<b>(준거 E는 HL에서 정교함·엄밀성을 추가 요구)</b>':''}</div>`:''}`;
 }
 
 /* ═══════════════ 시수 대시보드 ═══════════════ */
@@ -851,14 +856,18 @@ $('#btnPreset').onclick=()=>{
 };
 $('#btnAddUnit').onclick=()=>{state.outline.units.push(makeUnit(1,1,'',0,[])); renderUnitList();};
 $('#btnClearUnits').onclick=()=>{if(confirm('모든 단원을 삭제할까요? (상단 되돌리기로 복구 가능)')){snapshot();state.outline.units=[]; state.plans={}; renderUnitList();}};
+const MATH_IA_PRESET={
+ ko:{intro:'DP 1년차 2학기 초(9월): IA의 목적·준거(A~E) 소개, 우수/미흡 예시 보고서 함께 채점',
+     due:'DP 2년차 1학기(3월 중순): 최종본 제출',
+     stages:'① 1년차 9월 — IA 소개, 준거 이해 워크숍 (툴킷 시간 활용)\n② 1년차 10~12월 — 미니 탐구 2회로 탐구 기능 연습\n③ 1년차 1월 — 주제 브레인스토밍·주제 확정(교사 면담)\n④ 1년차 2월~2년차 8월 — 탐구 수행·초안 작성 (중간 점검 2회)\n⑤ 2년차 9월 — 초안 제출, 교사 서면 피드백(1회 허용)\n⑥ 2년차 10~2월 — 수정·보완\n⑦ 2년차 3월 — 최종 제출 및 진위 확인(academic integrity)'}
+};
 $('#btnIaPreset').onclick=()=>{
-  if(state.meta.docLang==='English'){
-    state.outline.iaIntro=ET.iaIntro; state.outline.iaDue=ET.iaDue; state.outline.iaStages=ET.iaStages;
+  const ip=SUBJ().iaPreset||MATH_IA_PRESET;
+  if(state.meta.docLang==='English'&&ip.en){
+    state.outline.iaIntro=ip.en.intro; state.outline.iaDue=ip.en.due; state.outline.iaStages=ip.en.stages;
     refreshStaticFields(); toast('Standard IA schedule filled (English).'); return;
   }
-  state.outline.iaIntro='DP 1년차 2학기 초(9월): IA의 목적·준거(A~E) 소개, 우수/미흡 예시 보고서 함께 채점';
-  state.outline.iaDue='DP 2년차 1학기(3월 중순): 최종본 제출';
-  state.outline.iaStages='① 1년차 9월 — IA 소개, 준거 이해 워크숍 (툴킷 시간 활용)\n② 1년차 10~12월 — 미니 탐구 2회로 탐구 기능 연습\n③ 1년차 1월 — 주제 브레인스토밍·주제 확정(교사 면담)\n④ 1년차 2월~2년차 8월 — 탐구 수행·초안 작성 (중간 점검 2회)\n⑤ 2년차 9월 — 초안 제출, 교사 서면 피드백(1회 허용)\n⑥ 2년차 10~2월 — 수정·보완\n⑦ 2년차 3월 — 최종 제출 및 진위 확인(academic integrity)';
+  state.outline.iaIntro=ip.ko.intro; state.outline.iaDue=ip.ko.due; state.outline.iaStages=ip.ko.stages;
   refreshStaticFields(); toast('표준 IA 일정 초안을 채웠습니다. 학사일정에 맞게 수정하세요.');
 };
 /* 아웃라인 예시 버튼 */
@@ -867,7 +876,7 @@ const OUTLINE_EX={
  atl:'예: 토픽 4(통계와 확률)에서 조사 기능과 미디어 리터러시를 집중 개발한다. 학생들은 언론 기사 속 통계 주장을 찾아 원자료 출처를 추적하고 표본·표집 방법의 타당성을 평가하는 과제를 수행한다. 모둠 프로젝트에서는 역할 분담표와 자기관리 체크리스트로 사회적·자기관리 기능을 함께 기른다.',
  im:'예: 토픽 1(수와 대수)을 선택한다. 수 체계의 발전(인도-아라비아 숫자, 0의 전파, 여러 문명의 기여)을 다루고, 이자·금융에 대한 문화별 관점(이슬람 금융의 무이자 원칙 등)을 비교한다. 이를 통해 수학이 특정 문화의 산물이 아니라 인류 공동의 유산임을 이해하게 한다. 자료: 수학사 읽기 자료, 국가별 금융 데이터.'
 };
-$$('button[data-bank]').forEach(b=>{b.onclick=()=>{const t=$('#'+b.dataset.target); const key=b.dataset.bank; const cur=t.value.trim(); t.value=(cur? cur+'\n\n':'')+OUTLINE_EX[key]; t.dispatchEvent(new Event('input')); toast('예시를 넣었습니다. 우리 학교 상황에 맞게 다듬으세요.');};});
+$$('button[data-bank]').forEach(b=>{b.onclick=()=>{const t=$('#'+b.dataset.target); const key=b.dataset.bank; const ex=(SUBJ().outlineEx||OUTLINE_EX)[key]; if(!ex){toast('이 과목의 예시는 준비 중입니다.'); return;} const cur=t.value.trim(); t.value=(cur? cur+'\n\n':'')+ex; t.dispatchEvent(new Event('input')); toast('예시를 넣었습니다. 우리 학교 상황에 맞게 다듬으세요.');};});
 
 /* ═══════════════ 유닛 플래너 ═══════════════ */
 let currentPlanId=null;
@@ -931,13 +940,18 @@ $('#up-unitSel').onchange=loadPlanForm;
 $$('[data-plan]').forEach(el=>{el.addEventListener('input',()=>{if(!currentPlanId)return; const p=state.plans[currentPlanId]; if(p) p[el.getAttribute('data-plan')]=el.value;});});
 $('#btnUpClear').onclick=()=>{if(currentPlanId&&confirm('이 단원의 플래너 내용을 모두 지울까요?')){state.plans[currentPlanId]=emptyPlan(); loadPlanForm();}};
 $('#btnInqBank').onclick=()=>{
-  if(!currentPlanId)return; const u=getUnit(currentPlanId); const bk=BANK[u.topic]||BANK[1]; const p=state.plans[currentPlanId];
+  if(!currentPlanId)return; const u=getUnit(currentPlanId); const BK=SUBJ().bank; const bk=BK[u.topic]||BK[Object.keys(BK)[0]]; const p=state.plans[currentPlanId];
   const add=(k,arr)=>{const nv=arr.join('\n'); p[k]=p[k].trim()? p[k]+'\n'+arr[Math.floor(Math.random()*arr.length)] : nv;};
   add('inqF',bk.inqF); add('inqC',bk.inqC); add('inqD',bk.inqD); loadPlanForm(); toast('예시은행의 탐구 질문을 채웠습니다.');
 };
 $('#btnUpDraft').onclick=()=>{
   if(!currentPlanId){toast('먼저 단원을 선택하세요.'); return;}
-  const u=getUnit(currentPlanId); const p=state.plans[currentPlanId]; const bk=BANK[u.topic]||BANK[1];
+  const u=getUnit(currentPlanId); const p=state.plans[currentPlanId];
+  const msg=(SUBJ().unitDraft||mathUnitDraft)(u,p);
+  loadPlanForm(); toast(msg);
+};
+function mathUnitDraft(u,p){
+  const bk=BANK[u.topic]||BANK[1];
   const c=CUR(), lv=state.meta.level; const tn=topicName(u.topic);
   const fill=(k,v)=>{if(!String(p[k]||'').trim()) p[k]=v;};
   const les=unitLessons(u);
@@ -954,8 +968,7 @@ $('#btnUpDraft').onclick=()=>{
     if(!p.atlChecks.length) p.atlChecks=atlFromBank(bk);
     if(!p.langChecks.length) p.langChecks=['새 학습을 위한 스캐폴딩','연습을 통한 습득'];
     if(!p.lpChecks.length) p.lpChecks=['탐구하는 사람','사고하는 사람','성찰하는 사람'];
-    loadPlanForm(); toast('English mode: 템플릿 항목만 영어로 채웠습니다. 탐구질문·TOK 등은 ④ AI 프롬프트로 영어 생성을 권장합니다.');
-    return;
+    return 'English mode: 템플릿 항목만 영어로 채웠습니다. 탐구질문·TOK 등은 ④ AI 프롬프트로 영어 생성을 권장합니다.';
   }
   fill('desc',`『${u.title||tn}』 단원. ${c.name} ${lv}의 ${tn} 영역을 다룬다. 총 ${u.hours||0}시간(약 ${les}교시). 주 교재: 교과서 해당 단원, GDC, Desmos/GeoGebra 활동 자료.`);
   fill('dpAssess', u.topic==='T' ? `내부평가(IA) 수학적 탐구 — 준거 A~E(20점), 총점의 20%. ${lv} 기준 유의: 준거 E(수학의 활용)${lv==='HL'?'는 정교함·엄밀성 추가 요구':'는 과정 수준에 상응하면 만점 가능'}.` : `외부평가 출제 영역: ${SUBJ().assess[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')} — 본 단원 내용 포함. 총괄평가는 해당 Paper 형식(단답+서술)을 반영해 설계.`);
@@ -980,13 +993,15 @@ $('#btnUpDraft').onclick=()=>{
   fill('cas', u.topic===4?'지역사회 설문·데이터 분석 봉사 프로젝트(Service)와 연계 가능':'해당 시 기록 (예: 수학 멘토링 봉사, 수학 동아리 활동과 연계)');
   if(!p.lpChecks.length) p.lpChecks=['탐구하는 사람','사고하는 사람','성찰하는 사람'];
   fill('resources','교과서 해당 단원, GDC(TI/카시오), Desmos·GeoGebra, 해당 토픽 기출 문항 세트, 교육청 IB 자료실 자료');
-  loadPlanForm(); toast('초안을 채웠습니다. 빈칸만 채우므로 이미 쓴 내용은 그대로 유지됩니다.');
-};
+  return '초안을 채웠습니다. 빈칸만 채우므로 이미 쓴 내용은 그대로 유지됩니다.';
+}
 
 /* ═══════════════ 차시 수업안 ═══════════════ */
 const LTYPE={intro:'개념 도입·탐구',practice:'연습·문제 해결',modeling:'모델링·탐구 활동',gdc:'GDC·테크놀로지 실습',ia:'IA(탐구보고서) 지도',review:'복습·평가'};
+const LT=t=>((SUBJ().lessonTypes||LTYPE)[t])||LTYPE[t]||t;
 function pick(arr,seed){return arr&&arr.length? arr[seed%arr.length] : '';}
-function lessonDraft(u,type,sub,note,seed){
+function lessonDraft(u,type,sub,note,seed){ return (SUBJ().lessonDraft||mathLessonDraft)(u,type,sub,note,seed); }
+function mathLessonDraft(u,type,sub,note,seed){
   const bk=BANK[u.topic]||BANK[1]; const min=state.meta.lessonMin||50;
   const t=sub||((u.title||'').replace(/^단원 \d+\. /,''))||'이번 차시 주제';
   const inq=pick(bk.inqC,seed)||'오늘의 핵심 질문';
@@ -1026,12 +1041,12 @@ $('#btnLsGen').onclick=()=>{
   const u=getUnit(id); const type=$('#ls-type').value;
   const d=lessonDraft(u,type,$('#ls-sub').value.trim(),$('#ls-note').value.trim(),state.lessons.length+ (Math.random()*3|0));
   $('#lsResultCard').style.display='block';
-  $('#lsResultTitle').textContent=`${u.title||'단원'} · ${$('#ls-no').value||'?차시'} · ${LTYPE[type]}`;
+  $('#lsResultTitle').textContent=`${u.title||'단원'} · ${$('#ls-no').value||'?차시'} · ${LT(type)}`;
   $('#ls-obj').value=d.obj; $('#ls-inq').value=d.inq; $('#ls-intro').value=d.intro; $('#ls-dev').value=d.dev; $('#ls-wrap').value=d.wrap; $('#ls-assess').value=d.assess; $('#ls-atl').value=d.atl; $('#ls-prep').value=d.prep;
   $('#lsResultCard').scrollIntoView({behavior:'smooth',block:'start'});
   toast('수업안 초안을 만들었습니다. 우리 반에 맞게 다듬으세요.');
 };
-function lessonText(l){return `[${l.unitTitle}] ${l.no} · ${LTYPE[l.type]}${l.sub?' · '+l.sub:''}\n\n■ 학습 목표\n${l.obj}\n\n■ 탐구 질문\n${l.inq}\n\n■ 도입 (${'약 10분'})\n${l.intro}\n\n■ 전개 (약 30분)\n${l.dev}\n\n■ 정리 (약 10분)\n${l.wrap}\n\n■ 형성평가·과제\n${l.assess}\n\n■ ATL 초점\n${l.atl}\n\n■ 준비물\n${l.prep}`;}
+function lessonText(l){return `[${l.unitTitle}] ${l.no} · ${LT(l.type)}${l.sub?' · '+l.sub:''}\n\n■ 학습 목표\n${l.obj}\n\n■ 탐구 질문\n${l.inq}\n\n■ 도입 (${'약 10분'})\n${l.intro}\n\n■ 전개 (약 30분)\n${l.dev}\n\n■ 정리 (약 10분)\n${l.wrap}\n\n■ 형성평가·과제\n${l.assess}\n\n■ ATL 초점\n${l.atl}\n\n■ 준비물\n${l.prep}`;}
 function collectLessonForm(){
   const id=$('#ls-unitSel').value; const u=getUnit(id);
   return {id:uid(),unitId:id,unitTitle:(u&&u.title)||'단원',no:$('#ls-no').value||'?차시',type:$('#ls-type').value,sub:$('#ls-sub').value.trim(),
@@ -1042,7 +1057,7 @@ $('#btnLsCopy').onclick=()=>{copyText(lessonText(collectLessonForm())); };
 function renderLessonList(){
   const el=$('#lessonList'); $('#lsCount').textContent=state.lessons.length? `총 ${state.lessons.length}차시`:'';
   if(!state.lessons.length){el.innerHTML='<div class="empty-note">아직 저장된 차시가 없습니다. 위에서 수업안을 생성한 뒤 저장해 보세요.</div>'; return;}
-  el.innerHTML=state.lessons.map(l=>`<div class="lesson-item" data-lid="${l.id}"><span class="badge b-blue">${esc(l.no)}</span><b>${esc(l.unitTitle)}</b><span style="color:#64748b; font-size:12.5px">${LTYPE[l.type]}${l.sub?' · '+esc(l.sub):''}</span><span style="margin-left:auto; display:flex; gap:5px"><button class="btn btn-ghost btn-sm" data-lact="copy">복사</button><button class="btn btn-danger btn-sm" data-lact="del">삭제</button></span></div>`).join('');
+  el.innerHTML=state.lessons.map(l=>`<div class="lesson-item" data-lid="${l.id}"><span class="badge b-blue">${esc(l.no)}</span><b>${esc(l.unitTitle)}</b><span style="color:#64748b; font-size:12.5px">${LT(l.type)}${l.sub?' · '+esc(l.sub):''}</span><span style="margin-left:auto; display:flex; gap:5px"><button class="btn btn-ghost btn-sm" data-lact="copy">복사</button><button class="btn btn-danger btn-sm" data-lact="del">삭제</button></span></div>`).join('');
 }
 $('#lessonList').addEventListener('click',e=>{
   const item=e.target.closest('.lesson-item'); if(!item)return;
@@ -1051,7 +1066,7 @@ $('#lessonList').addEventListener('click',e=>{
   if(act==='del'){state.lessons=state.lessons.filter(x=>x.id!==l.id); renderLessonList(); return;}
   if(act==='copy'){copyText(lessonText(l)); return;}
   $('#ls-unitSel').value=l.unitId; $('#ls-no').value=l.no; $('#ls-type').value=l.type; $('#ls-sub').value=l.sub;
-  $('#lsResultCard').style.display='block'; $('#lsResultTitle').textContent=`${l.unitTitle} · ${l.no} · ${LTYPE[l.type]}`;
+  $('#lsResultCard').style.display='block'; $('#lsResultTitle').textContent=`${l.unitTitle} · ${l.no} · ${LT(l.type)}`;
   ['obj','inq','intro','dev','wrap','assess','atl','prep'].forEach(k=>{$('#ls-'+k).value=l[k];});
   $$('.lesson-item').forEach(x=>x.classList.toggle('sel',x.dataset.lid===l.id));
 });
@@ -1077,19 +1092,22 @@ const QUALITY=`## 품질 기준 (반드시 지킬 것)
 - IB 용어는 한국어로 쓰되 필요한 곳에 영어 병기. 근거 없는 IB 규정 인용은 하지 말 것.`;
 function buildPrompt(){
   const type=$('#ai-type').value; const uid2=$('#ai-unitSel').value; const u=uid2?getUnit(uid2):null; const extra=$('#ai-extra').value.trim();
-  const head=`당신은 IB DP 수학을 20년 이상 가르치고 IB 교사 워크숍을 이끌어 온 수업 설계 전문가입니다. 한국 공교육 IB 학교의 수학 교사를 돕고 있습니다.\n\n## 수업 맥락\n${outlineSummary()}`;
+  const head=`${SUBJ().persona||'당신은 IB DP 과정을 20년 이상 가르쳐 온 수업 설계 전문가입니다.'}\n\n## 수업 맥락\n${outlineSummary()}`;
   if(type==='unitplan'){
     if(!u) return null;
-    return `${head}\n\n## 과제\n아래 단원의 IB DP 유닛 플래너를 한국어로 완성도 높게 작성해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, Year ${u.year}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n\n## 이미 작성해 둔 내용 (그대로 존중하고, 빈 부분을 보완)\n${planSummary(uid2)}\n\n## 작성 항목 (IB 공식 DP unit planner 구조)\n1. 단원 개요와 텍스트  2. 관련 DP 평가  3. 전이 목표(2~3개)  4. 핵심 이해(일반화 문장 3~4개)  5. 예상 오개념  6. 탐구 질문(사실적/개념적/논쟁적 각 2개)  7. 지식·기능·개념  8. 학습 경험과 전략(차시 흐름 개요 포함)  9. 형성평가·총괄평가(백워드로 먼저 설계)  10. 차별화 전략  11. ATL(5범주 중 초점 2개와 구체 전략)  12. TOK 연계(토론 질문 포함)  13. CAS 연계  14. 국제적 소양  15. 학습자상 초점  16. 언어와 학습  17. 자료  18. 성찰 계획(수업 전·중·후 점검 질문)\n\n${QUALITY}\n${LANGLINE()}${extra?`\n\n## 추가 조건\n${extra}`:''}\n\n## 출력 형식\n마크다운. 각 항목을 제목으로 구분하고, 표가 효과적인 곳(평가 계획, 차시 흐름)은 표로.`;
+    return `${head}\n\n## 과제\n아래 단원의 IB DP 유닛 플래너를 한국어로 완성도 높게 작성해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, Year ${u.year}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n\n## 이미 작성해 둔 내용 (그대로 존중하고, 빈 부분을 보완)\n${planSummary(uid2)}\n\n## 작성 항목 (IB 공식 DP unit planner 구조)\n1. 단원 개요와 텍스트  2. 관련 DP 평가  3. 전이 목표(2~3개)  4. 핵심 이해(일반화 문장 3~4개)  5. 예상 오개념  6. 탐구 질문(사실적/개념적/논쟁적 각 2개)  7. 지식·기능·개념  8. 학습 경험과 전략(차시 흐름 개요 포함)  9. 형성평가·총괄평가(백워드로 먼저 설계)  10. 차별화 전략  11. ATL(5범주 중 초점 2개와 구체 전략)  12. TOK 연계(토론 질문 포함)  13. CAS 연계  14. 국제적 소양  15. 학습자상 초점  16. 언어와 학습  17. 자료  18. 성찰 계획(수업 전·중·후 점검 질문)\n\n${SUBJ().quality||QUALITY}\n${LANGLINE()}${extra?`\n\n## 추가 조건\n${extra}`:''}\n\n## 출력 형식\n마크다운. 각 항목을 제목으로 구분하고, 표가 효과적인 곳(평가 계획, 차시 흐름)은 표로.`;
   }
   if(type==='lesson'){
     if(!u) return null;
-    return `${head}\n\n## 과제\n아래 단원의 차시별 수업안을 한국어로 상세 설계해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시, 1교시 ${state.meta.lessonMin}분)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n- 유닛 플래너 요약:\n${planSummary(uid2)}\n${extra?`- 추가 조건: ${extra}`:''}\n\n## 각 차시에 반드시 포함\n① 학습 목표(도달 가능하고 관찰 가능하게)  ② 이 차시의 탐구 질문  ③ 도입(분 단위, 훅 포함)  ④ 전개(분 단위, 활동·발문 예시·예상 오답과 대응)  ⑤ 정리(성찰·출구티켓)  ⑥ 형성평가와 과제  ⑦ ATL 초점  ⑧ GDC/자료 활용  ⑨ 판서 계획 개요\n\n${QUALITY}\n${LANGLINE()}\n\n## 출력 형식\n차시별로 구분된 마크다운. 먼저 전체 차시 흐름표(1행=1차시)를 제시한 뒤, 각 차시 상세안을 작성.`;
+    return `${head}\n\n## 과제\n아래 단원의 차시별 수업안을 한국어로 상세 설계해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시, 1교시 ${state.meta.lessonMin}분)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n- 유닛 플래너 요약:\n${planSummary(uid2)}\n${extra?`- 추가 조건: ${extra}`:''}\n\n## 각 차시에 반드시 포함\n① 학습 목표(도달 가능하고 관찰 가능하게)  ② 이 차시의 탐구 질문  ③ 도입(분 단위, 훅 포함)  ④ 전개(분 단위, 활동·발문 예시·예상 오답과 대응)  ⑤ 정리(성찰·출구티켓)  ⑥ 형성평가와 과제  ⑦ ATL 초점  ⑧ ${SUBJ().resourceLine||'GDC/자료 활용'}  ⑨ 판서 계획 개요\n\n${SUBJ().quality||QUALITY}\n${LANGLINE()}\n\n## 출력 형식\n차시별로 구분된 마크다운. 먼저 전체 차시 흐름표(1행=1차시)를 제시한 뒤, 각 차시 상세안을 작성.`;
   }
   if(type==='outline'){
-    return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족, 툴킷 30시간 확보 여부(검산 포함)\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course==='AA'?'AA':'AI'} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${SUBJ().assess[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
+    return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족${TK()?`, ${TK().name} ${TK().sl}시간 확보 여부(검산 포함)`:''}\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${SUBJ().assess[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
   }
   /* ia */
+  return (SUBJ().iaIdeasPrompt||mathIaPrompt)(head,u,extra);
+}
+function mathIaPrompt(head,u,extra){
   return `${head}\n${u?`- 참고 단원: ${u.title} (${topicName(u.topic)})`:''}${extra?`\n- 학생 관심 분야: ${extra}`:''}\n\n## 과제\n${CUR().name} ${state.meta.level} 학생을 위한 IA(수학적 탐구) 주제 아이디어 15개를 제안해 주세요.\n\n## 각 주제마다 포함\n① 주제명(한 줄)  ② 탐구 질문 형태로 정제한 버전  ③ 사용될 핵심 수학(실라버스 토픽 연결)  ④ 데이터/자료 확보 방법  ⑤ 준거 E(수학의 활용) 관점 위험도: 수학이 과정 수준에 못 미치거나(너무 얕음) 감당 불가(너무 깊음)할 위험 평가  ⑥ 한국 학생이 접근하기 좋은 현지화 포인트\n\n## 조건\n- '너무 흔한 주제'(BMI, 피보나치와 황금비 등)는 피하거나 참신한 변형으로만.\n- 개인적 참여(준거 C)를 살릴 수 있는 주제 위주로.\n- 12~20쪽 분량으로 완결 가능한 범위로.\n\n## 출력 형식\n표(주제/질문/핵심 수학/데이터/위험도/현지화) + 상위 추천 3개에 대한 상세 코멘트.\n${LANGLINE()}`;
 }
 $('#ai-type').onchange=()=>{
@@ -1153,11 +1171,11 @@ function buildOutlineDocHTML(){
     P.push('</table>');
   });
   const tot=Object.values(assignedByTopic()).reduce((a,b)=>a+b,0);
-  P.push(`<p class="pmeta"><b>총 배정 시수: ${tot} / ${targetHours()}시간</b> (공식 권장: SL 150 · HL 240, 툴킷 30시간 포함)</p>`);
+  P.push(`<p class="pmeta"><b>총 배정 시수: ${tot} / ${targetHours()}시간</b> (공식 권장: SL ${SUBJ().targetHours.SL} · HL ${SUBJ().targetHours.HL}${TK()?`, ${TK().name} ${TK().sl}시간 포함`:''})</p>`);
   P.push(`<h2>2. 내부평가(IA) 계획</h2><p><b>첫 소개:</b> ${esc(state.outline.iaIntro||'')}<br><b>최종 마감:</b> ${esc(state.outline.iaDue||'')}</p><p>${esc(state.outline.iaStages||'')}</p>`);
   P.push(`<h2>3. TOK 연계</h2><p>${esc(state.outline.tok||'')}</p><h2>4. 학습접근방법(ATL)</h2><p>${esc(state.outline.atl||'')}</p><h2>5. 국제적 소양</h2><p>${esc(state.outline.im||'')}</p><h2>6. IB 학습자상</h2><p><b>초점:</b> ${esc((state.outline.lpChecks||[]).join(', '))}</p><p>${esc(state.outline.lp||'')}</p><h2>7. 자료</h2><p>${esc(state.outline.resources||'')}</p>`);
-  P.push(`<h2>평가 구조 (참고)</h2><table><tr><th>평가</th><th>시간/분량</th><th>${esc(SUBJ().toolCol||'계산기')}</th><th>비중</th><th>구성</th></tr>${(SUBJ().assess[m.course]&&SUBJ().assess[m.course][m.level]||[]).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>${SUBJ().iaCrit?`<p class="pmeta">IA 준거: ${SUBJ().iaCrit.map(x=>x[0]+' '+x[1]+'점').join(' · ')} = ${SUBJ().iaCrit.reduce((a,x)=>a+x[1],0)}점</p>`:''}`);
-  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오 v0.3으로 작성된 초안 · 제출 전 최신 공식 가이드와 대조 필요 · 본 도구는 IBO와 무관하며 IBO의 승인·보증을 받지 않았습니다.</div>`);
+  P.push(`<h2>평가 구조 (참고)</h2><table><tr><th>평가</th><th>시간/분량</th><th>${esc(SUBJ().toolCol||'계산기')}</th><th>비중</th><th>구성</th></tr>${(SUBJ().assess[m.course]&&SUBJ().assess[m.course][m.level]||[]).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>${SUBJ().iaCrit?`<p class="pmeta">${SUBJ().iaCritLabel||'IA 준거'}: ${SUBJ().iaCrit.map(x=>x[0]+' '+x[1]+'점').join(' · ')} = ${SUBJ().iaCrit.reduce((a,x)=>a+x[1],0)}점</p>`:''}`);
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 작성된 초안 · 제출 전 최신 공식 가이드와 대조 필요 · 본 도구는 IBO와 무관하며 IBO의 승인·보증을 받지 않았습니다.</div>`);
   return P.join('');
 }
 function printOutline(){$('#printArea').innerHTML=buildOutlineDocHTML(); window.print();}
@@ -1168,7 +1186,7 @@ function buildUnitDocHTML(id){
   P.push(`<h2>탐구 INQUIRY — 단원의 목적</h2><table>${R('단원 개요·텍스트',p.desc)}${R('관련 DP 평가',p.dpAssess)}${R('전이 목표',p.transfer)}${R('핵심 이해',p.essential)}${R('예상 오개념',p.miscon)}${R('탐구 질문(사실)',p.inqF)}${R('탐구 질문(개념)',p.inqC)}${R('탐구 질문(논쟁)',p.inqD)}</table>`);
   P.push(`<h2>실행 ACTION — 탐구를 통한 교수·학습</h2><table>${R('지식(내용)',p.know)}${R('기능',p.skills)}${R('개념',p.concepts)}${R('학습 경험·전략'+((p.expChecks||[]).length?` (${p.expChecks.join(', ')})`:''),p.expDetail)}${R('형성평가',p.formative)}${R('총괄평가',p.summative)}${R('차별화'+((p.diffChecks||[]).length?` (${p.diffChecks.join(', ')})`:''),p.diffDetail)}${R('ATL'+((p.atlChecks||[]).length?` (${p.atlChecks.join(', ')})`:''),p.atlDetail)}${R('언어와 학습',p.langDetail)}${R('TOK 연계',p.tok)}${R('CAS 연계',p.cas)}${R('국제적 소양',p.im)}${R('학습자상',(p.lpChecks||[]).join(', '))}${R('자료',p.resources)}</table>`);
   P.push(`<h2>성찰 REFLECTION</h2><table>${R('수업 전',p.reflBefore)}${R('수업 중',p.reflDuring)}${R('수업 후',p.reflAfter)}</table>`);
-  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오 v0.3 초안 · IB 공식 DP unit planner 구조 기반 · 본 도구는 IBO와 무관합니다.</div>`);
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오 초안 · IB 공식 DP unit planner 구조 기반 · 본 도구는 IBO와 무관합니다.</div>`);
   return P.join('');
 }
 function printUnit(id){const h=buildUnitDocHTML(id); if(h==null)return; $('#printArea').innerHTML=h; window.print();}
@@ -1291,15 +1309,18 @@ const TOPIC_PAT={
  4:/statistic|probabilit|distribution|regression|correlation|sampling|data|통계|확률|분포|회귀|상관|표집|자료/i,
  5:/calculus|derivative|differenti|integra|limit|kinematic|미분|적분|미적분|극한|운동학/i};
 function inferTopic(title,contents,prev){
-  if(/toolkit|툴킷|수학적\s*탐구|mathematical\s*exploration|(^|[^A-Za-z])IA([^A-Za-z]|$)/i.test(title)) return 'T';
+  const pk=SUBJ();
+  if(pk.toolkit && pk.tPat && pk.tPat.test(title)) return 'T';
+  const pat=pk.topicPat||TOPIC_PAT;
   const lines=String(contents||'').split(/\n|;/);
   let best=0,bestK=0;
-  for(let k=1;k<=5;k++){
-    let s=(TOPIC_PAT[k].test(title)?3:0);
-    lines.forEach(L=>{if(TOPIC_PAT[k].test(L))s++;});
+  pk.topicDomain.forEach(k=>{
+    const re=pat[k]; if(!re) return;
+    let s=(re.test(title)?3:0);
+    lines.forEach(L=>{if(re.test(L))s++;});
     if(s>best){best=s;bestK=k;}
-  }
-  return best>0? bestK : (prev||1);
+  });
+  return best>0? bestK : (prev||pk.topicDomain[0]);
 }
 const HDR_LABELS=[['school',/school\s*name|학교명|학교\s*이름/i],['code',/school\s*code|학교\s*코드/i],['subject',/name of the dp subject|dp\s*과목|과목명/i],['teacher',/name of the teacher|작성\s*교사|교사명/i],['training',/date of ib training|ib\s*연수|연수\s*이수/i],['date',/outline was completed|작성\s*완료/i],['workshop',/name of workshop|워크숍/i]];
 function isLabelCell(v){const cc=v.replace(/\n/g,' '); return cc.length<90 && HDR_LABELS.some(([k,re])=>re.test(cc));}
@@ -1435,7 +1456,7 @@ function parseOutlineDoc(tables,flatText){
   const LP_MAP=[['탐구하는 사람',/inquirer|탐구하는/i],['지식이 풍부한 사람',/knowledgeable|지식이/i],['사고하는 사람',/thinker|사고하는/i],['소통하는 사람',/communicator|소통하는/i],['원칙을 지키는 사람',/principled|원칙/i],['열린 마음을 지닌 사람',/open-?minded|열린/i],['배려하는 사람',/caring|배려/i],['도전하는 사람',/risk-?taker|도전/i],['균형 잡힌 사람',/balanced|균형/i],['성찰하는 사람',/reflective|성찰하는/i]];
   const lpChecks=LP_MAP.filter(([k,re])=>re.test(lpTxt||'')).map(([k])=>k);
   const subj=hdr.subject||'';
-  const course=/응용과?\s*해석|applications|interpretation/i.test(subj+flatText.slice(0,400))?'AI':'AA';
+  const course=(SUBJ().detectCourse||(()=>SUBJ().defaultCourse))(subj,flatText);
   const level=/HL/i.test(subj)?'HL':(/SL/i.test(subj)?'SL':(hdr.levelX||'SL'));
   const sampleTxt=units.map(u=>u.title+' '+u.subs.join(' ')).join(' ').slice(0,600);
   const hangul=(sampleTxt.match(/[가-힣]/g)||[]).length;
@@ -1519,11 +1540,11 @@ function importSource(){const t=$('#im-paste').value.trim()||importedText; retur
 
 function promptDocConvert(){
   const t=importSource(); if(!t){toast('먼저 파일을 읽거나 내용을 붙여넣으세요.'); return null;}
-  return `당신은 IB DP 과정 문서 구조화 전문가입니다. 아래 [원본 문서]는 한 교사의 DP 수학 코스아웃라인입니다(한국어 또는 영어). 이를 'IB티처스' 수업설계 도구의 JSON 스키마로 변환해 주세요.\n\n## JSON 스키마\n{\n "meta": {"course":"AA"|"AI", "level":"SL"|"HL", "school":"", "teacher":"", "years":"", "training":"", "date":"", "lessonMin":50, "perWeek":4, "lang":"한국어"|"영어"|"한국어+영어", "docLang":"한국어"|"English", "hoursUnit":"시간"|"교시"},\n "outline": {\n  "units":[{"title":"", "year":1, "topic":1, "hours":0, "subs":["소주제"], "assess":["평가도구"], "res":"자료", "extra":""}],\n  "iaIntro":"", "iaDue":"", "iaStages":"", "tok":"", "atl":"", "im":"", "lp":"", "lpChecks":[], "resources":""\n }\n}\n\n## 변환 규칙\n1. topic 값: 1=수와 대수(Number and algebra), 2=함수(Functions), 3=기하와 삼각법(Geometry and trigonometry), 4=통계와 확률(Statistics and probability), 5=미적분(Calculus), "T"=수학 툴킷·IA(toolkit/exploration). 여러 토픽에 걸치면 비중이 가장 큰 토픽으로.\n2. year 값: 1 또는 2. 문서에 구분이 없으면 전반부=1, 후반부=2로 추정하고 해당 단원 title 끝에 " (추정)"을 붙일 것.\n3. 원문이 영어면 필드 값은 영어 그대로 두고 docLang="English"로 설정.\n4. 문서에 없는 정보는 빈 문자열/빈 배열/0으로 두고 절대 지어내지 말 것.\n5. AA/AI·SL/HL은 문서 내용으로 판단하되 불명확하면 "AA","SL".\n6. 표(| 구분)로 된 부분은 열 의미를 해석해 units에 매핑할 것 (단원명·내용·시수·평가·자료).\n7. 시수가 '교시/classes' 단위로 기재된 문서면 hoursUnit="교시"로 설정하고 hours에는 교시 수를 그대로 넣을 것 (시간 환산 금지).\n\n## 출력\n설명 없이 JSON 코드블록 하나만 출력하세요.\n\n## 원본 문서\n"""\n${t}\n"""`;
+  return `당신은 IB DP 과정 문서 구조화 전문가입니다. 아래 [원본 문서]는 한 교사의 ${SUBJ().short} 코스아웃라인입니다(한국어 또는 영어). 이를 'IB티처스' 수업설계 도구의 JSON 스키마로 변환해 주세요.\n\n## JSON 스키마\n{\n "meta": {"subject":"${state.meta.subject}", "course":${Object.keys(SUBJ().courses).map(c=>'"'+c+'"').join('|')}, "level":"SL"|"HL", "school":"", "teacher":"", "years":"", "training":"", "date":"", "lessonMin":50, "perWeek":4, "lang":"한국어"|"영어"|"한국어+영어", "docLang":"한국어"|"English", "hoursUnit":"시간"|"교시"},\n "outline": {\n  "units":[{"title":"", "year":1, "topic":1, "hours":0, "subs":["소주제"], "assess":["평가도구"], "res":"자료", "extra":""}],\n  "iaIntro":"", "iaDue":"", "iaStages":"", "tok":"", "atl":"", "im":"", "lp":"", "lpChecks":[], "resources":""\n }\n}\n\n## 변환 규칙\n${SUBJ().convertTopicRule}\n2. year 값: 1 또는 2. 문서에 구분이 없으면 전반부=1, 후반부=2로 추정하고 해당 단원 title 끝에 " (추정)"을 붙일 것.\n3. 원문이 영어면 필드 값은 영어 그대로 두고 docLang="English"로 설정.\n4. 문서에 없는 정보는 빈 문자열/빈 배열/0으로 두고 절대 지어내지 말 것.\n${SUBJ().convertCourseRule}\n6. 표(| 구분)로 된 부분은 열 의미를 해석해 units에 매핑할 것 (단원명·내용·시수·평가·자료).\n7. 시수가 '교시/classes' 단위로 기재된 문서면 hoursUnit="교시"로 설정하고 hours에는 교시 수를 그대로 넣을 것 (시간 환산 금지).\n\n## 출력\n설명 없이 JSON 코드블록 하나만 출력하세요.\n\n## 원본 문서\n"""\n${t}\n"""`;
 }
 function promptDocReview(){
   const t=importSource(); if(!t){toast('먼저 파일을 읽거나 내용을 붙여넣으세요.'); return null;}
-  return `당신은 IB DP 인증 심사 경험이 있는 수학 교육 전문가입니다. 아래 [원본 문서]는 한 교사가 작성한 DP 수학 코스아웃라인입니다. IB 제출 관점에서 냉정하게 진단해 주세요.\n\n## 진단 기준\n1. 공식 양식 요구 섹션 충족: Year 1/2 단원표(단원·내용·시수·평가도구·자료), IA 일정(첫 소개·단계·마감), TOK 연계, ATL, 국제적 소양, 학습자상, 자료\n2. 시수 검산: 합계가 SL 150 / HL 240 (수학 툴킷 30시간 포함)에 부합하는지\n3. 단원 배열의 논리성(선수학습 관계)과 평가-실제 시험 구조의 정렬\n4. TOK·ATL·국제적 소양·학습자상이 '토픽 하나를 골라 구체적으로 서술'이라는 양식 요구를 충족하는지\n5. 개념기반·백워드 설계 관점의 약점\n\n## 출력 형식\n${state.meta.docLang==='English'?'Respond in English.':'한국어로 답하세요.'} ① 섹션별 진단표(양호/보완/미흡 + 근거) ② 심사자가 지적할 Top 5 약점 ③ 수정 전→후 예시 3개 ④ 총평(10점 만점)\n\n## 원본 문서\n"""\n${t}\n"""`;
+  return `당신은 IB DP 인증 심사 경험이 있는 ${SUBJ().short} 교육 전문가입니다. 아래 [원본 문서]는 한 교사가 작성한 ${SUBJ().short} 코스아웃라인입니다. IB 제출 관점에서 냉정하게 진단해 주세요.\n\n## 진단 기준\n1. 공식 양식 요구 섹션 충족: Year 1/2 단원표(단원·내용·시수·평가도구·자료), IA 일정(첫 소개·단계·마감), TOK 연계, ATL, 국제적 소양, 학습자상, 자료\n2. 시수 검산: 합계가 SL ${SUBJ().targetHours.SL} / HL ${SUBJ().targetHours.HL}${TK()?` (${TK().name} ${TK().sl}시간 포함)`:''}에 부합하는지\n3. 단원 배열의 논리성(선수학습 관계)과 평가-실제 시험 구조의 정렬\n4. TOK·ATL·국제적 소양·학습자상이 '토픽 하나를 골라 구체적으로 서술'이라는 양식 요구를 충족하는지\n5. 개념기반·백워드 설계 관점의 약점\n\n## 출력 형식\n${state.meta.docLang==='English'?'Respond in English.':'한국어로 답하세요.'} ① 섹션별 진단표(양호/보완/미흡 + 근거) ② 심사자가 지적할 Top 5 약점 ③ 수정 전→후 예시 3개 ④ 총평(10점 만점)\n\n## 원본 문서\n"""\n${t}\n"""`;
 }
 function parseJsonLoose(s){s=String(s||'').trim(); const m=s.match(/```(?:json)?\s*([\s\S]*?)```/); if(m)s=m[1].trim(); const i=s.indexOf('{'), j=s.lastIndexOf('}'); if(i<0||j<=i) throw new Error('JSON 객체가 없습니다'); return JSON.parse(s.slice(i,j+1));}
 function normalizeImported(d){
@@ -1576,7 +1597,7 @@ function renderChecklist(){
     ['Year 1·2 모두 배치', o.units.some(u=>u.year===1)&&o.units.some(u=>u.year===2), '2개년 계획이 양식 요구사항'],
     ['모든 단원에 학습 내용', o.units.length>0&&o.units.every(u=>u.subs.length>0||(u.extra||'').trim()), ''],
     ['모든 단원에 평가 도구', o.units.length>0&&o.units.every(u=>u.assess.length>0), ''],
-    ...(TK()?[['수학 툴킷·IA 30시간 배정', (assignedByTopic()['T']||0)*hourFactor()>=(TK().sl-1), '공식 요구: 30시간(IA 10~15시간 포함) — 별도 단원 또는 분산 배정']]:[]),
+    ...(TK()?[[`${TK().name} ${TK().sl}시간 배정`, (assignedByTopic()['T']||0)*hourFactor()>=(TK().sl-1), `공식 요구: ${TK().sl}시간 — 별도 단원 또는 분산 배정`]]:[]),
     ['IA 일정(소개·단계·마감) 작성', !!(o.iaIntro.trim()&&o.iaDue.trim()&&o.iaStages.trim()), ''],
     ['TOK 연계 서술', !!o.tok.trim(), '토픽 1개를 골라 구체적으로'],
     ['ATL 서술', !!o.atl.trim(), ''],
@@ -1611,7 +1632,7 @@ $('#btnSample').onclick=()=>{
   ];
   state.outline.units.forEach(u=>{u.assess=u.topic==='T'?['IA 마일스톤','수행·탐구 과제']:['쪽지시험·퀴즈','단원평가(서술형)','모의 Paper 1','모의 Paper 2']; u.res='교과서 해당 단원, 토픽 기출 세트';});
   $('#btnIaPreset').onclick.call();
-  setCourse('AA'); setLevel('SL'); refreshStaticFields(); renderUnitList(); renderLessonList();
+  renderSubjectUI(); setCourse('AA'); setLevel('SL'); refreshStaticFields(); renderUnitList(); renderLessonList();
   /* 단원 1 유닛플래너 초안 자동 생성 */
   $('#up-unitSel').value=state.outline.units[0].id; loadPlanForm(); $('#btnUpDraft').onclick();
   /* 샘플 차시 1개 */
@@ -1622,7 +1643,6 @@ $('#btnSample').onclick=()=>{
 };
 
 /* ═══════════════ 용어집·내비게이션·초기화 ═══════════════ */
-$('#glossary').innerHTML=GLOSSARY.map(g=>`<details class="gloss"><summary>${esc(g[0])}</summary><p>${esc(g[1])}</p></details>`).join('');
 function showStep(name){
   $$('.step-btn').forEach(b=>b.classList.toggle('on',b.dataset.step===name));
   $$('.step-panel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+name));
@@ -1645,20 +1665,243 @@ $('#btnUndo').onclick=()=>{
    toolCol(평가표 3열 제목: 수학='계산기', 타 과목='허용 자료' 등), bank(예시은행), conceptCore, es(핵심 이해),
    skills(기능), assessTools(평가 도구 목록), topicDomain(허용 토픽 번호 배열)
    ※ 수업안 생성기·AI 프롬프트의 과목 고정 문구는 다음 단계(국어 팩 연결)에서 팩 필드로 이동 예정 */
+/* ═══════════════ 국어 A 팩 데이터 (자체 정리 초안 — PRC 원문 대조 전) ═══════════════ */
+const KO_SYLLABUS={
+ LIT:{ code:'LIT', name:'국어 A: 문학', eng:'Korean A: Literature',
+  desc:'문학 작품의 깊이 있는 읽기·해석·비교 중심. 작품 수 요건: SL 9편 / HL 13편(번역 문학·시대·장소 요건 포함 — 최신 공식 가이드와 반드시 대조). ※ 본 과목 데이터는 자체 정리 초안입니다.',
+  topics:[
+   {n:1,name:'독자, 작가, 텍스트',eng:'Readers, writers and texts',sl:50,hl:80,
+    slItems:['작가의 선택(구성·문체·어조·기법)이 의미와 효과를 만드는 방식 분석','꼼꼼히 읽기(close reading)로 해석의 근거 세우기 — 인용과 분석의 연결','갈래(시·소설·희곡·수필)별 관습과 표현 방식의 이해','독자 반응의 다양성과 타당한 해석의 조건 토론','분석적 문단·에세이 쓰기의 기초(주장-근거-분석)','학습자 포트폴리오에 읽기 기록·해석 변화 축적'],
+    hlItems:['문학 비평 용어·이론적 관점을 활용한 심화 해석','HL 에세이 대비: 독자적 탐구 질문 수립과 장문 논증(1,200~1,500단어) 연습']},
+   {n:2,name:'시간과 공간',eng:'Time and space',sl:50,hl:80,
+    slItems:['작품이 생산된 시대·사회·문화적 맥락이 의미에 미치는 영향 탐구','수용 맥락의 변화 — 오늘의 독자가 고전을 읽을 때 달라지는 의미','작품 속 정체성·권력·역사 재현의 분석','한국 문학사의 흐름 속에서 학습 작품 위치 짓기','번역 문학 읽기 — 문화 간 관점 비교와 번역의 한계 인식'],
+    hlItems:['동일 작품의 시대별 비평적 수용사 비교','맥락 논증을 HL 에세이·Paper 2에 통합하는 전략']},
+   {n:3,name:'상호텍스트성: 텍스트 잇기',eng:'Intertextuality: connecting texts',sl:50,hl:80,
+    slItems:['작품 간 주제·모티프·인물형·기법의 비교 분석','갈래 전통의 계승과 변주(패러디·재해석) 탐구','개념(정체성·문화·창의성·의사소통·관점·변형·재현) 중심의 작품 연결','Paper 2 대비: 두 작품 비교 에세이의 논증 구조 연습','작품 간 대화를 통한 새로운 해석 생성'],
+    hlItems:['세 작품 이상을 관통하는 통합 논증 구성','비평 이론 렌즈(여성주의·탈식민주의 등)를 적용한 재독해']}
+  ]},
+ LL:{ code:'LL', name:'국어 A: 언어와 문학', eng:'Korean A: Language and Literature',
+  desc:'문학 작품과 비문학·미디어 텍스트를 함께 다룸. 작품 수 요건: SL 4편 / HL 6편(번역 문학 요건 포함 — 최신 공식 가이드와 반드시 대조). ※ 본 과목 데이터는 자체 정리 초안입니다.',
+  topics:[
+   {n:1,name:'독자, 작가, 텍스트',eng:'Readers, writers and texts',sl:50,hl:80,
+    slItems:['텍스트 유형(기사·광고·연설·사설·블로그 등)별 관습·목적·청중 분석','언어 선택(어휘·문체·수사)이 태도와 효과를 만드는 방식','문학 작품에서 작가의 선택과 그 효과 분석','복합양식 텍스트(이미지+글)의 시각 문법 읽기','분석적 글쓰기 기초(주장-근거-분석)와 용어 사용'],
+    hlItems:['HL 에세이 대비: 언어·문학 쟁점에 대한 독자적 탐구','비판적 담화 분석의 기초 개념 활용']},
+   {n:2,name:'시간과 공간',eng:'Time and space',sl:50,hl:80,
+    slItems:['텍스트 생산·수용의 시대적·문화적 맥락 분석','미디어 담론이 정체성·권력 인식에 미치는 영향','동일 사건에 대한 상이한 보도·재현 비교','광고·대중문화 텍스트 속 가치관의 시대 변화','번역·세계 문학을 통한 문화 간 관점 비교'],
+    hlItems:['담론의 역사적 변화 심화 연구','맥락 논증의 HL 에세이 통합']},
+   {n:3,name:'상호텍스트성: 텍스트 잇기',eng:'Intertextuality: connecting texts',sl:50,hl:80,
+    slItems:['문학·비문학 텍스트를 관통하는 주제·재현 방식 비교','장르 관습의 차용과 변형(패러디·리믹스) 분석','개념 중심(재현·변형·관점 등) 텍스트 묶음 탐구','Paper 2 대비: 학습 작품 비교 에세이 연습','미디어 간 각색(소설→영화 등)의 선택과 효과'],
+    hlItems:['세 텍스트 이상을 잇는 통합 논증','비평 이론을 적용한 재독해']}
+  ]}
+};
+const KO_ASSESS={
+ LIT:{SL:[['Paper 1 문학 분석','1시간 15분','자료 반입 불가','35%','보지 않은 문학 지문 1편, 안내 질문에 따른 분석'],
+          ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','35%','학습 작품 2편 비교(택1 문항)'],
+          ['개인 구술 IO','15분(발표10+질의5)','개요 메모 1장','30%','글로벌 이슈 중심, 작품 2편(번역작 포함) 발췌 분석']],
+      HL:[['Paper 1 문학 분석','2시간 15분','자료 반입 불가','35%','보지 않은 문학 지문 2편 각각 분석'],
+          ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','25%','학습 작품 2편 비교'],
+          ['HL 에세이','1,200~1,500단어','-','20%','작품 1편 자율 탐구 에세이(외부 채점)'],
+          ['개인 구술 IO','15분','개요 메모 1장','20%','글로벌 이슈 중심 발췌 분석']]},
+ LL:{SL:[['Paper 1 텍스트 분석','1시간 15분','자료 반입 불가','35%','보지 않은 비문학 텍스트 1편, 안내 질문에 따른 분석'],
+         ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','35%','학습 작품 2편 비교(택1 문항)'],
+         ['개인 구술 IO','15분(발표10+질의5)','개요 메모 1장','30%','글로벌 이슈 중심, 문학·비문학 텍스트 발췌 분석']],
+     HL:[['Paper 1 텍스트 분석','2시간 15분','자료 반입 불가','35%','보지 않은 비문학 텍스트 2편 각각 분석'],
+         ['Paper 2 비교 에세이','1시간 45분','자료 반입 불가','25%','학습 작품 2편 비교'],
+         ['HL 에세이','1,200~1,500단어','-','20%','텍스트·작품·쟁점 자율 탐구 에세이(외부 채점)'],
+         ['개인 구술 IO','15분','개요 메모 1장','20%','글로벌 이슈 중심 발췌 분석']]}
+};
+const KO_IO_CRIT=[['A 지식·이해·해석',10],['B 분석·평가',10],['C 초점·구성',10],['D 언어',10]];
+const KO_BANK={
+ 1:{inqF:['작가의 어조와 문체는 어떤 언어적 선택으로 만들어지는가?','이 텍스트의 갈래 관습은 무엇이며 어디서 변형되는가?'],
+    inqC:['텍스트의 의미는 작가와 독자 중 누가 만드는가?','형식은 어떻게 그 자체로 의미가 되는가?'],
+    inqD:['작가의 의도를 모르면 해석은 불완전한가?','모든 해석은 동등하게 타당한가?'],
+    act:['한 단락 바꿔 쓰기: 어조를 바꾸면 무엇이 달라지는지 비교','같은 장면을 다른 갈래(시→극)로 전환해 관습 차이 체험','문장 단위 꼼꼼히 읽기 릴레이(모둠별 근거 찾기)','인상 비평 vs 근거 비평 판별 워크숍'],
+    tok:['문학 해석에서 "증거"란 무엇인가 — 과학의 증거와 어떻게 다른가?','아름다움의 판단은 지식이 될 수 있는가?'],
+    im:['같은 작품의 각국 번역본 첫 문장 비교 — 번역가의 선택이 의미를 어떻게 바꾸는지 탐구'],
+    atl:['사고: 해석-근거-분석 3단 문단 루틴 훈련','의사소통: 해석 차이를 존중하는 토론 규칙 만들기'],
+    mis:['줄거리 요약을 분석으로 착각','작가의 전기를 곧 작품의 의미로 환원(의도주의 오류)','인용 없이 인상만 나열하는 감상문 쓰기']},
+ 2:{inqF:['이 작품의 시대적 맥락은 어떤 표현에 흔적을 남겼는가?','오늘의 독자는 이 작품을 어떻게 다르게 읽는가?'],
+    inqC:['텍스트는 시대를 반영하는가, 구성하는가?','고전은 왜 시대마다 다시 읽히는가?'],
+    inqD:['오늘의 윤리 기준으로 과거 작품을 평가하는 것은 정당한가?','문학은 사회를 바꿀 수 있는가?'],
+    act:['작품 발표 당시 신문·광고 자료와 함께 읽기(맥락 상자 만들기)','같은 작품의 시대별 서평·비평 비교 발표','작품 배경 장소·시대 온라인 아카이브 답사 보고서','현대적 각색(영화·웹툰)과 원작의 재현 차이 분석'],
+    tok:['역사적 맥락 지식은 해석을 풍부하게 하는가, 제한하는가?','번역된 텍스트를 읽을 때 우리는 누구의 목소리를 듣는가?'],
+    im:['한국 문학의 세계적 수용(번역 수상작 등) 사례로 번역·수용의 문화 간 차이 탐구'],
+    atl:['조사: 신뢰할 수 있는 맥락 자료(아카이브·학술DB) 찾기와 인용','사회성: 민감한 역사 주제 토론에서의 존중 규칙'],
+    mis:['맥락 설명이 분석을 대체해 버리는 에세이','작품 속 화자·인물의 견해를 작가의 견해와 동일시','시대상을 단일한 것으로 일반화']},
+ 3:{inqF:['두 작품은 같은 주제를 어떤 다른 방식으로 다루는가?','이 텍스트가 차용·변형한 전통(관습)은 무엇인가?'],
+    inqC:['텍스트들은 서로 어떻게 대화하는가?','비교는 어떻게 각 텍스트의 고유함을 드러내는가?'],
+    inqD:['모방과 창조의 경계는 어디인가?','비교의 기준은 객관적일 수 있는가?'],
+    act:['두 작품 인물 가상 대담 대본 쓰기·공연','공통 모티프 카드로 작품 연결망(개념 지도) 그리기','Paper 2형 비교 논제 만들고 개요 짜기 토너먼트','원작-각색(소설→영화) 병렬 장면 분석'],
+    tok:['새로운 지식은 기존 텍스트들의 재조합인가?','비교를 통해 얻는 이해는 개별 읽기와 어떻게 다른가?'],
+    im:['동일 모티프(예: 이방인·집·경계)의 한국 문학과 번역 문학 속 변주 비교'],
+    atl:['사고: 비교 매트릭스(관점×기법×효과)로 논증 조직','자기관리: Paper 2 대비 장기 복습 계획 수립'],
+    mis:['비교 없이 두 작품을 순서대로 서술만 하는 에세이','표면적 유사점 나열에 그치고 "그래서 무엇"이 없는 비교','비교 기준(논점) 없이 시작하는 글쓰기']}
+};
+const KO_ES={1:'· 텍스트의 의미는 작가의 선택과 독자의 해석이 만나는 지점에서 생성된다.\n· 형식과 문체는 내용의 그릇이 아니라 그 자체로 의미를 만든다.\n· 타당한 해석은 텍스트 근거에 의해 뒷받침되는 해석이다.',
+2:'· 텍스트는 생산·수용의 맥락 속에서 의미가 달라지는 역사적 존재다.\n· 문학은 정체성·권력·역사를 재현하며 동시에 그 인식을 형성한다.\n· 번역과 수용은 문화 간 대화의 한 형태다.',
+3:'· 텍스트는 다른 텍스트들과의 관계 속에서 의미를 확장한다.\n· 전통의 계승과 변형은 창조의 두 얼굴이다.\n· 비교는 각 텍스트의 고유한 선택을 더 선명하게 드러낸다.'};
+const KO_SKILLS={1:'꼼꼼히 읽기, 문체·기법 분석, 근거 기반 해석, 분석적 문단 쓰기, 학습자 포트폴리오 기록',
+2:'맥락 조사와 적용, 수용사 비교, 재현 방식 비평, 번역 텍스트 읽기',
+3:'비교 논증 구성, 개념 중심 연결, 에세이 개요 설계, 구술 발표(IO) 조직'};
+const KO_CONCEPT={1:'창의성, 재현, 의사소통',2:'문화, 관점, 정체성',3:'변형, 관점, 창의성'};
+const KO_TYPES={intro:'작품·개념 도입',close:'꼼꼼히 읽기·분석',discussion:'토론·세미나',writing:'분석적 글쓰기',io:'IO·구술 준비',review:'복습·평가'};
+const KO_OUTLINE_EX={
+ tok:'예: 영역 1(독자, 작가, 텍스트)을 TOK와 연계한다. "문학 해석에서 증거란 무엇인가?"를 중심으로, 같은 시에 대한 상반된 해석 두 편을 비교하며 해석의 정당화 방식을 토론한다. 학생들은 문학적 앎과 과학적 앎의 정당화 방식을 비교하는 짧은 글을 쓴다.',
+ atl:'예: 영역 3(상호텍스트성)에서 사고 기능을 집중 개발한다. 비교 매트릭스(논점×기법×효과)로 두 작품의 논증을 조직하는 훈련을 하고, Paper 2 개요 짜기에서 자기 점검 체크리스트로 자기관리 기능을 함께 기른다.',
+ im:'예: 영역 2(시간과 공간)를 선택한다. 한국 현대소설과 번역 문학을 나란히 읽으며 같은 주제(전쟁·이주)가 문화권마다 어떻게 재현되는지 비교하고, 한국 문학의 번역·국제 수용 사례를 토론한다. 자료: 대역본, 국외 서평 발췌.'};
+const KO_IA_PRESET={
+ ko:{intro:'DP 1년차 1학기: 글로벌 이슈 개념 소개, 작품마다 이슈 연결 메모를 학습자 포트폴리오에 축적',
+     due:'DP 2년차 2학기 초(학교 일정에 따라 10~11월): 본 IO 실시·녹음',
+     stages:'① 1년차 1학기 — 글로벌 이슈 영역 소개, 포트폴리오 기록 습관 만들기\n② 1년차 2학기 — 작품·텍스트별 이슈 연결 토론, 발췌 고르기 연습\n③ 2년차 1학기 — IO 구조(발표 10분+질의 5분) 학습, 연습 IO 1회+피드백\n④ 2년차 9월 — 작품·발췌·글로벌 이슈 확정, 개요 작성(10개 항목 이내)\n⑤ 2년차 10~11월 — 본 IO 실시·녹음, 진위 확인(academic integrity)\n⑥ 이후 — 채점·표본 제출(moderation)'},
+ en:{intro:'DP Year 1: introduce the concept of global issues; build learner portfolio entries for each work',
+     due:'DP Year 2 (Oct-Nov, per school calendar): final individual oral, recorded',
+     stages:'1) Y1 S1 - introduce global issue fields and portfolio habits\n2) Y1 S2 - connect each work/text to global issues; practise choosing extracts\n3) Y2 S1 - learn the IO structure (10 min + 5 min); one practice IO with feedback\n4) Y2 Sep - confirm works, extracts and global issue; outline (max 10 bullets)\n5) Y2 Oct-Nov - final IO, recorded; academic integrity check\n6) marking and sample submission for moderation'}};
+const KO_GLOSSARY=[
+ ['개인 구술 (IO, Individual oral)','글로벌 이슈를 중심으로 학습 작품·텍스트의 발췌를 분석하는 15분 구술 내부평가(발표 10분+교사 질의 5분). 준거 A~D 합계 40점. ※ 자체 정리 초안 — 공식 가이드 대조 필요.'],
+ ['글로벌 이슈 (Global issue)','국경을 넘어 널리 영향을 미치고 여러 텍스트에서 다뤄질 수 있는 중요한 쟁점(문화·정체성·공동체·권력 등). IO의 중심축.'],
+ ['HL 에세이 (HL essay)','HL 전용 외부평가. 학습 작품·텍스트 하나에 대해 학생이 탐구 질문을 세워 쓰는 1,200~1,500단어 에세이.'],
+ ['학습자 포트폴리오 (Learner portfolio)','읽기 기록·해석 변화·글로벌 이슈 연결 메모를 축적하는 필수 기록물. 직접 평가 대상은 아니지만 IO·에세이 준비의 토대.'],
+ ['작품 선정 요건','문학: SL 9편/HL 13편, 언어와 문학: SL 4편/HL 6편 (번역 문학·시대·장소 요건 포함) — 반드시 최신 공식 가이드와 대조해 확정할 것.']];
+const KO_QUALITY=`## 품질 기준 (반드시 지킬 것)
+- 개념 기반 설계: 작품 줄거리 나열이 아니라 개념적 이해(일반화 문장)가 중심이 되게 할 것.
+- 백워드 설계: 총괄평가(Paper·IO)를 먼저 확정하고 학습 경험을 그 평가에 정렬할 것.
+- 모든 활동은 실제 교실에서 실행 가능한 수준으로 구체적으로(시간 배분, 발문 예시, 모둠 구성 포함).
+- 한국 공교육 교실 맥락 반영: 학급당 20~25명, 국가교육과정과 병행 운영.
+- 국가교육과정(2022 개정) 국어과와의 연계 지점을 최소 1곳 명시할 것.
+- 작품 인용은 분석에 필요한 최소한으로(저작권 유의). IB 용어는 한국어로 쓰되 필요한 곳에 영어 병기. 근거 없는 IB 규정 인용 금지.`;
+function koUnitDraft(u,p){
+  const bk=KO_BANK[u.topic]||KO_BANK[1];
+  const c=CUR(), lv=state.meta.level; const tn=topicName(u.topic);
+  const fill=(k,v)=>{if(!String(p[k]||'').trim()) p[k]=v;};
+  const les=unitLessons(u);
+  fill('desc',`『${u.title||tn}』 단원. ${c.name} ${lv}의 ${tn} 영역을 다룬다. 총 ${u.hours||0}시간(약 ${les}교시). 주 자료: 학습 작품·텍스트, 학습자 포트폴리오.`);
+  fill('dpAssess',`외부평가: ${KO_ASSESS[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')} — 본 영역의 기능과 직결. 내부평가: 개인 구술(IO)${lv==='HL'?' · HL 에세이':''} 대비 활동을 단원에 포함.`);
+  fill('transfer',`· 학생들은 처음 보는 텍스트에서도 ${tn.replace(/^토픽 \d+\. /,'')}의 관점으로 의미를 구성하고 텍스트 근거로 정당화할 수 있다.\n· 학생들은 자신의 해석을 분석적 글과 구술로 설득력 있게 전달할 수 있다.`);
+  fill('essential',KO_ES[u.topic]||KO_ES[1]);
+  fill('miscon','· '+bk.mis.join('\n· '));
+  fill('inqF',bk.inqF.join('\n')); fill('inqC',bk.inqC.join('\n')); fill('inqD',bk.inqD.join('\n'));
+  fill('know',(u.subs.length? u.subs.map(s=>'· '+s).join('\n') : '· (아웃라인에서 학습 내용을 선택하면 자동으로 들어옵니다)')+(u.extra?'\n· '+u.extra:''));
+  fill('skills','· '+(KO_SKILLS[u.topic]||KO_SKILLS[1]).split(', ').join('\n· '));
+  fill('concepts','핵심 개념: '+(KO_CONCEPT[u.topic]||KO_CONCEPT[1]));
+  if(!p.expChecks.length) p.expChecks=['소크라테스식 세미나','모둠·짝 활동','학생 발표'];
+  fill('expDetail','· '+bk.act.slice(0,3).join('\n· '));
+  fill('formative','· 매 차시 출구티켓(오늘의 해석 1문장+근거 인용 1개)\n· 분석 문단 쓰기 2~3차시마다 1회(동료 피드백 포함)\n· 오독 진단: '+(bk.mis[0]||''));
+  fill('summative','· 단원평가: 모의 Paper 형식(분석·비교 에세이)\n· 수행과제: '+(bk.act[0]||'탐구 과제')+' 결과 발표 또는 보고서');
+  if(!p.diffChecks.length) p.diffChecks=['학습 스캐폴딩','심화·확장 학습'];
+  fill('diffDetail','· 지원: 문단 프레임·문장 시작어 제공, 어휘 주석 자료\n· 심화: '+(lv==='HL'?'HL 에세이 예비 탐구, 비평 이론 읽기':'개방형 비교 과제')+', 또래 첨삭 리더 역할');
+  if(!p.atlChecks.length) p.atlChecks=atlFromBank(bk);
+  fill('atlDetail','· '+bk.atl.join('\n· '));
+  if(!p.langChecks.length) p.langChecks=['새 학습을 위한 스캐폴딩','연습을 통한 습득'];
+  fill('langDetail','문학·비평 용어 한·영 병기 단어벽, 분석 문장 프레임("…라는 표현은 …효과를 낳는다") 제공.');
+  fill('tok','· '+bk.tok.join('\n· ')); fill('im','· '+bk.im.join('\n· '));
+  fill('cas','해당 시 기록 (예: 지역 도서관 낭독 봉사, 학교 문예지 편집과 연계)');
+  if(!p.lpChecks.length) p.lpChecks=['탐구하는 사람','소통하는 사람','열린 마음을 지닌 사람'];
+  fill('resources','학습 작품(원문·대역본), 학습자 포트폴리오, 발췌 자료집, 기출 문항 세트, 문학관·국립국어원 아카이브');
+  return '초안을 채웠습니다. 빈칸만 채우므로 이미 쓴 내용은 그대로 유지됩니다. (국어 팩 초안 — 공식 가이드 대조 필요)';
+}
+function koLessonDraft(u,type,sub,note,seed){
+  const bk=KO_BANK[u.topic]||KO_BANK[1];
+  const t=sub||((u.title||'').replace(/^단원 \d+\. /,''))||'이번 차시 주제';
+  const inq=pick(bk.inqC,seed)||'오늘의 핵심 질문';
+  const act=pick(bk.act,seed); const mis=pick(bk.mis,seed);
+  const base={
+   obj:`· ${t}에 대한 자신의 해석을 텍스트 근거를 들어 구성할 수 있다.\n· 해석을 분석적 문장(주장-근거-분석)으로 표현할 수 있다.`,
+   inq:`· ${inq}\n· (사실적) ${pick(bk.inqF,seed)||''}`,
+   assess:`· 출구티켓: 오늘의 해석 1문장 + 근거 인용 1개\n· 과제: 분석 문단 1개(주장-근거-분석 구조)`,
+   atl:`· ${(atlFromBank(bk))[0]||'사고 기능'} — 활동 중 명시적으로 언급하고 성찰과 연결`,
+   prep:`· 학습 텍스트 발췌본, 학습자 포트폴리오, 문장 프레임 카드\n· ${note?('학생 특성 대응: '+note):'수준차 대비 어휘 주석·심화 논제 각 1세트'}`};
+  const dev={
+   intro:`· (5분) 첫인상 기록: 텍스트를 읽고 떠오른 단어 3개를 포트폴리오에 기록\n· (15분) 모둠 탐구: 인상의 근거가 된 표현 찾기 → 갈래 관습·개념과 연결\n· (7분) 전체 공유: 교사가 핵심 용어로 정리(한·영 병기)\n· (3분) 오독 선제 처리: "${mis}" 사례를 함께 교정`,
+   close:`· (10분) 시범 분석(교사 사고 구술): 한 문장을 함께 뜯어 읽기\n· (15분) 짝 활동: 지정 발췌에서 표현 선택→효과 분석 표 채우기\n· (5분) 결과 비교: 같은 표현의 다른 해석 살펴보기 — 어느 근거가 더 강한가`,
+   discussion:`· (8분) 논제 제시와 입장 정리(포스트잇 스펙트럼)\n· (18분) 세미나: 발언 규칙(근거 인용 필수)에 따른 토론 — ${act||'논쟁적 질문 활용'}\n· (4분) 정리: 입장 변화와 그 이유 한 줄 쓰기`,
+   writing:`· (8분) 우수/미흡 문단 비교 — 무엇이 "분석"을 만드는가\n· (18분) 개별 쓰기: ${t} 관련 분석 문단(주장-근거-분석) 작성\n· (4분) 동료 피드백: 체크리스트(근거 인용? 효과 설명?) 기반 상호 코멘트`,
+   io:`· (10분) IO 준거 하나 집중 해설(오늘: ${pick(KO_IO_CRIT.map(x=>x[0]),seed)}) — 우수/미흡 사례 비교\n· (15분) 개인 연습: 발췌 1개로 2분 미니 구술 → 짝 피드백\n· (5분) 글로벌 이슈 연결 메모를 포트폴리오에 기록`,
+   review:`· (10분) 단원 개념 지도(작품×개념×기법) 모둠 완성\n· (15분) 모의 Paper 미니 세트(발췌 분석 1문항) 실전 조건 풀이\n· (5분) 채점 기준 함께 읽기 — 스스로 별점 매기기`};
+  const intro={
+   intro:`· (3분) 전시 학습 확인: 지난 텍스트 핵심 1문답\n· (7분) 훅: "${inq}" 질문 게시 → 예상 답 포스트잇 부착(수업 끝에 재방문)`,
+   close:`· (5분) 오늘의 발췌 소리 내어 읽기(낭독)\n· (5분) 첫 반응 메모: 눈에 걸리는 표현 2개 밑줄`,
+   discussion:`· (5분) 논제 배경 1분 브리핑\n· (5분) 입장 예열: 찬반 스펙트럼에 자기 위치 표시`,
+   writing:`· (5분) 지난 문단 과제 우수 사례 1개 낭독\n· (5분) 오늘의 논점 고르기(2개 중 택1)`,
+   io:`· (5분) IO 전체 일정에서 오늘 위치 확인\n· (5분) 우수 구술 1분 듣기 — 좋은 점 한 가지씩 발언`,
+   review:`· (5분) 셀프 진단: 단원 체크리스트(할 수 있다/애매하다/모른다)\n· (5분) '애매하다' 최다 항목 즉석 미니 강의`};
+  const wrap={
+   intro:`· (5분) 포스트잇 재방문: 처음 예상과 지금 이해 비교 발표 2~3명\n· (5분) 출구티켓 + 다음 차시 예고`,
+   close:`· (5분) 오늘의 발견 공유: 가장 강력한 근거 문장 투표\n· (5분) 출구티켓: 표현→효과 1쌍 쓰기`,
+   discussion:`· (7분) 토론 성찰: 가장 설득력 있던 근거와 그 이유\n· (3분) 내 입장 최종 정리 한 줄 쓰기`,
+   writing:`· (5분) 자기 문단에서 가장 약한 고리 표시\n· (5분) 수정 계획 메모 + 다음 차시 예고`,
+   io:`· (5분) 오늘 연습에서 좋아진 점 1가지 공유\n· (5분) 다음 마일스톤·마감 리마인드`,
+   review:`· (5분) 개념 지도 최종본 사진 제출\n· (5분) 시험 전략 1가지씩 공유(시간 배분·개요 먼저 등)`};
+  return {obj: type==='io'? '· 자신의 IO 준비 상태를 평가 준거에 비추어 점검하고 구체적 개선 계획을 세울 수 있다.' : type==='review'? `· ${t} 단원의 핵심 개념을 구조화하고 실전 형식 문제에 적용할 수 있다.` : base.obj,
+   inq:base.inq, intro:intro[type]||intro.intro, dev:dev[type]||dev.intro, wrap:wrap[type]||wrap.intro, assess: type==='io'? '· 개선 계획 메모 제출(다음 면담 자료)\n· 포트폴리오 기록 확인':''+base.assess, atl:base.atl, prep:base.prep};
+}
+function koIaPrompt(head,u,extra){
+  return `${head}\n${u?`- 참고 단원: ${u.title} (${topicName(u.topic)})`:''}${extra?`\n- 학생 관심 분야: ${extra}`:''}\n\n## 과제\n${CUR().name} ${state.meta.level} 학생의 개인 구술(IO)을 위한 "글로벌 이슈 × 작품/텍스트 발췌" 아이디어 15개를 제안해 주세요.\n\n## 각 아이디어마다 포함\n① 글로벌 이슈(구체화된 한 줄)  ② 어울리는 작품/텍스트 짝과 발췌 후보(각 40행 이내)  ③ 발표 논점 개요 3~4개  ④ 준거 B(분석·평가) 관점의 깊이 확보 전략  ⑤ 흔한 실패 요인(이슈가 너무 넓음, 발췌와 이슈의 헐거운 연결 등) 점검  ⑥ 한국 학생이 접근하기 좋은 현지화 포인트\n\n## 조건\n- 이슈는 "전쟁 일반"처럼 넓은 주제가 아니라 구체화된 형태로.\n- 학습 작품 목록이 달라도 대체 가능한 유연한 짝 구성 포함.\n- 15분(발표 10+질의 5) 분량으로 완결 가능한 범위로.\n\n## 출력 형식\n표(이슈/텍스트 짝/발췌/논점/전략) + 상위 추천 3개에 대한 상세 코멘트.\n${LANGLINE()}`;
+}
+/* ═══════════════ 과목 팩 레지스트리 ═══════════════ */
 const SUBJECTS={
  math:{ id:'math', short:'DP 수학',
   courses:SYLLABUS, defaultCourse:'AA',
   courseShort:{AA:'AA 분석과 접근', AI:'AI 응용과 해석'},
   toolkit:TOOLKIT, targetHours:{SL:150,HL:240},
-  assess:ASSESS, iaCrit:IA_CRIT, toolCol:'계산기',
+  assess:ASSESS, iaCrit:IA_CRIT, iaCritLabel:'IA 준거', toolCol:'계산기',
+  iaTitle:'내부평가 계획 — 수학적 탐구', iaTitleEng:'Internal assessment: mathematical exploration',
+  iaInfo:'IB 양식 원문: IA를 <b>언제 처음 소개하고, 어떤 단계로 진행하며, 언제 마감하는지</b> 서술해야 합니다. IA는 총점의 20%, 준거 A~E 합계 20점, 권장 분량 12~20쪽입니다.',
+  persona:'당신은 IB DP 수학을 20년 이상 가르치고 IB 교사 워크숍을 이끌어 온 수업 설계 전문가입니다. 한국 공교육 IB 학교의 수학 교사를 돕고 있습니다.',
+  quality:QUALITY, resourceLine:'GDC/자료 활용',
+  convertTopicRule:'1. topic 값: 1=수와 대수(Number and algebra), 2=함수(Functions), 3=기하와 삼각법(Geometry and trigonometry), 4=통계와 확률(Statistics and probability), 5=미적분(Calculus), "T"=수학 툴킷·IA(toolkit/exploration). 여러 토픽에 걸치면 비중이 가장 큰 토픽으로.',
+  convertCourseRule:'5. AA/AI·SL/HL은 문서 내용으로 판단하되 불명확하면 "AA","SL".',
+  iaPreset:{ko:MATH_IA_PRESET.ko, en:{intro:ET.iaIntro,due:ET.iaDue,stages:ET.iaStages}},
+  outlineEx:OUTLINE_EX, lessonTypes:LTYPE, lessonDraft:mathLessonDraft, unitDraft:mathUnitDraft, iaIdeasPrompt:mathIaPrompt,
+  glossary:MATH_GLOSSARY, tPat:/toolkit|툴킷|수학적\s*탐구|mathematical\s*exploration|(^|[^A-Za-z])IA([^A-Za-z]|$)/i,
+  topicPat:TOPIC_PAT, detectCourse:(s,f)=>/응용과?\s*해석|applications|interpretation/i.test(s+f.slice(0,400))?'AI':'AA',
   bank:BANK, conceptCore:CONCEPT_CORE, es:ES, skills:SKILLS,
-  assessTools:ASSESS_TOOLS, topicDomain:[1,2,3,4,5] }
+  assessTools:ASSESS_TOOLS, topicDomain:[1,2,3,4,5], subPlaceholder:'예: 등비수열의 합' },
+ korean:{ id:'korean', short:'DP 국어 A', draft:true,
+  courses:KO_SYLLABUS, defaultCourse:'LL',
+  courseShort:{LL:'언어와 문학', LIT:'문학'},
+  toolkit:null, targetHours:{SL:150,HL:240},
+  assess:KO_ASSESS, iaCrit:KO_IO_CRIT, iaCritLabel:'IO 준거', toolCol:'허용 자료',
+  iaTitle:'내부평가 계획 — 개인 구술(IO)', iaTitleEng:'Internal assessment: individual oral',
+  iaInfo:'IO는 <b>글로벌 이슈</b>를 중심으로 학습 작품·텍스트의 발췌를 분석하는 15분 구술 평가입니다(준거 A~D 합계 40점, SL 30%·HL 20%). 글로벌 이슈를 언제 소개하고, 발췌 선정·연습을 어떤 단계로 진행하며, 언제 실시하는지 서술하세요. <b>※ 국어 팩은 자체 정리 초안 — 공식 가이드(PRC) 대조 후 사용하세요.</b>',
+  persona:'당신은 IB DP 언어 A: 한국어(문학, 언어와 문학)를 20년 이상 가르치고 IB 교사 워크숍을 이끌어 온 수업 설계 전문가입니다. 한국 공교육 IB 학교의 국어 교사를 돕고 있습니다.',
+  quality:KO_QUALITY, resourceLine:'자료·매체 활용',
+  convertTopicRule:'1. topic 값: 1=독자, 작가, 텍스트(Readers, writers and texts), 2=시간과 공간(Time and space), 3=상호텍스트성(Intertextuality: connecting texts). 여러 영역에 걸치면 비중이 가장 큰 영역으로.',
+  convertCourseRule:'5. 과정·레벨: "LIT"=문학(Literature), "LL"=언어와 문학(Language and literature). 문서 내용으로 판단하되 불명확하면 "LL","SL".',
+  iaPreset:KO_IA_PRESET,
+  outlineEx:KO_OUTLINE_EX, lessonTypes:KO_TYPES, lessonDraft:koLessonDraft, unitDraft:koUnitDraft, iaIdeasPrompt:koIaPrompt,
+  glossary:KO_GLOSSARY, tPat:null,
+  topicPat:{1:/독자|작가|텍스트\s*분석|readers|writers|문체|기법|갈래|close/i,2:/시간과?\s*공간|time and space|맥락|context|시대|문학사|수용/i,3:/상호\s*텍스트|intertext|비교|연결|각색|장르/i},
+  detectCourse:(s,f)=>/언어와\s*문학|language\s*(and|&)\s*literature|lang\s*lit/i.test(s+f.slice(0,400))?'LL':'LIT',
+  bank:KO_BANK, conceptCore:KO_CONCEPT, es:KO_ES, skills:KO_SKILLS,
+  assessTools:['쪽지시험·퀴즈','단원평가(서술형)','수행·탐구 과제','토론·세미나 평가','분석 에세이','모의 Paper 1','모의 Paper 2','IO 연습(녹음)','HL 에세이 마일스톤'],
+  topicDomain:[1,2,3], subPlaceholder:'예: 시적 화자의 어조 분석' }
 };
 function renderSubjectUI(){
   const p=SUBJ();
-  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.5`;
+  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.6`;
+  const sel=$('#subjectSel');
+  if(sel){ const keys=Object.keys(SUBJECTS);
+    sel.style.display=keys.length>1?'':'none';
+    sel.innerHTML=keys.map(k=>`<option value="${k}" ${state.meta.subject===k?'selected':''}>${esc(SUBJECTS[k].short)}${SUBJECTS[k].draft?' (초안)':''}</option>`).join(''); }
   const seg=$('#segCourse'); if(seg) seg.innerHTML=Object.keys(p.courses).map(k=>`<button data-c="${k}" class="${state.meta.course===k?'on':''}">${esc(p.courseShort[k]||k)}</button>`).join('');
+  const hint=$('#hoursHint'); if(hint) hint.textContent=`권장 시수는 IB 공식 subject brief 기준(${TK()?`${TK().name} ${TK().sl}시간 포함, `:''}SL ${p.targetHours.SL} · HL ${p.targetHours.HL}). 배정 시수는 아래 단원 구성의 합계입니다.${p.draft?' ※ 이 과목 데이터는 자체 정리 초안입니다 — 반드시 공식 가이드와 대조하세요.':''}`;
+  const iaT=$('#iaCardTitle'); if(iaT) iaT.innerHTML=`<span class="chip">2. IA</span>${esc(p.iaTitle||'내부평가 계획')} <span class="eng">${esc(p.iaTitleEng||'Internal assessment')}</span>`;
+  const iaI=$('#iaCardInfo'); if(iaI) iaI.innerHTML=p.iaInfo||'';
+  const lt=$('#ls-type'); if(lt){ const cur=lt.value; lt.innerHTML=Object.entries(p.lessonTypes||LTYPE).map(([k,vv])=>`<option value="${k}">${esc(vv)}</option>`).join(''); if((p.lessonTypes||LTYPE)[cur]) lt.value=cur; }
+  const sp=$('#ls-sub'); if(sp&&p.subPlaceholder) sp.placeholder=p.subPlaceholder;
+  const gl=$('#glossary'); if(gl) gl.innerHTML=[...GLOSSARY,...(p.glossary||[])].map(g=>`<details class="gloss"><summary>${esc(g[0])}</summary><p>${esc(g[1])}</p></details>`).join('');
 }
+$('#subjectSel').onchange=e=>{
+  const ns=e.target.value; if(ns===state.meta.subject) return;
+  if((state.outline.units.length||state.lessons.length) && !confirm('과목을 바꾸면 단원 구성·유닛플래너·차시안이 새로 시작됩니다.\n(상단 되돌리기로 복구 가능) 계속할까요?')){ e.target.value=state.meta.subject; return; }
+  snapshot();
+  state.meta.subject=ns; state.meta.course=SUBJ().defaultCourse;
+  state.outline.units=[]; state.plans={}; state.lessons=[];
+  state.outline.iaIntro=''; state.outline.iaDue=''; state.outline.iaStages='';
+  renderSubjectUI(); setCourse(state.meta.course); setLevel(state.meta.level);
+  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist();
+  toast(`${SUBJ().short} 모드로 전환했습니다.${SUBJ().draft?' ※ 자체 정리 초안 — 공식 가이드와 대조하세요.':''}`);
+};
 
 renderSubjectUI();
 bindStaticFields();

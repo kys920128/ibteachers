@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.5)</title>
+<style>
+:root{
+  --navy:#14304e; --navy2:#1d4368; --blue:#2f6fdd; --blue-soft:#e8f0fd;
+  --teal:#0e7f8c; --amber:#b45309; --amber-soft:#fef3e2;
+  --ink:#1f2937; --ink2:#4b5563; --line:#e3e8ef; --bg:#f4f6f9; --card:#ffffff;
+  --green:#15803d; --green-soft:#e9f7ee; --red:#b91c1c;
+  --radius:14px; --shadow:0 1px 3px rgba(16,30,54,.08),0 4px 14px rgba(16,30,54,.05);
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI','Malgun Gothic',sans-serif; background:var(--bg); color:var(--ink); font-size:15px; line-height:1.6}
+button{font-family:inherit; cursor:pointer}
+input,select,textarea{font-family:inherit; font-size:14px; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:#fff; width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue-soft); border-color:var(--blue)}
+textarea{resize:vertical; min-height:70px; line-height:1.55}
+label.f-label{display:block; font-size:12.5px; font-weight:700; color:var(--ink2); margin:0 0 4px 2px; letter-spacing:.01em}
+.hint{font-size:12px; color:#7b8794; margin-top:3px}
+.eng{font-weight:500; color:#8895a7; font-size:.85em}
+
+/* ── layout ── */
+.topbar{position:sticky; top:0; z-index:50; background:var(--navy); color:#fff; padding:10px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.brand{display:flex; align-items:center; gap:10px}
+.brand .logo{width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,#2f6fdd,#0e7f8c); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; letter-spacing:-.5px}
+.brand h1{font-size:16px; font-weight:800; letter-spacing:-.01em}
+.brand .ver{font-size:11px; opacity:.65; font-weight:500}
+.top-controls{display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap}
+.top-controls .seg{display:flex; background:rgba(255,255,255,.12); border-radius:8px; padding:3px}
+.top-controls .seg button{border:0; background:transparent; color:#cdd9ea; padding:5px 12px; border-radius:6px; font-size:13px; font-weight:700}
+.top-controls .seg button.on{background:#fff; color:var(--navy)}
+.btn{border:0; border-radius:9px; padding:8px 14px; font-size:13.5px; font-weight:700; display:inline-flex; align-items:center; gap:6px; transition:filter .15s}
+.btn:hover{filter:brightness(1.06)}
+.btn-primary{background:var(--blue); color:#fff}
+.btn-ghost{background:#fff; color:var(--navy); border:1px solid var(--line)}
+.btn-ghost-dark{background:rgba(255,255,255,.14); color:#fff}
+.btn-soft{background:var(--blue-soft); color:var(--blue)}
+.btn-warn{background:var(--amber-soft); color:var(--amber)}
+.btn-sm{padding:5px 10px; font-size:12.5px; border-radius:7px}
+.btn-danger{background:#fdecec; color:var(--red)}
+
+.app{display:flex; min-height:calc(100vh - 54px)}
+.sidebar{width:216px; flex:0 0 216px; background:#fff; border-right:1px solid var(--line); padding:16px 10px; position:sticky; top:54px; height:calc(100vh - 54px); overflow-y:auto}
+.step-btn{display:flex; align-items:center; gap:10px; width:100%; border:0; background:transparent; padding:10px 10px; border-radius:10px; font-size:14px; font-weight:600; color:var(--ink2); text-align:left; margin-bottom:2px}
+.step-btn .num{width:24px; height:24px; flex:0 0 24px; border-radius:7px; background:#eef2f7; color:#64748b; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800}
+.step-btn.on{background:var(--blue-soft); color:var(--blue)}
+.step-btn.on .num{background:var(--blue); color:#fff}
+.side-note{margin-top:14px; padding:10px 12px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; font-size:11.5px; color:#64748b; line-height:1.55}
+
+main{flex:1; padding:22px 26px 80px; max-width:1080px; margin:0 auto; width:100%}
+.step-panel{display:none}
+.step-panel.on{display:block; animation:fadein .25s}
+@keyframes fadein{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+.page-head{margin-bottom:16px}
+.page-head h2{font-size:21px; font-weight:800; letter-spacing:-.02em; color:var(--navy)}
+.page-head p{color:var(--ink2); font-size:13.5px; margin-top:3px}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; margin-bottom:16px}
+.card>h3{font-size:15.5px; font-weight:800; color:var(--navy); display:flex; align-items:center; gap:8px; margin-bottom:12px}
+.card>h3 .chip{font-size:11px; background:var(--blue-soft); color:var(--blue); border-radius:6px; padding:2px 8px; font-weight:800}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+.field{margin-bottom:10px}
+
+.callout{border-radius:10px; padding:10px 14px; font-size:13px; margin:10px 0; line-height:1.6}
+.callout.info{background:var(--blue-soft); color:#1e4fa3}
+.callout.warn{background:var(--amber-soft); color:var(--amber)}
+.callout.good{background:var(--green-soft); color:var(--green)}
+
+/* chips (checkbox group) */
+.chips{display:flex; flex-wrap:wrap; gap:7px}
+.chips label{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:999px; padding:5px 12px; font-size:13px; font-weight:600; color:var(--ink2); background:#fff; cursor:pointer; user-select:none}
+.chips input{width:auto; accent-color:var(--blue); margin:0}
+.chips label:has(input:checked){background:var(--blue-soft); border-color:var(--blue); color:var(--blue)}
+
+/* tables */
+table.tbl{width:100%; border-collapse:collapse; font-size:13.5px}
+.tbl th{background:#f1f5f9; color:#475569; font-size:12px; font-weight:800; text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap}
+.tbl td{padding:8px 10px; border-bottom:1px solid #edf1f6; vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.num-cell{text-align:right; font-variant-numeric:tabular-nums}
+
+/* progress */
+.pbar{height:9px; background:#e8edf3; border-radius:99px; overflow:hidden}
+.pbar>div{height:100%; background:linear-gradient(90deg,var(--blue),var(--teal)); border-radius:99px; transition:width .3s}
+.pbar.over>div{background:linear-gradient(90deg,#f59e0b,#dc2626)}
+
+/* unit cards */
+.unit-card{border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:12px; background:#fcfdfe}
+.unit-card .uc-head{display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap}
+.uc-head .year-tag{font-size:11px; font-weight:800; padding:3px 8px; border-radius:6px; background:#ede9fe; color:#6d28d9}
+.uc-head .year-tag.y2{background:#dcfce7; color:#15803d}
+.uc-head .topic-tag{font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; background:#f1f5f9; color:#475569}
+.uc-head .sp{margin-left:auto; display:flex; gap:5px}
+details.sub-picker{border:1px dashed #cbd5e1; border-radius:9px; padding:8px 12px; margin-top:8px; background:#fff}
+details.sub-picker summary{font-size:12.5px; font-weight:700; color:var(--blue); cursor:pointer}
+.sub-list{margin-top:8px; display:grid; grid-template-columns:1fr 1fr; gap:4px}
+.sub-list label{display:flex; gap:7px; align-items:flex-start; font-size:12.5px; color:var(--ink2); padding:3px 4px; border-radius:6px; cursor:pointer}
+.sub-list label:hover{background:#f5f8fc}
+.sub-list input{width:auto; margin-top:4px; accent-color:var(--blue)}
+.sub-list .hl-item{color:#8b5cf6}
+
+.badge{display:inline-block; font-size:11px; font-weight:800; border-radius:6px; padding:2px 8px}
+.badge.b-blue{background:var(--blue-soft); color:var(--blue)}
+.badge.b-gray{background:#f1f5f9; color:#64748b}
+.badge.b-green{background:var(--green-soft); color:var(--green)}
+.badge.b-amber{background:var(--amber-soft); color:var(--amber)}
+
+.sec-block{border-top:1px solid #eef2f7; padding-top:14px; margin-top:14px}
+.sec-block h4{font-size:14px; font-weight:800; color:var(--navy); margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.mini-btns{display:inline-flex; gap:5px}
+
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.empty-note{padding:28px; text-align:center; color:#94a3b8; font-size:13.5px; border:1.5px dashed #dbe2ea; border-radius:12px}
+
+/* prompt box */
+.prompt-box{background:#0f172a; color:#dbeafe; font-family:ui-monospace,'D2Coding',Consolas,monospace; font-size:12.5px; border-radius:12px; padding:16px; white-space:pre-wrap; max-height:420px; overflow:auto; line-height:1.6}
+
+/* lesson list */
+.lesson-item{display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:10px; padding:9px 13px; margin-bottom:7px; background:#fff; cursor:pointer}
+.lesson-item:hover{border-color:var(--blue)}
+.lesson-item.sel{border-color:var(--blue); background:var(--blue-soft)}
+
+/* glossary */
+details.gloss{border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin-bottom:8px; background:#fff}
+details.gloss summary{font-weight:700; font-size:14px; color:var(--navy); cursor:pointer}
+details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
+
+/* toast */
+#toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:#fff; padding:10px 20px; border-radius:10px; font-size:13.5px; font-weight:600; opacity:0; pointer-events:none; transition:all .25s; z-index:99; box-shadow:0 6px 24px rgba(0,0,0,.25)}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+/* print */
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  .topbar,.app{display:none!important}
+  #printArea{display:block; font-size:12px; color:#111}
+  #printArea h1{font-size:18px; margin-bottom:2px}
+  #printArea h2{font-size:14px; margin:14px 0 6px; padding:4px 8px; background:#eef2f7; border-left:4px solid var(--navy)}
+  #printArea table{width:100%; border-collapse:collapse; font-size:11px; margin:6px 0}
+  #printArea th,#printArea td{border:1px solid #94a3b8; padding:5px 7px; text-align:left; vertical-align:top}
+  #printArea th{background:#f1f5f9}
+  #printArea .pmeta{font-size:11px; color:#334155}
+  #printArea .pfoot{margin-top:18px; font-size:10px; color:#64748b; border-top:1px solid #cbd5e1; padding-top:6px}
+  #printArea p{margin:4px 0; white-space:pre-wrap}
+}
+
+@media (max-width: 920px){
+  .app{flex-direction:column}
+  .sidebar{width:100%; flex:none; position:static; height:auto; display:flex; overflow-x:auto; padding:8px; gap:4px; border-right:0; border-bottom:1px solid var(--line)}
+  .step-btn{width:auto; white-space:nowrap; padding:8px 10px}
+  .side-note{display:none}
+  .grid2,.grid3,.grid4,.two-col,.sub-list{grid-template-columns:1fr}
+  main{padding:16px 14px 60px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">IB</div>
+    <div>
+      <h1>IB티처스 <span class="ver">IB 수업설계 스튜디오 · DP 수학 · v0.5</span></h1>
+    </div>
+  </div>
+  <div class="top-controls">
+    <div class="seg" id="segCourse">
+      <button data-c="AA" class="on">AA 분석과 접근</button>
+      <button data-c="AI">AI 응용과 해석</button>
+    </div>
+    <div class="seg" id="segLevel">
+      <button data-l="SL" class="on">SL</button>
+      <button data-l="HL">HL</button>
+    </div>
+    <button class="btn btn-ghost-dark btn-sm" id="btnUndo" style="display:none">↩ 되돌리기</button>
+    <button class="btn btn-ghost-dark btn-sm" id="btnSample">✨ 샘플 불러오기</button>
+    <button class="btn btn-ghost-dark btn-sm" id="btnSaveJson">💾 저장</button>
+    <button class="btn btn-ghost-dark btn-sm" id="btnLoadJson">📂 불러오기</button>
+    <input type="file" id="fileInput" accept=".json,.docx,.doc,.txt,.md" style="display:none">
+  </div>
+</header>
+
+<div class="app">
+  <nav class="sidebar">
+    <button class="step-btn on" data-step="course"><span class="num">1</span> 코스 아웃라인</button>
+    <button class="step-btn" data-step="unit"><span class="num">2</span> 유닛 플래너</button>
+    <button class="step-btn" data-step="lesson"><span class="num">3</span> 차시 수업안</button>
+    <button class="step-btn" data-step="ai"><span class="num">4</span> AI 초안 만들기</button>
+    <button class="step-btn" data-step="export"><span class="num">5</span> 가져오기·내보내기</button>
+    <button class="step-btn" data-step="help"><span class="num">?</span> 도움말·용어</button>
+    <div class="side-note">
+      ⚠️ 데이터는 브라우저 화면에만 있습니다. 작업 후 <b>저장(JSON)</b> 버튼으로 파일을 내려받아 보관하세요.<br><br>
+      본 도구는 IBO와 무관한 독립 도구이며, 최종 제출 전 반드시 공식 가이드와 대조하세요.
+    </div>
+  </nav>
+
+  <main>
+
+  <!-- ═══════════ STEP 1 : 코스 아웃라인 ═══════════ -->
+  <section class="step-panel on" id="panel-course">
+    <div class="page-head">
+      <h2>① 코스 아웃라인 <span class="eng">Course Outline</span></h2>
+      <p>IB 인증 시 제출하는 공식 「Diploma Programme course outline」 양식의 구조를 그대로 따릅니다. 위에서부터 차례로 채우면 제출용 초안이 완성됩니다.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">기본 정보</span>양식 머리말 <span class="eng">Header</span></h3>
+      <div class="grid3">
+        <div class="field"><label class="f-label">학교명 (School name)</label><input id="f-school" data-meta="school" placeholder="예: 한국IB고등학교"></div>
+        <div class="field"><label class="f-label">학교 코드 (School code)</label><input id="f-code" data-meta="code" placeholder="선택 입력"></div>
+        <div class="field"><label class="f-label">작성 교사 (Teacher)</label><input id="f-teacher" data-meta="teacher" placeholder="예: 김영우"></div>
+        <div class="field"><label class="f-label">과정 기간 (학년도)</label><input id="f-years" data-meta="years" placeholder="예: 2027.3 ~ 2029.2"></div>
+        <div class="field"><label class="f-label">IB 연수 이수 (워크숍명 / 이수일)</label><input id="f-training" data-meta="training" placeholder="예: DP Mathematics AA Cat.1 / 2026.01"></div>
+        <div class="field"><label class="f-label">작성 완료일</label><input id="f-date" data-meta="date" placeholder="예: 2026.08.07"></div>
+        <div class="field"><label class="f-label">1교시 수업 시간(분)</label><input id="f-lessonMin" data-meta="lessonMin" type="number" value="50"></div>
+        <div class="field"><label class="f-label">주당 교시 수</label><input id="f-perWeek" data-meta="perWeek" type="number" value="4"></div>
+        <div class="field"><label class="f-label">시수 입력 단위</label><select id="f-hoursUnit" data-meta="hoursUnit"><option>시간</option><option>교시</option></select><div class="hint">'교시' 선택 시 대시보드가 1교시 길이로 환산해 권장 시수(60분 기준)와 비교합니다</div></div>
+        <div class="field"><label class="f-label">수업 언어</label><select id="f-lang" data-meta="lang"><option>한국어</option><option>영어</option><option>한국어+영어</option></select></div>
+        <div class="field"><label class="f-label">문서 작성 언어 <span class="eng">Document language</span></label><select id="f-docLang" data-meta="docLang"><option>한국어</option><option>English</option></select><div class="hint">English 선택 시 자동 초안·AI 프롬프트가 영어로 생성됩니다 (영어 수업 교과용)</div></div>
+      </div>
+      <div class="callout info" id="courseInfoBox"></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">시수 대시보드</span>공식 권장 시수 대비 배정 현황</h3>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px">
+        <div style="flex:1"><div class="pbar" id="hoursBar"><div style="width:0%"></div></div></div>
+        <div style="font-size:13.5px; font-weight:800; color:var(--navy)" id="hoursText">0 / 150시간</div>
+      </div>
+      <table class="tbl" id="hoursTable"></table>
+      <p class="hint">권장 시수는 IB 공식 subject brief 기준(툴킷 30시간 포함, SL 150 · HL 240). 배정 시수는 아래 단원 구성의 합계입니다.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">1. Course outline</span>단원(토픽) 구성 — Year 1 / Year 2 <span class="eng">Topic · Contents · Time · Assessment · Resources</span></h3>
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" id="btnPreset">⚡ 공식 토픽으로 단원 자동 구성</button>
+        <span class="hint" style="align-self:center">※ 처음부터 새로 짤 때 쓰는 골격 생성 버튼 — 현재 구성을 지우고 공식 토픽 기본 골격으로 대체합니다</span>
+        <button class="btn btn-soft btn-sm" id="btnAddUnit">＋ 단원 추가</button>
+        <button class="btn btn-danger btn-sm" id="btnClearUnits">비우기</button>
+      </div>
+      <div id="unitList"></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">2. IA</span>내부평가 계획 — 수학적 탐구 <span class="eng">Internal assessment: mathematical exploration</span></h3>
+      <div class="callout info">IB 양식 원문: IA를 <b>언제 처음 소개하고, 어떤 단계로 진행하며, 언제 마감하는지</b> 서술해야 합니다. IA는 총점의 20%, 준거 A~E 합계 20점, 권장 분량 12~20쪽입니다.</div>
+      <button class="btn btn-soft btn-sm" id="btnIaPreset" style="margin-bottom:10px">📋 표준 일정 초안 채우기</button>
+      <div class="grid2">
+        <div class="field"><label class="f-label">IA 첫 소개 시점</label><input id="f-iaIntro" data-outline="iaIntro" placeholder="예: DP 1년차 2학기 시작(9월)"></div>
+        <div class="field"><label class="f-label">최종 제출 마감</label><input id="f-iaDue" data-outline="iaDue" placeholder="예: DP 2년차 1학기 말(3월 중순)"></div>
+      </div>
+      <div class="field"><label class="f-label">단계별 일정 (도입 → 주제 탐색 → 초안 → 피드백 → 최종)</label><textarea id="f-iaStages" data-outline="iaStages" rows="5"></textarea></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">3~6. 연계</span>TOK · ATL · 국제적 소양 · 학습자상</h3>
+      <div class="sec-block" style="border-top:0; padding-top:0; margin-top:0">
+        <h4>TOK 연계 <span class="eng">Links to TOK</span> <span class="mini-btns"><button class="btn btn-soft btn-sm" data-bank="tok" data-target="f-tok">💡 예시 넣기</button></span></h4>
+        <p class="hint" style="margin-bottom:6px">양식 요구: 아웃라인의 토픽 중 하나를 골라, 그 토픽을 TOK와 연계해 어떻게 수업할지 설명.</p>
+        <textarea id="f-tok" data-outline="tok" rows="4" placeholder="예: 토픽 5(미적분)에서 '무한소' 개념의 역사적 논쟁을 다루며, 수학적 지식의 정당화 방식이 시대에 따라 어떻게 변했는지 토론한다…"></textarea>
+      </div>
+      <div class="sec-block">
+        <h4>학습접근방법 ATL <span class="eng">Approaches to learning</span> <span class="mini-btns"><button class="btn btn-soft btn-sm" data-bank="atl" data-target="f-atl">💡 예시 넣기</button></span></h4>
+        <p class="hint" style="margin-bottom:6px">양식 요구: 토픽 하나를 예로 들어 ATL 기능(사고·의사소통·사회성·자기관리·조사)을 어떻게 기를지 설명.</p>
+        <textarea id="f-atl" data-outline="atl" rows="4"></textarea>
+      </div>
+      <div class="sec-block">
+        <h4>국제적 소양 <span class="eng">International mindedness</span> <span class="mini-btns"><button class="btn btn-soft btn-sm" data-bank="im" data-target="f-im">💡 예시 넣기</button></span></h4>
+        <p class="hint" style="margin-bottom:6px">양식 요구: 서로 다른 문화적 관점에서 분석할 수 있는 토픽 하나를 고르고, 이유와 활용 자료를 설명.</p>
+        <textarea id="f-im" data-outline="im" rows="4"></textarea>
+      </div>
+      <div class="sec-block">
+        <h4>IB 학습자상 개발 <span class="eng">Development of the IB learner profile</span></h4>
+        <div class="chips" id="lpChips" style="margin-bottom:8px"></div>
+        <textarea id="f-lp" data-outline="lp" rows="3" placeholder="선택한 학습자상 특성을 토픽 예시와 함께 어떻게 기를지 서술"></textarea>
+      </div>
+      <div class="sec-block">
+        <h4>7. 자료 <span class="eng">Resources</span></h4>
+        <p class="hint" style="margin-bottom:6px">양식 요구: 교사·학생이 사용할 자료의 질·양·다양성(교과서, GDC, 소프트웨어, 온라인 자료 등)을 서술.</p>
+        <textarea id="f-resources" data-outline="resources" rows="4" placeholder="예: 공학용 그래픽 계산기(TI-84/nspire) 1인 1대, GeoGebra·Desmos, Haese Mathematics AA SL 교과서, 교육청 IB 자료실…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STEP 2 : 유닛 플래너 ═══════════ -->
+  <section class="step-panel" id="panel-unit">
+    <div class="page-head">
+      <h2>② 유닛 플래너 <span class="eng">DP Unit Planner</span></h2>
+      <p>IB 공식 「DP unit planner」 템플릿 구조입니다. 단원을 선택하고 <b>초안 자동 생성</b>을 누르면 예시은행을 바탕으로 빈칸을 채워줍니다 — 이후 우리 반에 맞게 다듬으세요.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">단원 선택</span>어떤 단원의 플래너를 작성할까요?</h3>
+      <div class="grid2">
+        <div class="field"><label class="f-label">단원</label><select id="up-unitSel"></select></div>
+        <div class="field" style="display:flex; align-items:flex-end; gap:8px">
+          <button class="btn btn-primary" id="btnUpDraft">✨ 초안 자동 생성</button>
+          <button class="btn btn-danger btn-sm" id="btnUpClear">이 플래너 비우기</button>
+        </div>
+      </div>
+      <div id="upHeaderInfo" class="callout info"></div>
+    </div>
+
+    <div id="upFormWrap">
+    <div class="card">
+      <h3><span class="chip">탐구 INQUIRY</span>단원의 목적 설정</h3>
+      <div class="field"><label class="f-label">단원 개요와 사용 텍스트 <span class="eng">Unit description and texts</span></label><textarea data-plan="desc" rows="3"></textarea></div>
+      <div class="field"><label class="f-label">이 단원과 관련된 DP 평가 <span class="eng">DP assessment(s) for unit</span></label><textarea data-plan="dpAssess" rows="2" placeholder="예: Paper 1 Section A 단답형, IA 탐구 연계"></textarea></div>
+      <div class="field"><label class="f-label">전이 목표 <span class="eng">Transfer goals</span> — 학생이 이 단원을 넘어 지속적으로 할 수 있어야 하는 것 (1~3개)</label><textarea data-plan="transfer" rows="3"></textarea></div>
+      <div class="two-col">
+        <div class="field"><label class="f-label">핵심 이해 <span class="eng">Essential understandings</span></label><textarea data-plan="essential" rows="4"></textarea></div>
+        <div class="field"><label class="f-label">예상 오개념·놓치기 쉬운 개념 <span class="eng">Missed concepts / misunderstandings</span></label><textarea data-plan="miscon" rows="4"></textarea></div>
+      </div>
+      <h4 style="font-size:14px; font-weight:800; color:var(--navy); margin:10px 0 8px">탐구 질문 <span class="eng">Inquiry questions</span> <span class="mini-btns"><button class="btn btn-soft btn-sm" id="btnInqBank">💡 예시은행에서 채우기</button></span></h4>
+      <div class="grid3">
+        <div class="field"><label class="f-label">사실적 (내용 기반)</label><textarea data-plan="inqF" rows="3"></textarea></div>
+        <div class="field"><label class="f-label">개념적 (개념 기반)</label><textarea data-plan="inqC" rows="3"></textarea></div>
+        <div class="field"><label class="f-label">논쟁적 (토론 가능)</label><textarea data-plan="inqD" rows="3"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">실행 ACTION</span>탐구를 통한 교수·학습</h3>
+      <div class="grid3">
+        <div class="field"><label class="f-label">학생이 알게 될 지식(내용) <span class="eng">Content</span></label><textarea data-plan="know" rows="5"></textarea></div>
+        <div class="field"><label class="f-label">개발할 기능 <span class="eng">Skills</span></label><textarea data-plan="skills" rows="5"></textarea></div>
+        <div class="field"><label class="f-label">파악할 개념 <span class="eng">Concepts</span></label><textarea data-plan="concepts" rows="5"></textarea></div>
+      </div>
+      <div class="sec-block">
+        <h4>학습 경험·전략 <span class="eng">Learning experiences and strategies</span></h4>
+        <div class="chips" id="expChips" style="margin-bottom:8px"></div>
+        <textarea data-plan="expDetail" rows="4" placeholder="선택한 전략의 구체적 운영 방식 (활동, 모둠 구성, 순서 등)"></textarea>
+      </div>
+      <div class="two-col sec-block">
+        <div class="field"><label class="f-label">형성평가 <span class="eng">Formative assessment</span></label><textarea data-plan="formative" rows="4"></textarea></div>
+        <div class="field"><label class="f-label">총괄평가 <span class="eng">Summative assessment</span></label><textarea data-plan="summative" rows="4"></textarea></div>
+      </div>
+      <div class="sec-block">
+        <h4>차별화(개별화) <span class="eng">Differentiation</span></h4>
+        <div class="chips" id="diffChips" style="margin-bottom:8px"></div>
+        <textarea data-plan="diffDetail" rows="3" placeholder="상·하위 수준 지원, 스캐폴딩 자료, 심화 과제 등"></textarea>
+      </div>
+      <div class="sec-block">
+        <h4>학습접근방법 ATL <span class="eng">Approaches to learning</span></h4>
+        <div class="chips" id="atlChips" style="margin-bottom:8px"></div>
+        <textarea data-plan="atlDetail" rows="3"></textarea>
+      </div>
+      <div class="sec-block">
+        <h4>언어와 학습 <span class="eng">Language and learning</span></h4>
+        <div class="chips" id="langChips" style="margin-bottom:8px"></div>
+        <textarea data-plan="langDetail" rows="2" placeholder="수학 용어 지도(한/영 병기), 어휘 스캐폴딩 등"></textarea>
+      </div>
+      <div class="grid3 sec-block">
+        <div class="field"><label class="f-label">TOK 연계 <span class="eng">TOK connections</span></label><textarea data-plan="tok" rows="4"></textarea></div>
+        <div class="field"><label class="f-label">CAS 연계 <span class="eng">CAS connections</span></label><textarea data-plan="cas" rows="4" placeholder="예: 통계 단원 — 지역사회 설문 봉사 프로젝트와 연계"></textarea></div>
+        <div class="field"><label class="f-label">국제적 소양 <span class="eng">International mindedness</span></label><textarea data-plan="im" rows="4"></textarea></div>
+      </div>
+      <div class="sec-block">
+        <h4>학습자상 <span class="eng">Learner profile</span></h4>
+        <div class="chips" id="upLpChips"></div>
+      </div>
+      <div class="field sec-block"><label class="f-label">자료 <span class="eng">Resources</span></label><textarea data-plan="resources" rows="3"></textarea></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">성찰 REFLECTION</span>계획·과정·영향에 대한 성찰</h3>
+      <div class="grid3">
+        <div class="field"><label class="f-label">수업 전 <span class="eng">Prior to teaching</span></label><textarea data-plan="reflBefore" rows="4" placeholder="학생 사전지식 예상, 우려 지점"></textarea></div>
+        <div class="field"><label class="f-label">수업 중 <span class="eng">During teaching</span></label><textarea data-plan="reflDuring" rows="4" placeholder="잘 된 점 / 조정한 점 기록"></textarea></div>
+        <div class="field"><label class="f-label">수업 후 <span class="eng">After teaching</span></label><textarea data-plan="reflAfter" rows="4" placeholder="다음에 바꿀 점, 전이 목표 달성 여부"></textarea></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STEP 3 : 차시 수업안 ═══════════ -->
+  <section class="step-panel" id="panel-lesson">
+    <div class="page-head">
+      <h2>③ 차시 수업안 <span class="eng">Lesson Plan</span></h2>
+      <p>단원과 수업 유형을 고르면 도입–전개–정리 흐름의 수업안 초안을 만들어줍니다. 유닛 플래너의 탐구질문·ATL과 자동으로 연결됩니다.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">새 차시 만들기</span></h3>
+      <div class="grid4">
+        <div class="field"><label class="f-label">단원</label><select id="ls-unitSel"></select></div>
+        <div class="field"><label class="f-label">차시 (예: 3/12)</label><input id="ls-no" placeholder="예: 3/12"></div>
+        <div class="field"><label class="f-label">수업 유형</label><select id="ls-type">
+          <option value="intro">개념 도입·탐구</option>
+          <option value="practice">연습·문제 해결</option>
+          <option value="modeling">모델링·탐구 활동</option>
+          <option value="gdc">GDC·테크놀로지 실습</option>
+          <option value="ia">IA(탐구보고서) 지도</option>
+          <option value="review">복습·평가</option>
+        </select></div>
+        <div class="field"><label class="f-label">이번 차시 소주제</label><input id="ls-sub" placeholder="예: 등비수열의 합"></div>
+      </div>
+      <div class="field"><label class="f-label">학생 특성 메모 (선택)</label><input id="ls-note" placeholder="예: GDC 사용이 아직 서툰 학생 다수, 수준차 큼"></div>
+      <button class="btn btn-primary" id="btnLsGen">✨ 수업안 초안 생성</button>
+    </div>
+
+    <div class="card" id="lsResultCard" style="display:none">
+      <h3><span class="chip">수업안</span><span id="lsResultTitle"></span></h3>
+      <div class="grid2">
+        <div class="field"><label class="f-label">학습 목표</label><textarea id="ls-obj" rows="3"></textarea></div>
+        <div class="field"><label class="f-label">이 차시의 탐구 질문</label><textarea id="ls-inq" rows="3"></textarea></div>
+      </div>
+      <div class="field"><label class="f-label">도입 (약 10분) — 주의 환기·탐구 유발</label><textarea id="ls-intro" rows="4"></textarea></div>
+      <div class="field"><label class="f-label">전개 (약 30분) — 핵심 활동</label><textarea id="ls-dev" rows="7"></textarea></div>
+      <div class="field"><label class="f-label">정리 (약 10분) — 성찰·형성평가</label><textarea id="ls-wrap" rows="4"></textarea></div>
+      <div class="grid3">
+        <div class="field"><label class="f-label">형성평가·과제</label><textarea id="ls-assess" rows="3"></textarea></div>
+        <div class="field"><label class="f-label">ATL 초점</label><textarea id="ls-atl" rows="3"></textarea></div>
+        <div class="field"><label class="f-label">준비물·GDC/테크</label><textarea id="ls-prep" rows="3"></textarea></div>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-primary btn-sm" id="btnLsSave">💾 차시 목록에 저장</button>
+        <button class="btn btn-ghost btn-sm" id="btnLsCopy">📋 텍스트 복사</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">저장된 차시</span><span id="lsCount"></span></h3>
+      <div id="lessonList"><div class="empty-note">아직 저장된 차시가 없습니다. 위에서 수업안을 생성한 뒤 저장해 보세요.</div></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STEP 4 : AI 프롬프트 ═══════════ -->
+  <section class="step-panel" id="panel-ai">
+    <div class="page-head">
+      <h2>④ AI 초안 만들기 <span class="eng">AI Draft Assistant</span></h2>
+      <p>지금까지 입력한 모든 맥락(학교·과정·단원·플래너)을 담은 <b>전문가급 프롬프트</b>를 자동으로 조립합니다. 복사해서 Claude에 붙여넣으면 훨씬 정교한 초안을 받을 수 있습니다.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">프롬프트 생성</span></h3>
+      <div class="grid3">
+        <div class="field"><label class="f-label">무엇을 만들까요?</label><select id="ai-type">
+          <option value="unitplan">유닛 플래너 정교화·완성</option>
+          <option value="lesson">차시 수업안 상세 설계</option>
+          <option value="outline">코스 아웃라인 검토(제출 관점)</option>
+          <option value="ia">IA 탐구 주제 아이디어</option>
+        </select></div>
+        <div class="field" id="ai-unitWrap"><label class="f-label">대상 단원</label><select id="ai-unitSel"></select></div>
+        <div class="field" id="ai-extraWrap" style="display:none"><label class="f-label">추가 조건 (선택)</label><input id="ai-extra" placeholder="예: 3차시 분량, 모둠활동 중심"></div>
+      </div>
+      <button class="btn btn-primary" id="btnAiGen">🤖 프롬프트 조립하기</button>
+      <div class="callout info" style="margin-top:12px">사용법: ① 프롬프트 복사 → ② <b>claude.ai</b> 접속(무료 가능) → ③ 붙여넣기 → ④ 결과를 이 도구의 해당 칸에 붙여 다듬기. <b>정식 버전에서는 버튼 한 번으로 자동 생성됩니다(API 연동 예정).</b></div>
+    </div>
+
+    <div class="card" id="aiResultCard" style="display:none">
+      <h3><span class="chip">완성된 프롬프트</span><button class="btn btn-primary btn-sm" id="btnAiCopy" style="margin-left:auto">📋 전체 복사</button></h3>
+      <div class="prompt-box" id="aiPromptBox"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════ STEP 5 : 내보내기 ═══════════ -->
+  <section class="step-panel" id="panel-export">
+    <div class="page-head">
+      <h2>⑤ 가져오기·내보내기 <span class="eng">Import / Export</span></h2>
+      <p>이미 작성해 둔 문서(Word 등)를 가져와 분석·변환하고, 완성본은 Word·PDF·마크다운으로 내보냅니다.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">가져오기</span>기존 코스아웃라인 불러오기 — Word(.docx)·텍스트 <span class="eng">Import</span></h3>
+      <div class="callout info"><b>파일을 선택하거나 이 창에 끌어다 놓으면 자동으로 분석됩니다</b> — 공식 IB 코스아웃라인 양식(영어/한국어)은 단원·시수·평가·연계 섹션까지 정밀 인식하고, 일반 표 형식 문서도 최대한 인식합니다. 인식 결과를 확인하고 <b>「이대로 불러오기」</b> 한 번이면 끝. AI 프롬프트는 인식이 어긋날 때 쓰는 보조 수단입니다.<span id="im-frameNote"></span></div>
+      <div class="callout warn" style="font-size:12.5px">파일 선택이 반응하지 않으면: ① 좌측 상단 버전이 <b>v0.4</b> 이상인지 확인(구버전 파일은 .docx 미지원) ② 파일을 이 창에 드래그해서 놓기 ③ Word에서 내용을 복사해 아래 칸에 붙여넣기 — 셋 중 하나면 됩니다.</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px">
+        <button class="btn btn-primary" id="im-btnFile">📄 파일 선택 (.docx / .txt / .md / .json)</button>
+      </div>
+      <div class="field"><label class="f-label">또는 문서 내용 붙여넣기 (Word에서 Ctrl+A → Ctrl+C → 여기에 Ctrl+V)</label><textarea id="im-paste" rows="5" placeholder="기존 코스아웃라인 내용을 통째로 붙여넣으세요 (한국어/영어 모두 가능)"></textarea></div>
+      <div id="im-status" class="hint"></div>
+      <div id="im-parseBox" style="display:none"></div>
+      <details class="sub-picker" style="margin-top:10px">
+        <summary>고급 — 자동 인식이 실패하는 특수한 문서일 때 (AI 보조)</summary>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px">
+          <button class="btn btn-soft btn-sm" id="im-btnConvert">🤖 AI 변환 프롬프트</button>
+          <button class="btn btn-soft btn-sm" id="im-btnReview">🔍 AI 검토 프롬프트</button>
+          <button class="btn btn-primary btn-sm" id="im-btnCopy" style="display:none">📋 프롬프트 복사</button>
+        </div>
+        <div class="prompt-box" id="im-promptBox" style="display:none; max-height:240px; margin-top:6px"></div>
+        <div class="field" style="margin-top:10px"><label class="f-label">AI가 돌려준 JSON 붙여넣기 → 적용</label>
+          <textarea id="im-jsonIn" rows="3" placeholder='JSON 코드블록을 통째로 붙여넣어도 됩니다'></textarea>
+          <button class="btn btn-primary btn-sm" id="im-btnApply" style="margin-top:8px">✅ 적용하기</button>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">제출 전 점검</span>자동 체크리스트</h3>
+      <div id="chkList"></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="chip">문서로 내보내기</span>Word / 인쇄·PDF</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+        <button class="btn btn-primary" id="btnDocOutline">📝 코스 아웃라인 → Word</button>
+        <button class="btn btn-ghost" id="btnPrintOutline">🖨️ 코스 아웃라인 인쇄·PDF</button>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+        <select id="pr-unitSel" style="width:auto; min-width:220px"></select>
+        <button class="btn btn-primary" id="btnDocUnit">📝 유닛 플래너 → Word</button>
+        <button class="btn btn-ghost" id="btnPrintUnit">🖨️ 인쇄·PDF</button>
+      </div>
+      <p class="hint">Word 저장은 .doc 형식(Word·한글에서 열림), 인쇄에서 'PDF로 저장'을 선택하면 PDF가 됩니다. IB 제출 양식과 유사한 표 형식입니다.</p>
+    </div>
+    <div class="card">
+      <h3><span class="chip">마크다운</span>다른 문서로 옮기기</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn btn-ghost" id="btnMdOutline">📄 아웃라인 마크다운 복사</button>
+        <button class="btn btn-ghost" id="btnMdUnit">📄 유닛 플래너 마크다운 복사</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">데이터 파일</span>저장·백업 (중요)</h3>
+      <div class="callout warn">이 프로토타입은 서버가 없어 <b>새로고침하면 입력 내용이 사라집니다.</b> 작업을 마칠 때마다 JSON 파일로 저장해 두고, 다음에 '불러오기'로 이어서 작업하세요. (정식 버전: 자동 클라우드 저장)</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn btn-primary" id="btnSaveJson2">💾 JSON으로 저장</button>
+        <button class="btn btn-ghost" id="btnLoadJson2">📂 JSON 불러오기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 도움말 ═══════════ -->
+  <section class="step-panel" id="panel-help">
+    <div class="page-head">
+      <h2>도움말 · IB 용어 미니사전</h2>
+      <p>처음 IB를 맡은 선생님을 위한 핵심 개념 요약입니다.</p>
+    </div>
+    <div class="card">
+      <h3><span class="chip">이 도구의 사용 순서</span></h3>
+      <div class="callout good">① 상단에서 과정(AA/AI)·레벨(SL/HL) 선택 → ② 코스 아웃라인에서 '공식 토픽으로 자동 구성' → 시수·배치 조정 → ③ 단원별 유닛 플래너 '초안 자동 생성' 후 다듬기 → ④ 차시 수업안 생성 → ⑤ AI 프롬프트로 정교화 → ⑥ 인쇄/저장. 처음이라면 상단 <b>'샘플 불러오기'</b>로 완성 예시를 먼저 보세요.</div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">용어사전</span></h3>
+      <div id="glossary"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">안내</span></h3>
+      <p style="font-size:13px; color:var(--ink2)">본 도구는 IBO(International Baccalaureate Organization)와 무관한 독립 도구이며 IBO의 승인·보증을 받지 않았습니다. 내장된 실라버스 항목·권장 시수는 공식 가이드(2019, 현행)의 항목 번호 체계를 기준으로 정리·요약(한국어 의역)한 <b>참고용</b>입니다. 학교 제출 문서는 반드시 최신 공식 가이드(MyIB)와 대조하세요. 수학 과정은 2027년 8월 첫 수업 기준으로 개정 예정(2029년 5월 첫 평가)이므로, 해당 학년도 계획 시 개정 가이드를 확인해야 합니다.</p>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+  <div id="toast"></div>
+  <div id="printArea"></div>
+
+<script>
+'use strict';
+/* ═══════════════ 데이터: DP 수학 실라버스 요약 (2019 가이드 기준 · 참고용) ═══════════════ */
+const SYLLABUS = {
+ AA: { code:"AA", name:"수학: 분석과 접근", eng:"Mathematics: Analysis and Approaches",
+  desc:"대수적 조작과 증명, 함수와 미적분 중심. 수학적 논증과 일반화에 강점이 있는 학생에게 적합하며, 한국어 DP 지정 과목. (항목 번호는 공식 가이드 실라버스 기준)",
+  topics:[
+   {"n": 1, "name": "수와 대수", "eng": "Number and algebra", "sl": 19, "hl": 39, "slItems": ["1.1 지수 표기(a×10^k) 연산", "1.2 등차수열과 급수, 시그마 표기와 응용", "1.3 등비수열과 급수", "1.4 금융 응용: 복리, 감가상각", "1.5 지수법칙(정수 지수)과 로그의 도입", "1.6 단순한 연역적 증명(LHS→RHS)", "1.7 지수법칙(유리 지수)과 로그 법칙, 밑변환", "1.8 무한 수렴 등비급수의 합", "1.9 이항정리 (a+b)^n, n∈ℕ"], "hlItems": ["1.10 계수 원리(순열·조합)와 이항정리의 확장(유리 지수)", "1.11 부분분수", "1.12 복소수: 허수 i와 직교형식, 아르강 도표", "1.13 극형식(모듈러스-편각)·오일러 형식, 드무아브르 정리와 거듭제곱근", "1.14 이차·다항방정식의 켤레 복소근", "1.15 증명: 수학적 귀납법, 귀류법, 반례", "1.16 연립일차방정식(최대 3×3)의 해"]},
+   {"n": 2, "name": "함수", "eng": "Functions", "sl": 21, "hl": 32, "slItems": ["2.1 직선의 방정식의 여러 형태와 기울기", "2.2 함수의 개념: 정의역, 치역, 그래프", "2.3 함수의 그래프 y=f(x) 작성(GDC 포함)", "2.4 그래프의 주요 특징 파악: 절편·극값·점근선 등", "2.5 합성함수와 역함수", "2.6 이차함수 f(x)=ax²+bx+c: 그래프, 축, 꼭짓점", "2.7 이차방정식과 부등식의 해, 판별식", "2.8 역수함수와 유리함수 (ax+b)/(cx+d), 점근선", "2.9 지수함수와 로그함수의 그래프", "2.10 방정식의 그래프적·해석적 풀이", "2.11 그래프 변환: 평행이동, 확대·축소, 반사"], "hlItems": ["2.12 다항함수의 그래프·방정식: 근, 인수정리, 나머지정리", "2.13 유리함수의 확장(이차식 분모 등)", "2.14 홀함수·짝함수, 자기역함수", "2.15 부등식 g(x)≥f(x)의 그래프적·해석적 풀이", "2.16 절댓값 그래프 y=|f(x)|, y=f(|x|) 등 변환 확장"]},
+   {"n": 3, "name": "기하와 삼각법", "eng": "Geometry and trigonometry", "sl": 25, "hl": 51, "slItems": ["3.1 3차원 공간의 두 점 사이 거리·중점, 입체의 부피와 겉넓이", "3.2 삼각비(sin·cos·tan), 사인·코사인 법칙, 삼각형의 넓이", "3.3 직각·비직각 삼각법의 응용: 고도각, 방위각 등", "3.4 원: 호도법, 호의 길이, 부채꼴의 넓이", "3.5 단위원에서 cosθ·sinθ·tanθ의 정의, 특수각의 값", "3.6 피타고라스 항등식과 배각공식(sin2θ, cos2θ)", "3.7 원형 함수 sin·cos·tan의 그래프·변환·실생활 모델", "3.8 유한 구간에서 삼각방정식의 풀이(그래프적·해석적)"], "hlItems": ["3.9 보조 삼각비(sec, csc, cot)의 정의와 항등식", "3.10 합성각 항등식", "3.11 삼각함수 사이의 관계와 대칭성", "3.12 벡터의 개념: 위치벡터, 변위벡터, 크기", "3.13 내적과 두 벡터 사이의 각", "3.14 직선의 벡터방정식(2·3차원)", "3.15 직선 간의 관계: 일치·평행·교차·꼬임, 거리", "3.16 외적", "3.17 평면의 벡터방정식 r=a+λb+μc", "3.18 직선-평면·평면-평면의 교점, 각, 거리"]},
+   {"n": 4, "name": "통계와 확률", "eng": "Statistics and probability", "sl": 27, "hl": 33, "slItems": ["4.1 모집단·표본·임의표본, 이산·연속 자료, 표집과 편향", "4.2 자료의 표현: 도수분포, 히스토그램, 누적도수, 상자그림", "4.3 중심경향(평균·중앙값·최빈값)과 산포(IQR·표준편차·분산), 이상값", "4.4 이변량 자료의 선형 상관: 피어슨 r, 산점도, 회귀직선(y on x)", "4.5 확률의 기초: 시행, 결과, 상대도수, 기댓값 개념", "4.6 벤 다이어그램·수형도·표본공간, 조합 사건의 확률", "4.7 이산확률변수와 확률분포, 기댓값 E(X)", "4.8 이항분포: 평균과 분산", "4.9 정규분포와 곡선의 성질(GDC 활용 확률 계산)", "4.10 x on y 회귀직선과 활용", "4.11 조건부확률 P(A|B)의 정의·공식, 독립의 판정", "4.12 정규변수의 표준화(z값)와 역정규 계산"], "hlItems": ["4.13 베이즈 정리(최대 3사건)", "4.14 이산확률변수의 분산·표준편차, 연속확률변수와 확률밀도함수"]},
+   {"n": 5, "name": "미적분", "eng": "Calculus", "sl": 28, "hl": 55, "slItems": ["5.1 극한 개념의 도입, 변화율로서의 미분", "5.2 증가·감소 함수와 도함수의 부호", "5.3 f(x)=axⁿ의 도함수(다항함수의 미분)", "5.4 접선과 법선의 방정식", "5.5 역미분으로서의 적분 도입, xⁿ의 부정적분", "5.6 xⁿ(n∈ℚ)·sin·cos·eˣ·ln x의 미분, 연쇄·곱·몫의 법칙", "5.7 이계도함수와 그래프 해석", "5.8 극대·극소·변곡점, 최적화", "5.9 운동학 문제: 변위·속도·가속도·이동거리", "5.10 부정적분과 경계조건, 치환에 의한 적분(단순한 경우)", "5.11 정적분과 넓이(해석적 접근 포함, GDC 활용)"], "hlItems": ["5.12 연속과 미분가능성의 직관적 이해", "5.13 극한값의 계산: 로피탈 정리와 매클로린 급수 활용", "5.14 음함수 미분과 관련 변화율", "5.15 tan·sec·csc·cot, aˣ·logₐx, 역삼각함수의 미분", "5.16 치환적분·부분적분과 반복 적용", "5.17 y축 둘레의 넓이, 회전체의 부피", "5.18 1계 미분방정식: 변수분리, 동차, 적분인자, 오일러 방법", "5.19 매클로린 급수와 근사"]}
+  ]},
+ AI: { code:"AI", name:"수학: 응용과 해석", eng:"Mathematics: Applications and Interpretation",
+  desc:"실생활 모델링·통계·기술(GDC) 활용 중심. 데이터와 맥락 문제 해결을 선호하는 학생에게 적합. (항목 번호는 공식 가이드 실라버스 기준)",
+  topics:[
+   {"n": 1, "name": "수와 대수", "eng": "Number and algebra", "sl": 16, "hl": 29, "slItems": ["1.1 지수 표기(a×10^k) 연산", "1.2 등차수열과 급수, 응용", "1.3 등비수열과 급수, 응용", "1.4 금융 응용: 복리, 연이율 환산, 감가상각", "1.5 지수법칙(정수 지수)과 로그의 도입, 기술 활용 풀이", "1.6 근사: 소수점 자리, 유효숫자, 백분율 오차, 어림 추정", "1.7 상환(할부)과 연금 — 기술(재무 앱) 활용", "1.8 기술을 활용한 연립일차방정식(최대 3원)·다항방정식의 해"], "hlItems": ["1.9 로그 법칙", "1.10 수·식의 단순화(유리 지수 포함)", "1.11 무한 수렴 등비급수의 합", "1.12 복소수: 허수 i와 직교형식(응용 맥락)", "1.13 극형식·지수(오일러) 형식과 응용", "1.14 행렬: 정의, 연산, 행렬식, 역행렬", "1.15 고유값과 고유벡터, 행렬 거듭제곱의 응용"]},
+   {"n": 2, "name": "함수", "eng": "Functions", "sl": 31, "hl": 42, "slItems": ["2.1 직선의 방정식의 여러 형태와 기울기", "2.2 함수의 개념: 정의역, 치역, 역함수", "2.3 함수의 그래프 작성(GDC 포함)", "2.4 그래프의 주요 특징 파악: 절편·극값·점근선(GDC)", "2.5 모델링 함수: 선형, 이차, 지수, 직접·역변동, 삼차, 사인 모델", "2.6 모델링 과정: 적합·선택·검증과 한계 평가"], "hlItems": ["2.7 맥락 속 합성함수와 역함수", "2.8 그래프 변환의 확장", "2.9 추가 모델: 로지스틱, 조각(구간별) 함수 등", "2.10 로그 스케일: 매우 큰·작은 수의 척도화와 선형화(semi-log/log-log)"]},
+   {"n": 3, "name": "기하와 삼각법", "eng": "Geometry and trigonometry", "sl": 18, "hl": 46, "slItems": ["3.1 3차원 공간의 거리·중점, 입체의 부피와 겉넓이", "3.2 삼각비(sin·cos·tan)로 변과 각 구하기", "3.3 직각·비직각 삼각법의 응용(사인·코사인 법칙), 고도각·방위각", "3.4 원: 호의 길이와 부채꼴 넓이(도 단위)", "3.5 수직이등분선의 방정식", "3.6 보로노이 다이어그램: 사이트·꼭짓점·모서리·셀, 최근접 응용"], "hlItems": ["3.7 라디안의 정의와 도-라디안 변환", "3.8 단위원에서 cosθ·sinθ의 정의, 삼각함수 그래프·사인 모델 심화", "3.9 2차원 점의 기하 변환(행렬): 회전·반사·확대", "3.10 벡터와 스칼라의 개념", "3.11 직선의 벡터방정식(2·3차원)", "3.12 벡터 운동학", "3.13 내적과 외적의 정의·계산", "3.14 그래프 이론: 그래프, 꼭짓점, 모서리, 인접", "3.15 인접행렬과 거듭제곱", "3.16 무향 그래프의 트리·순회 알고리즘(최소신장트리, 중국인 우체부, 외판원)"]},
+   {"n": 4, "name": "통계와 확률", "eng": "Statistics and probability", "sl": 36, "hl": 52, "slItems": ["4.1 모집단·표본·임의표본, 이산·연속 자료, 표집·편향·신뢰성", "4.2 자료의 표현: 도수분포, 히스토그램, 누적도수, 상자그림", "4.3 중심경향과 산포, 이상값", "4.4 이변량 자료의 선형 상관: 피어슨 r, 회귀직선", "4.5 확률의 기초: 시행·결과·상대도수·기댓값", "4.6 벤 다이어그램·수형도·표본공간, 조건부확률·독립", "4.7 이산확률변수와 확률분포, 기댓값(공정한 게임)", "4.8 이항분포", "4.9 정규분포와 곡선(GDC 확률 계산)", "4.10 스피어만 순위상관계수", "4.11 가설검정: 귀무·대립가설, 유의수준, 카이제곱(적합도·독립성), t-검정"], "hlItems": ["4.12 타당한 자료 수집 방법의 설계(설문 등)", "4.13 비선형 회귀와 결정계수(R², SSres)", "4.14 확률변수의 선형변환", "4.15 n개 독립 정규확률변수의 선형결합", "4.16 정규 모집단 평균의 신뢰구간", "4.17 포아송 분포: 평균과 분산", "4.18 임계값과 기각역을 이용한 검정", "4.19 전이행렬과 마르코프 연쇄"]},
+   {"n": 5, "name": "미적분", "eng": "Calculus", "sl": 19, "hl": 41, "slItems": ["5.1 극한 개념의 도입, 변화율로서의 미분", "5.2 증가·감소 함수", "5.3 f(x)=axⁿ의 도함수", "5.4 접선과 법선의 방정식(해석적·GDC)", "5.5 역미분으로서의 적분 도입, 부정적분", "5.6 기울기가 0인 점, 극대·극소", "5.7 맥락 속 최적화 문제", "5.8 사다리꼴 공식을 이용한 넓이 근사"], "hlItems": ["5.9 sin·cos·tan·eˣ·ln x의 미분, 연쇄·곱·몫의 법칙", "5.10 이계도함수와 그래프 해석", "5.11 xⁿ(n∈ℚ)의 정적분·부정적분(치환 포함)", "5.12 곡선과 축 사이의 넓이, 회전체의 부피", "5.13 운동학 문제", "5.14 맥락에서 미분방정식 세우기와 변수분리 해법", "5.15 기울기장과 그 다이어그램", "5.16 오일러 방법(1계 미방의 근사해)", "5.17 연립(결합) 미분방정식 해의 위상 초상, 평형점·안정성", "5.18 2계 미분방정식 d²x/dt²=f(x,dx/dt,t)의 수치 해법"]}
+  ]}
+};
+const TOOLKIT = {n:'T', name:'수학 툴킷 & IA 탐구', eng:'Mathematical toolkit & exploration', sl:30, hl:30,
+ items:['탐구(inquiry)·모델링·조사 기능 개발 활동','미니 탐구 과제(주제 찾기 연습)','IA 주제 브레인스토밍과 계획','IA 작성(10~15시간)·피드백·수정']};
+
+const ASSESS = {
+ AA:{SL:[['Paper 1','1시간 30분','GDC 불허','40%','Section A 단답 + Section B 서술'],['Paper 2','1시간 30분','GDC 필수','40%','Section A 단답 + Section B 서술'],['IA 수학적 탐구','12~20쪽','-','20%','준거 A~E · 20점']],
+     HL:[['Paper 1','2시간','GDC 불허','30%','Section A + B'],['Paper 2','2시간','GDC 필수','30%','Section A + B'],['Paper 3','1시간 15분','GDC 필수','20%','장문 문제해결 2문항'],['IA 수학적 탐구','12~20쪽','-','20%','준거 A~E · 20점']]},
+ AI:{SL:[['Paper 1','1시간 30분','GDC 필수','40%','단답형'],['Paper 2','1시간 30분','GDC 필수','40%','서술형'],['IA 수학적 탐구','12~20쪽','-','20%','준거 A~E · 20점']],
+     HL:[['Paper 1','2시간','GDC 필수','30%','단답형'],['Paper 2','2시간','GDC 필수','30%','서술형'],['Paper 3','1시간 15분','GDC 필수','20%','장문 문제해결 2문항'],['IA 수학적 탐구','12~20쪽','-','20%','준거 A~E · 20점']]}
+};
+const IA_CRIT = [['A 구성·표현(Presentation)',4],['B 수학적 의사소통(Mathematical communication)',4],['C 개인적 참여(Personal engagement)',3],['D 성찰(Reflection)',3],['E 수학의 활용(Use of mathematics)',6]];
+
+/* ═══════════════ 예시은행 (토픽별 탐구질문·활동·TOK·IM·ATL·오개념) ═══════════════ */
+const BANK = {
+ 1:{inqF:['등차·등비수열의 일반항과 합은 어떻게 결정되는가?','복리 계산에서 이자 주기가 결과에 어떤 영향을 주는가?'],
+    inqC:['패턴의 일반화는 어떻게 미래에 대한 예측을 가능하게 하는가?','유한한 과정으로 무한을 다룰 수 있는 이유는 무엇인가?'],
+    inqD:['복리는 금융 이해의 도구인가, 소비자를 현혹하는 함정인가?','수학적 증명 없이 패턴을 믿어도 되는가?'],
+    act:['적금·대출 상환 시뮬레이션(GDC 재무 앱 활용)','종이접기·세균 배양으로 지수적 성장 체험 후 일반항 유도','시에르핀스키 삼각형 등 프랙털로 무한급수 탐구','실제 금융상품 광고에서 이율 조건을 찾아 실효이율 비교'],
+    tok:['수학적 귀납법이 주는 확실성은 자연과학의 귀납적 일반화와 어떻게 다른가?','복소수 같은 수 체계는 발견되는가, 발명되는가?'],
+    im:['인도-아라비아 숫자 체계와 0의 전파 역사, 이자에 대한 문화·종교별 관점(이슬람 금융의 무이자 원칙 등) 비교'],
+    atl:['조사: 금융상품 약관에서 필요한 정보를 추출·평가하기','사고: 추측→검증→일반화 루틴으로 수열 규칙 발견하기'],
+    mis:['등비수열의 "비"와 등차수열의 "차"를 혼동','시그마 표기에서 시작 인덱스 처리 오류','복리 기간 단위(연/월) 혼동']},
+ 2:{inqF:['역함수가 존재하기 위한 조건은 무엇인가?','판별식은 이차방정식의 근에 대해 무엇을 알려주는가?'],
+    inqC:['함수는 어떻게 두 변화량 사이의 관계를 표현하는가?','같은 상황을 표·그래프·식으로 나타낼 때 각 표현은 무엇을 드러내고 무엇을 감추는가?'],
+    inqD:['모든 실생활 관계를 함수로 모델링할 수 있는가?','좋은 모델의 기준은 정확성인가, 단순함인가?'],
+    act:['Desmos/GeoGebra로 그래프 변환 규칙 탐구 후 모둠 갤러리워크','음료 냉각 데이터 측정 → 지수 모델 적합','다리·분수 사진 위에 이차함수 피팅 프로젝트','같은 데이터에 여러 모델을 적합해보는 "모델 선택 토너먼트"'],
+    tok:['오컴의 면도날: 더 단순한 모델을 선호하는 것은 합리적 원칙인가, 미적 취향인가?'],
+    im:['세계 인구·기후 데이터를 국가별로 비교하며 모델링 — 데이터 출처와 신뢰성의 국제 비교'],
+    atl:['의사소통: 그래프↔말↔식 번역 릴레이 활동','자기관리: GDC 기능 자가 체크리스트 운영'],
+    mis:['f⁻¹(x)를 1/f(x)로 오해','점근선을 "절대 닿지 않는 선"으로만 암기','그래프 변환의 적용 순서 혼동']},
+ 3:{inqF:['사인법칙이 두 개의 해를 갖는 경우는 언제인가?','벡터의 내적은 무엇을 측정하는가?'],
+    inqC:['공간과 도형은 수로 어떻게 기술되는가?','좌표계의 선택은 문제 해결을 어떻게 바꾸는가?'],
+    inqD:['GPS 시대에 삼각법 손계산 능력은 여전히 필요한가?','직관과 증명이 충돌할 때 무엇을 믿어야 하는가?'],
+    act:['운동장에서 클리노미터로 건물 높이 실측 후 이론값과 오차 분석','지도 위 응급시설 최적 배치 — 보로노이 다이어그램 작도(AI)','벡터로 드론 비행 경로 설계하기(HL)','단위원 인간 그래프: 몸으로 사인 곡선 만들기'],
+    tok:['유클리드 공리계는 확실한 지식의 이상적 모형인가?','비유클리드 기하의 등장은 수학적 진리의 본성에 대해 무엇을 말하는가?'],
+    im:['이슬람 기하 문양·한국 단청·에셔의 테셀레이션에 나타난 대칭 비교, 나라별 측량 단위의 역사'],
+    atl:['사회성: 야외 실측 활동의 역할 분담과 협업','조사: 실측값-이론값 오차의 원인 분석 보고서'],
+    mis:['라디안과 도 단위 혼용 실수','코사인법칙 부호 처리 오류','SSA 조건(모호한 경우)에서 해가 2개일 가능성 간과']},
+ 4:{inqF:['표준편차는 무엇을 측정하는가?','정규분포를 가정할 수 있는 조건은 무엇인가?'],
+    inqC:['불확실성은 어떻게 수량화되고 관리되는가?','표본은 어떻게 전체를 대표할 수 있는가?'],
+    inqD:['"상관관계" 보도는 인과관계에 대한 오해를 부추기는가?','여론조사는 민주주의를 돕는가, 왜곡하는가?'],
+    act:['학급→전교 설문 통계 프로젝트(표집 설계부터 보고서까지)','몬티홀 문제 실험·시뮬레이션','언론 그래프 왜곡 사례 찾아 비평하기','스포츠 기록 데이터 회귀 분석','급식 메뉴 선호와 학년의 독립성 카이제곱 검정(AI)'],
+    tok:['통계는 어떻게 거짓말을 하는가 — 데이터는 중립적인가?','확률적 지식도 "앎"이라고 할 수 있는가?'],
+    im:['국가별 통계청 데이터의 수집 방식·신뢰성 비교, 국제 여론조사에서의 문화적 편향 사례'],
+    atl:['조사·미디어 리터러시: 기사 속 통계 주장 검증하기','의사소통: 데이터 기반 보고서·인포그래픽 작성'],
+    mis:['상관관계를 인과관계로 해석','P(A|B)와 P(B|A)의 혼동','"무작위"의 의미 오해(패턴이 없어야 한다는 착각)','모든 자료에 정규분포를 무비판적으로 가정']},
+ 5:{inqF:['도함수 그래프와 원함수 그래프는 어떤 관계인가?','정적분은 왜 넓이를 주는가?'],
+    inqC:['무한히 작은 것들의 누적이 어떻게 유한한 전체가 되는가?','순간 변화율이라는 개념은 어떻게 정당화되는가?'],
+    inqD:['엄밀한 극한 정의 없이 직관으로 미적분을 쓰는 것은 수학적으로 정직한가?','최적화가 항상 "최선"을 의미하는가(무엇을 최적화할지는 누가 정하는가)?'],
+    act:['스마트폰 센서로 속도-시간 데이터 수집 → 변위 추정(리만 합)','음료캔 최소 재료 설계 최적화 프로젝트','스프레드시트로 리만 합 수렴 실험','전염병 확산 SIR 모형 시뮬레이션(HL 미분방정식)'],
+    tok:['뉴턴-라이프니츠 우선권 논쟁: 발견의 공로는 어떻게 배분되어야 하는가?','무한소 개념의 정당화 역사는 수학 지식의 성장 방식에 대해 무엇을 보여주는가?'],
+    im:['미적분의 동시 발견(영국·대륙)과 표기법 경쟁이 남긴 유산, 나라별 교육과정의 미적분 도입 시기 비교'],
+    atl:['사고: 그래프·수치·대수 표상을 전환하며 문제 해결하기','자기관리: 누적 오답 노트와 재도전 주기 운영'],
+    mis:['극값과 최댓값·최솟값의 혼동','적분상수 누락','속도와 속력의 혼동','dy/dx를 단순한 분수로만 취급']},
+ T:{inqF:['좋은 수학적 탐구(IA) 주제의 조건은 무엇인가?'],
+    inqC:['수학적 탐구는 교과서 문제 풀이와 어떻게 다른가?'],
+    inqD:['개인적 관심과 수학적 깊이가 충돌할 때 무엇을 우선해야 하는가?'],
+    act:['미니 탐구 3회 사이클(주제 정하기→계획→실행→동료 피드백)','IA 준거 A~E로 공개 예시 보고서 채점 워크숍','좋은 주제/위험한 주제 판별 카드 게임','관심사→수학 연결 브레인스토밍 매트릭스'],
+    tok:['수학에서 "개인적 참여"란 무엇을 의미하는가?'],
+    im:['세계 각국 학생들의 IA 주제 경향 비교로 문화와 수학적 관심사의 관계 탐색'],
+    atl:['자기관리: IA 장기 일정 계획과 마일스톤 관리','조사: 신뢰할 수 있는 데이터 출처 찾기와 인용'],
+    mis:['너무 넓거나 수학적 깊이가 없는 주제 선택','자료 수집만 하고 수학적 분석이 없는 보고서','인용·출처 표기 누락(학문적 정직성)']}
+};
+const CONCEPT_CORE = {1:'일반화, 표현, 패턴', 2:'관계, 모델링, 표현', 3:'공간, 표현, 근사', 4:'불확실성, 타당성, 추론', 5:'변화, 근사, 축적', T:'탐구, 정당화, 의사소통'};
+
+const LP10 = ['탐구하는 사람','지식이 풍부한 사람','사고하는 사람','소통하는 사람','원칙을 지키는 사람','열린 마음을 지닌 사람','배려하는 사람','도전하는 사람','균형 잡힌 사람','성찰하는 사람'];
+const ATL5 = ['사고 기능','의사소통 기능','사회적 기능','자기관리 기능','조사 기능'];
+const EXP8 = ['강의·설명','소크라테스식 세미나','모둠·짝 활동','학생 발표','학생 주도 수업','학제간 연계','GDC·테크놀로지 실습','실측·야외 활동'];
+const DIFF4 = ['정체성 긍정과 자존감 형성','사전지식의 가치화','학습 스캐폴딩','심화·확장 학습'];
+const LANG4 = ['배경지식 활성화','새 학습을 위한 스캐폴딩','연습을 통한 습득','능숙도 입증 기회'];
+const ASSESS_TOOLS = ['쪽지시험·퀴즈','단원평가(서술형)','수행·탐구 과제','구술 발표','모의 Paper 1','모의 Paper 2','모의 Paper 3(HL)','IA 마일스톤'];
+
+const GLOSSARY = [
+ ['코스 아웃라인 (Course outline)','IB 인증(authorization) 신청 시 과목 교사가 작성해 제출하는 공식 2개년 과목 운영 계획서. Year 1/2별 토픽·시수·평가·자료와 IA 일정, TOK·ATL·국제적 소양·학습자상 연계를 담는다.'],
+ ['유닛 플래너 (Unit planner)','한 단원의 수업 설계도. DP는 의무 양식은 없지만 IB가 제공하는 공식 템플릿(탐구 INQUIRY–실행 ACTION–성찰 REFLECTION 구조)이 사실상 표준이다.'],
+ ['백워드 설계 (Backward design)','목표(전이 목표)와 평가를 먼저 정하고 그다음 학습 활동을 설계하는 방식. IB 유닛 플래너의 기본 철학.'],
+ ['전이 목표 (Transfer goals)','단원이 끝난 뒤에도 학생이 새로운 상황에서 스스로 해낼 수 있어야 하는 장기 목표. "시험 범위"가 아니라 "삶으로 가져가는 능력"으로 서술한다.'],
+ ['핵심 이해 (Essential understandings)','학생이 단원을 통해 도달해야 할 개념적 이해. 지식 나열이 아니라 "~은 ~이다/~하다" 형태의 일반화 문장으로 쓴다.'],
+ ['ATL (Approaches to Learning, 학습접근방법)','IB가 모든 과목에서 기르도록 요구하는 5가지 범용 학습 기능: 사고, 의사소통, 사회성, 자기관리, 조사.'],
+ ['TOK (Theory of Knowledge, 지식이론)','DP 필수 핵심과정. 각 과목은 "이 지식은 어떻게 정당화되는가?" 같은 질문으로 TOK와 연계해야 한다. 수학은 증명·공리·모델의 본성이 단골 소재.'],
+ ['CAS (Creativity, Activity, Service)','창의·신체활동·봉사로 구성된 DP 핵심과정. 교과 수업과의 연계 지점을 유닛 플래너에 기록한다.'],
+ ['IA (Internal Assessment, 내부평가)','수학에서는 "수학적 탐구(mathematical exploration)" — 학생이 스스로 주제를 정해 쓰는 12~20쪽 보고서. 총점의 20%, 준거 A~E 합계 20점. 교사가 채점하고 IB가 조정(moderation)한다.'],
+ ['수학 툴킷 (Mathematical toolkit)','탐구·모델링·조사 기능을 기르는 30시간의 필수 활동 시간(IA 작성 10~15시간 포함). 진도와 별개로 시수표에 반드시 배정해야 한다.'],
+ ['국제적 소양 (International mindedness)','다른 문화·관점에 대한 이해와 존중. 수학에서는 수학사(여러 문명의 기여), 국제 데이터 비교, 표기법의 다양성 등으로 연계한다.'],
+ ['학습자상 (Learner profile)','IB가 기르고자 하는 10가지 인간상(탐구하는 사람, 사고하는 사람, 도전하는 사람 등). 단원별로 초점 특성을 정해 활동과 연결한다.'],
+ ['GDC (Graphic Display Calculator)','그래픽 계산기. AA는 Paper 1에서 금지·Paper 2에서 필수, AI는 전 시험 필수라 수업 중 상시 훈련이 필요하다.'],
+ ['형성평가 / 총괄평가','형성평가는 배우는 중간에 이해를 점검해 수업을 조정하는 평가(퀴즈·관찰·출구티켓), 총괄평가는 단원이 끝난 뒤 도달도를 판정하는 평가(단원평가·모의 Paper·IA).'],
+ ['SOI·글로벌 맥락 (MYP 용어)','탐구명제(Statement of Inquiry)·글로벌 맥락은 MYP 유닛플래너 요소로, DP 플래너에는 없다. MYP 확장 버전에서 지원 예정.']
+];
+
+/* ═══════════════ 상태·헬퍼 ═══════════════ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=t=>String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function toast(msg){const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),2400);}
+let uidSeq=1; const uid=()=>'u'+(uidSeq++);
+
+let state={
+  meta:{course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
+  outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},
+  plans:{}, lessons:[]
+};
+let lastSnapshot=null;
+function snapshot(){ lastSnapshot=JSON.parse(JSON.stringify(state)); const b=$('#btnUndo'); if(b) b.style.display='inline-flex'; }
+const CUR=()=>SYLLABUS[state.meta.course];
+const topicByN=n=> n==='T'? TOOLKIT : CUR().topics.find(t=>t.n===Number(n));
+const topicName=n=> n==='T'? TOOLKIT.name : (topicByN(n)? `토픽 ${n}. ${topicByN(n).name}` : '(토픽 미지정)');
+const targetHours=()=> state.meta.level==='SL'?150:240;
+const hourFactor=()=> (state.meta.hoursUnit==='교시')? (Number(state.meta.lessonMin)||50)/60 : 1;
+const hoursSuffix=()=> (state.meta.hoursUnit==='교시')?'교시':'시간';
+const unitLessons=u=> (state.meta.hoursUnit==='교시')? (Number(u.hours)||0) : Math.max(1,Math.ceil((Number(u.hours)||0)*60/(Number(state.meta.lessonMin)||50)));
+const unitHoursLabel=u=> (state.meta.hoursUnit==='교시')? `${u.hours||0}교시(≈${Math.round((u.hours||0)*hourFactor())}h)` : `${u.hours||0}시간(약 ${unitLessons(u)}교시)`;
+
+function emptyPlan(){return {desc:'',dpAssess:'',transfer:'',essential:'',miscon:'',inqF:'',inqC:'',inqD:'',know:'',skills:'',concepts:'',expChecks:[],expDetail:'',formative:'',summative:'',diffChecks:[],diffDetail:'',atlChecks:[],atlDetail:'',langChecks:[],langDetail:'',tok:'',cas:'',im:'',lpChecks:[],resources:'',reflBefore:'',reflDuring:'',reflAfter:''};}
+
+/* ═══════════════ 칩 그룹 렌더 ═══════════════ */
+function renderChips(elId,list,checked,onToggle){
+  const el=document.getElementById(elId); if(!el) return;
+  el.innerHTML=list.map(item=>`<label><input type="checkbox" data-chip="${esc(item)}" ${checked.includes(item)?'checked':''}> ${esc(item)}</label>`).join('');
+  el.oninput=e=>{const v=e.target.getAttribute('data-chip'); if(v==null)return; onToggle(v,e.target.checked);};
+}
+const toggleArr=(arr,v,on)=>{const i=arr.indexOf(v); if(on&&i<0)arr.push(v); if(!on&&i>=0)arr.splice(i,1);};
+
+/* ═══════════════ 메타·아웃라인 필드 바인딩 ═══════════════ */
+function bindStaticFields(){
+  $$('[data-meta]').forEach(el=>{el.oninput=()=>{state.meta[el.getAttribute('data-meta')]=el.value; if(['f-lessonMin','f-perWeek','f-hoursUnit'].includes(el.id)){renderHours(); renderUnitList();}};});
+  $$('[data-outline]').forEach(el=>{el.oninput=()=>{state.outline[el.getAttribute('data-outline')]=el.value;};});
+}
+function refreshStaticFields(){
+  $$('[data-meta]').forEach(el=>{el.value=state.meta[el.getAttribute('data-meta')]??'';});
+  $$('[data-outline]').forEach(el=>{el.value=state.outline[el.getAttribute('data-outline')]??'';});
+  renderChips('lpChips',LP10,state.outline.lpChecks,(v,on)=>toggleArr(state.outline.lpChecks,v,on));
+}
+
+/* ═══════════════ 과정·레벨 선택 ═══════════════ */
+function setCourse(c){state.meta.course=c; $$('#segCourse button').forEach(b=>b.classList.toggle('on',b.dataset.c===c)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
+function setLevel(l){state.meta.level=l; $$('#segLevel button').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
+$('#segCourse').addEventListener('click',e=>{if(e.target.dataset.c) setCourse(e.target.dataset.c);});
+$('#segLevel').addEventListener('click',e=>{if(e.target.dataset.l) setLevel(e.target.dataset.l);});
+
+function renderCourseInfo(){
+  const c=CUR(), lv=state.meta.level;
+  const rows=ASSESS[c.code][lv].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td class="num-cell">${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+  $('#courseInfoBox').innerHTML=`<b>${c.name} ${lv}</b> <span class="eng">${c.eng}</span> — ${c.desc}<br>
+  <table class="tbl" style="margin-top:8px; background:#fff; border-radius:8px; overflow:hidden">
+  <tr><th>평가</th><th>시간/분량</th><th>계산기</th><th>비중</th><th>구성</th></tr>${rows}</table>
+  <div style="margin-top:6px; font-size:12px">IA 준거: ${IA_CRIT.map(x=>`${x[0]} ${x[1]}점`).join(' · ')} = 20점 ${lv==='HL'?'<b>(준거 E는 HL에서 정교함·엄밀성을 추가 요구)</b>':''}</div>`;
+}
+
+/* ═══════════════ 시수 대시보드 ═══════════════ */
+function assignedByTopic(){const m={}; state.outline.units.forEach(u=>{const k=u.topic||'?'; m[k]=(m[k]||0)+(Number(u.hours)||0);}); return m;}
+function renderHours(){
+  const lv=state.meta.level.toLowerCase(); const asg=assignedByTopic(); const f=hourFactor(); const isP=state.meta.hoursUnit==='교시';
+  const rows=[...CUR().topics.map(t=>({key:String(t.n),name:`토픽 ${t.n}. ${t.name}`,rec:t[lv]})),{key:'T',name:TOOLKIT.name,rec:TOOLKIT[lv]}];
+  let total=0; Object.values(asg).forEach(v=>total+=v);
+  const totalH=total*f;
+  const html=[`<tr><th>영역</th><th style="text-align:right">권장(h)</th><th style="text-align:right">배정${isP?'(교시)':''}</th><th>상태</th></tr>`];
+  rows.forEach(r=>{
+    const a=asg[r.key]||0; const ah=a*f; const diff=Math.round(ah-r.rec);
+    const badge= a===0?'<span class="badge b-gray">미배정</span>': Math.abs(ah-r.rec)<=2?'<span class="badge b-green">적정</span>': diff<0?`<span class="badge b-amber">${-diff}시간 부족</span>`:`<span class="badge b-blue">+${diff}시간</span>`;
+    html.push(`<tr><td>${esc(r.name)}</td><td class="num-cell">${r.rec}</td><td class="num-cell"><b>${a}</b>${isP?` <span style="color:#94a3b8">≈${Math.round(ah)}h</span>`:''}</td><td>${badge}</td></tr>`);
+  });
+  $('#hoursTable').innerHTML=html.join('');
+  const tgt=targetHours(); const pct=Math.min(100,Math.round(totalH/tgt*100));
+  const bar=$('#hoursBar'); bar.classList.toggle('over',totalH>tgt*1.12); bar.firstElementChild.style.width=pct+'%';
+  $('#hoursText').textContent= isP? `${total}교시 ≈ ${Math.round(totalH)}h / 목표 ${tgt}h` : `${total} / ${tgt}시간`;
+  const classes= isP? total : Math.round(total*60/(Number(state.meta.lessonMin)||50));
+  $('#hoursText').title=state.meta.perWeek>0? `주당 ${state.meta.perWeek}교시 기준 약 ${Math.round(classes/Number(state.meta.perWeek))}주 분량`:'';
+}
+
+/* ═══════════════ 단원 목록 ═══════════════ */
+function unitLabel(u,i){return `${u.title||('단원 '+(i+1))}`;}
+function renderUnitList(){
+  const wrap=$('#unitList'); const units=state.outline.units; const lv=state.meta.level;
+  if(!units.length){wrap.innerHTML='<div class="empty-note">아직 단원이 없습니다. <b>「공식 토픽으로 단원 자동 구성」</b>을 눌러 시작하세요.</div>'; renderHours(); refreshUnitSelects(); return;}
+  wrap.innerHTML=units.map((u,i)=>{
+    const t=topicByN(u.topic);
+    const slItems=(u.topic==='T'? TOOLKIT.items : (t?t.slItems:[]));
+    const hlItems=(u.topic==='T'? [] : (t?t.hlItems:[]));
+    const subChecks=[...slItems.map(s=>({s,hl:false})),...(lv==='HL'?hlItems.map(s=>({s,hl:true})):[])];
+    const officialSet=new Set(subChecks.map(o=>o.s));
+    const customSubs=u.subs.filter(s=>!officialSet.has(s));
+    const customAssess=u.assess.filter(a=>!ASSESS_TOOLS.includes(a));
+    const topicOpts=[...CUR().topics.map(tp=>`<option value="${tp.n}" ${String(u.topic)===String(tp.n)?'selected':''}>토픽 ${tp.n}. ${tp.name}</option>`),`<option value="T" ${u.topic==='T'?'selected':''}>${TOOLKIT.name}</option>`].join('');
+    return `<div class="unit-card" data-uid="${u.id}">
+      <div class="uc-head">
+        <span class="year-tag ${u.year===2?'y2':''}">Year ${u.year}</span>
+        <span class="topic-tag">${esc(topicName(u.topic))}</span>
+        <span class="badge b-blue">${u.hours||0}${hoursSuffix()}</span>
+        <span class="sp">
+          <button class="btn btn-ghost btn-sm" data-act="up" title="위로">▲</button>
+          <button class="btn btn-ghost btn-sm" data-act="down" title="아래로">▼</button>
+          <button class="btn btn-danger btn-sm" data-act="del">삭제</button>
+        </span>
+      </div>
+      <div class="grid4">
+        <div class="field"><label class="f-label">단원명</label><input data-f="title" value="${esc(u.title)}"></div>
+        <div class="field"><label class="f-label">연계 토픽</label><select data-f="topic">${topicOpts}</select></div>
+        <div class="field"><label class="f-label">배치</label><select data-f="year"><option value="1" ${u.year===1?'selected':''}>Year 1 (DP 1년차)</option><option value="2" ${u.year===2?'selected':''}>Year 2 (DP 2년차)</option></select></div>
+        <div class="field"><label class="f-label">배정 시수</label><input data-f="hours" type="number" min="0" value="${u.hours||0}"></div>
+      </div>
+      <details class="sub-picker" ${u._open?'open':''}>
+        <summary>학습 내용(Contents) 선택 — ${u.subs.length}개 선택됨 ${lv==='HL'?'<span class="badge b-gray">보라색 = HL 추가 내용</span>':''}</summary>
+        <div class="sub-list">${subChecks.map(o=>`<label class="${o.hl?'hl-item':''}"><input type="checkbox" data-sub="${esc(o.s)}" ${u.subs.includes(o.s)?'checked':''}><span>${esc(o.s)}${o.hl?' <b>(HL)</b>':''}</span></label>`).join('')}</div>
+        ${customSubs.length?`<div style="margin-top:8px"><div class="hint" style="margin-bottom:4px">가져온 문서의 자체 내용 (체크 해제 시 제외)</div><div class="sub-list">${customSubs.map(s=>`<label style="color:#0e7f8c"><input type="checkbox" data-sub="${esc(s)}" checked><span>${esc(s)}</span></label>`).join('')}</div></div>`:''}
+        <div class="field" style="margin-top:8px"><label class="f-label">추가 내용(직접 입력)</label><input data-f="extra" value="${esc(u.extra||'')}" placeholder="학교 자체 보충 내용"></div>
+      </details>
+      <details class="sub-picker">
+        <summary>평가 도구 — ${u.assess.length}개 선택됨</summary>
+        <div class="chips" style="margin-top:8px">${ASSESS_TOOLS.map(a=>`<label><input type="checkbox" data-assess="${esc(a)}" ${u.assess.includes(a)?'checked':''}> ${esc(a)}</label>`).join('')}</div>
+        ${customAssess.length?`<div style="margin-top:8px"><div class="hint" style="margin-bottom:4px">가져온 문서의 자체 평가도구 (체크 해제 시 제외)</div><div class="sub-list">${customAssess.map(a=>`<label style="color:#0e7f8c"><input type="checkbox" data-assess="${esc(a)}" checked><span>${esc(a)}</span></label>`).join('')}</div></div>`:''}
+      </details>
+      <div class="field" style="margin-top:8px"><label class="f-label">자료 (Resources)</label><input data-f="res" value="${esc(u.res||'')}" placeholder="예: 교과서 3단원, GeoGebra 시뮬레이션, 기출 문항 세트"></div>
+    </div>`;
+  }).join('');
+  renderHours(); refreshUnitSelects();
+}
+$('#unitList').addEventListener('input',e=>{
+  const card=e.target.closest('.unit-card'); if(!card)return;
+  const u=state.outline.units.find(x=>x.id===card.dataset.uid); if(!u)return;
+  const f=e.target.getAttribute('data-f'), sub=e.target.getAttribute('data-sub'), asx=e.target.getAttribute('data-assess');
+  if(f){ if(f==='hours'){u.hours=Number(e.target.value)||0; renderHours(); card.querySelector('.badge.b-blue').textContent=`${u.hours}${hoursSuffix()}`;}
+    else if(f==='year'){u.year=Number(e.target.value); card.querySelector('.year-tag').classList.toggle('y2',u.year===2); card.querySelector('.year-tag').textContent='Year '+u.year;}
+    else if(f==='topic'){u.topic=e.target.value==='T'?'T':Number(e.target.value); u.subs=[]; u._open=true; renderUnitList();}
+    else u[f]=e.target.value;
+    if(f==='title') refreshUnitSelects();
+  }
+  else if(sub!=null){toggleArr(u.subs,sub,e.target.checked); card.querySelectorAll('summary')[0].childNodes[0].textContent=`학습 내용(Contents) 선택 — ${u.subs.length}개 선택됨 `;}
+  else if(asx!=null){toggleArr(u.assess,asx,e.target.checked);}
+});
+$('#unitList').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-act]'); if(!btn)return;
+  const card=btn.closest('.unit-card'); const units=state.outline.units;
+  const i=units.findIndex(x=>x.id===card.dataset.uid); if(i<0)return;
+  const act=btn.dataset.act;
+  if(act==='del'){if(confirm('이 단원을 삭제할까요? 연결된 유닛 플래너도 함께 삭제됩니다.')){delete state.plans[units[i].id]; units.splice(i,1); renderUnitList();}}
+  if(act==='up'&&i>0){[units[i-1],units[i]]=[units[i],units[i-1]]; renderUnitList();}
+  if(act==='down'&&i<units.length-1){[units[i+1],units[i]]=[units[i],units[i+1]]; renderUnitList();}
+});
+function makeUnit(topic,year,title,hours,subs){return {id:uid(),year,term:'1',title,topic,hours,subs:subs||[],extra:'',assess:[],res:''};}
+$('#btnPreset').onclick=()=>{
+  if(state.outline.units.length && !confirm(`현재 ${state.outline.units.length}개 단원 구성을 모두 지우고, 공식 5개 토픽+수학 툴킷의 기본 골격(권장 시수·기본 Year 배치)으로 새로 만듭니다.\n\n실수로 눌렀다면 상단 '되돌리기'로 복구할 수 있습니다. 계속할까요?`)) return;
+  snapshot();
+  state.meta.hoursUnit='시간'; refreshStaticFields();
+  const lv=state.meta.level.toLowerCase(); const c=CUR();
+  state.plans={};
+  state.outline.units=[
+    ...c.topics.map(t=>makeUnit(t.n, t.n<=3?1:2, `단원 ${t.n}. ${t.name}`, t[lv], [...t.slItems,...(state.meta.level==='HL'?t.hlItems:[])])),
+    makeUnit('T',2,TOOLKIT.name,TOOLKIT[lv],[...TOOLKIT.items])
+  ];
+  renderUnitList(); toast('공식 토픽 6개 영역으로 단원을 구성했습니다. 학교 일정에 맞게 Year·시수를 조정하세요.');
+};
+$('#btnAddUnit').onclick=()=>{state.outline.units.push(makeUnit(1,1,'',0,[])); renderUnitList();};
+$('#btnClearUnits').onclick=()=>{if(confirm('모든 단원을 삭제할까요? (상단 되돌리기로 복구 가능)')){snapshot();state.outline.units=[]; state.plans={}; renderUnitList();}};
+$('#btnIaPreset').onclick=()=>{
+  if(state.meta.docLang==='English'){
+    state.outline.iaIntro=ET.iaIntro; state.outline.iaDue=ET.iaDue; state.outline.iaStages=ET.iaStages;
+    refreshStaticFields(); toast('Standard IA schedule filled (English).'); return;
+  }
+  state.outline.iaIntro='DP 1년차 2학기 초(9월): IA의 목적·준거(A~E) 소개, 우수/미흡 예시 보고서 함께 채점';
+  state.outline.iaDue='DP 2년차 1학기(3월 중순): 최종본 제출';
+  state.outline.iaStages='① 1년차 9월 — IA 소개, 준거 이해 워크숍 (툴킷 시간 활용)\n② 1년차 10~12월 — 미니 탐구 2회로 탐구 기능 연습\n③ 1년차 1월 — 주제 브레인스토밍·주제 확정(교사 면담)\n④ 1년차 2월~2년차 8월 — 탐구 수행·초안 작성 (중간 점검 2회)\n⑤ 2년차 9월 — 초안 제출, 교사 서면 피드백(1회 허용)\n⑥ 2년차 10~2월 — 수정·보완\n⑦ 2년차 3월 — 최종 제출 및 진위 확인(academic integrity)';
+  refreshStaticFields(); toast('표준 IA 일정 초안을 채웠습니다. 학사일정에 맞게 수정하세요.');
+};
+/* 아웃라인 예시 버튼 */
+const OUTLINE_EX={
+ tok:'예: 토픽 5(미적분)를 TOK와 연계한다. 무한소 개념을 둘러싼 역사적 논쟁(뉴턴·라이프니츠·버클리)을 소개하고, "엄밀한 정의 없이 사용된 수학은 지식이라 할 수 있는가?"를 토론한다. 학생들은 수학적 지식의 정당화 방식(증명)과 자연과학의 정당화 방식(실험)을 비교하는 짧은 글을 작성한다.',
+ atl:'예: 토픽 4(통계와 확률)에서 조사 기능과 미디어 리터러시를 집중 개발한다. 학생들은 언론 기사 속 통계 주장을 찾아 원자료 출처를 추적하고 표본·표집 방법의 타당성을 평가하는 과제를 수행한다. 모둠 프로젝트에서는 역할 분담표와 자기관리 체크리스트로 사회적·자기관리 기능을 함께 기른다.',
+ im:'예: 토픽 1(수와 대수)을 선택한다. 수 체계의 발전(인도-아라비아 숫자, 0의 전파, 여러 문명의 기여)을 다루고, 이자·금융에 대한 문화별 관점(이슬람 금융의 무이자 원칙 등)을 비교한다. 이를 통해 수학이 특정 문화의 산물이 아니라 인류 공동의 유산임을 이해하게 한다. 자료: 수학사 읽기 자료, 국가별 금융 데이터.'
+};
+$$('button[data-bank]').forEach(b=>{b.onclick=()=>{const t=$('#'+b.dataset.target); const key=b.dataset.bank; const cur=t.value.trim(); t.value=(cur? cur+'\n\n':'')+OUTLINE_EX[key]; t.dispatchEvent(new Event('input')); toast('예시를 넣었습니다. 우리 학교 상황에 맞게 다듬으세요.');};});
+
+/* ═══════════════ 유닛 플래너 ═══════════════ */
+let currentPlanId=null;
+const ES={1:'· 패턴은 일반항의 형태로 일반화되어 미지의 값을 예측하게 한다.\n· 유한한 합의 극한이라는 아이디어로 무한을 다룰 수 있다.\n· 지수와 로그는 역연산 관계로, 곱셈적 변화를 덧셈적 구조로 바꾼다.',
+2:'· 함수는 두 양 사이의 대응 관계를 표현하는 수학적 모델이다.\n· 그래프의 변환은 함수식의 구조 변화와 일대일로 대응한다.\n· 모델은 현실의 단순화이며, 좋은 모델의 기준은 목적에 따라 달라진다.',
+3:'· 도형과 공간의 성질은 수와 식으로 표현되고 계산될 수 있다.\n· 삼각비는 각과 길이를 연결하며 주기 현상의 모델이 된다.\n· 측정은 언제나 근사이며, 오차의 이해와 관리가 결론의 신뢰도를 결정한다.',
+4:'· 자료의 요약은 정보를 드러내는 동시에 감춘다.\n· 확률은 불확실성을 수량화하여 합리적 판단을 돕는다.\n· 표본으로 모집단을 추론할 때 표집의 타당성이 결론의 신뢰도를 결정한다.',
+5:'· 순간 변화율은 극한 과정을 통해 정의된다.\n· 미분과 적분은 서로 역과정이다(미적분학의 기본정리).\n· 무한히 작은 것들의 축적으로 유한한 전체를 구할 수 있다.',
+T:'· 수학적 탐구는 좋은 질문에서 출발하여 수학적 정당화로 완성된다.\n· 좋은 탐구 주제는 개인적 관심과 수학적 깊이의 교집합에 있다.'};
+const SKILLS={1:'수열의 일반항·합 계산, 지수·로그 조작, 금융 상황에의 적용, GDC 수열·재무 기능 활용, 간단한 증명 구성',
+2:'함수식↔그래프↔표 사이의 전환, GDC를 활용한 그래프 특징 분석, 모델 적합·해석·비평, 방정식의 해석적·그래프적 풀이',
+3:'삼각법을 이용한 길이·각·넓이 계산, 3차원 상황의 시각화와 단면 분석, 실측 자료의 오차 분석' ,
+4:'자료 수집·정리·시각화, GDC 통계 기능 활용, 회귀·확률 계산과 맥락적 해석, 통계적 주장에 대한 비평',
+5:'미분·적분 계산, 그래프의 종합적 해석(증감·극값·변곡), 맥락 문제의 최적화 모델링, GDC를 활용한 수치 계산 검증',
+T:'탐구 질문 설정, 수학적 모델링 사이클 수행, 자료·출처의 관리와 인용, 수학적 글쓰기'};
+/* 영어 모드 템플릿 */
+const ET={
+ transfer:t=>`· Students will apply the key ideas of ${t} to model and solve problems in unfamiliar real-world contexts.\n· Students will justify their reasoning and communicate solutions using appropriate mathematical notation.`,
+ formative:'· Exit tickets each lesson (one key question + confidence self-check)\n· Concept-check quizzes every 2-3 lessons (calculator / non-calculator practice)\n· Diagnostic questions targeting common misconceptions',
+ summative:'· End-of-unit test in examination format (Section A short-response + Section B extended-response)\n· Performance task: modelling investigation with a written report',
+ diffDetail:'· Support: scaffolded worksheets, worked examples, GDC procedure cards\n· Extension: open-ended challenge problems, peer-teaching roles',
+ langDetail:'Bilingual word wall for key terminology; sentence frames for written justification.',
+ resources:'Textbook chapter, GDC, Desmos/GeoGebra, past-paper question sets by topic, school mathematics lab',
+ iaIntro:'Early in DP Year 1 Semester 2 (September): introduce the IA purpose and criteria A-E using sample explorations',
+ iaDue:'DP Year 2 Semester 1 (mid-March): final submission',
+ iaStages:'1) Y1 Sep - IA introduction and criteria workshop (toolkit time)\n2) Y1 Oct-Dec - two mini-explorations to practise inquiry skills\n3) Y1 Jan - topic brainstorming and approval (teacher conference)\n4) Y1 Feb - Y2 Aug - exploration work and first draft (two checkpoints)\n5) Y2 Sep - draft submission; one round of written teacher feedback\n6) Y2 Oct-Feb - revision and refinement\n7) Y2 Mar - final submission and academic integrity check'
+};
+const LANGLINE=()=> state.meta.docLang==='English'
+ ? '- Output language: ENGLISH. Write ALL generated content in English using standard IB terminology (keep the given school facts as they are).'
+ : '- 산출물 작성 언어: 한국어 (IB 용어는 필요한 곳에 영어 병기).';
+
+function atlFromBank(bk){const map={'사고':'사고 기능','의사소통':'의사소통 기능','사회':'사회적 기능','자기관리':'자기관리 기능','조사':'조사 기능'}; const out=[];
+ (bk.atl||[]).forEach(s=>{const p=s.split(':')[0].trim(); for(const k in map){if(p.startsWith(k)&&!out.includes(map[k]))out.push(map[k]);}}); return out.length?out:['사고 기능','조사 기능'];}
+
+function refreshUnitSelects(){
+  const opts=state.outline.units.map((u,i)=>`<option value="${u.id}">${esc(u.title||('단원 '+(i+1)))} (Y${u.year}·${u.hours||0}h)</option>`).join('');
+  ['#up-unitSel','#ls-unitSel','#ai-unitSel','#pr-unitSel'].forEach(sel=>{
+    const el=$(sel); if(!el)return; const prev=el.value;
+    el.innerHTML=opts||'<option value="">(단원 없음 — ① 코스 아웃라인에서 먼저 구성하세요)</option>';
+    if(prev&&[...el.options].some(o=>o.value===prev)) el.value=prev;
+  });
+  loadPlanForm();
+}
+function getUnit(id){return state.outline.units.find(u=>u.id===id);}
+function loadPlanForm(){
+  const id=$('#up-unitSel').value; currentPlanId=id||null;
+  const wrap=$('#upFormWrap'), info=$('#upHeaderInfo');
+  if(!id){wrap.style.display='none'; info.className='callout warn'; info.innerHTML='먼저 <b>① 코스 아웃라인</b>에서 단원을 구성하면 이곳에서 단원별 플래너를 작성할 수 있습니다.'; return;}
+  wrap.style.display='block';
+  const u=getUnit(id); const p=state.plans[id]||(state.plans[id]=emptyPlan());
+  info.className='callout info';
+  info.innerHTML=`<b>${esc(u.title||'무제 단원')}</b> — ${esc(topicName(u.topic))} · Year ${u.year} · ${unitHoursLabel(u)} · ${esc(CUR().name)} ${state.meta.level} · 교사: ${esc(state.meta.teacher||'-')}`;
+  $$('[data-plan]').forEach(el=>{el.value=p[el.getAttribute('data-plan')]??'';});
+  renderChips('expChips',EXP8,p.expChecks,(v,on)=>toggleArr(p.expChecks,v,on));
+  renderChips('diffChips',DIFF4,p.diffChecks,(v,on)=>toggleArr(p.diffChecks,v,on));
+  renderChips('atlChips',ATL5,p.atlChecks,(v,on)=>toggleArr(p.atlChecks,v,on));
+  renderChips('langChips',LANG4,p.langChecks,(v,on)=>toggleArr(p.langChecks,v,on));
+  renderChips('upLpChips',LP10,p.lpChecks,(v,on)=>toggleArr(p.lpChecks,v,on));
+}
+$('#up-unitSel').onchange=loadPlanForm;
+$$('[data-plan]').forEach(el=>{el.addEventListener('input',()=>{if(!currentPlanId)return; const p=state.plans[currentPlanId]; if(p) p[el.getAttribute('data-plan')]=el.value;});});
+$('#btnUpClear').onclick=()=>{if(currentPlanId&&confirm('이 단원의 플래너 내용을 모두 지울까요?')){state.plans[currentPlanId]=emptyPlan(); loadPlanForm();}};
+$('#btnInqBank').onclick=()=>{
+  if(!currentPlanId)return; const u=getUnit(currentPlanId); const bk=BANK[u.topic]||BANK[1]; const p=state.plans[currentPlanId];
+  const add=(k,arr)=>{const nv=arr.join('\n'); p[k]=p[k].trim()? p[k]+'\n'+arr[Math.floor(Math.random()*arr.length)] : nv;};
+  add('inqF',bk.inqF); add('inqC',bk.inqC); add('inqD',bk.inqD); loadPlanForm(); toast('예시은행의 탐구 질문을 채웠습니다.');
+};
+$('#btnUpDraft').onclick=()=>{
+  if(!currentPlanId){toast('먼저 단원을 선택하세요.'); return;}
+  const u=getUnit(currentPlanId); const p=state.plans[currentPlanId]; const bk=BANK[u.topic]||BANK[1];
+  const c=CUR(), lv=state.meta.level; const tn=topicName(u.topic);
+  const fill=(k,v)=>{if(!String(p[k]||'').trim()) p[k]=v;};
+  const les=unitLessons(u);
+  if(state.meta.docLang==='English'){
+    const tnEng=u.topic==='T'? TOOLKIT.eng : ((topicByN(u.topic)||{}).eng||'this topic');
+    fill('desc',`Unit "${u.title||tnEng}" — ${c.eng} ${lv}, covering ${tnEng}. ${u.hours||0} teaching hours (about ${les} lessons). Core resources: textbook chapter, GDC, Desmos/GeoGebra tasks.`);
+    fill('dpAssess', u.topic==='T' ? `Internal assessment (mathematical exploration) — criteria A-E, 20 marks, 20% of the final grade.` : 'External assessment: this unit is examined in '+ASSESS[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')+'. Design the summative task in the matching format.');
+    fill('transfer',ET.transfer(tnEng));
+    fill('formative',ET.formative); fill('summative',ET.summative);
+    fill('diffDetail',ET.diffDetail); fill('langDetail',ET.langDetail); fill('resources',ET.resources);
+    fill('know',(u.subs.length? u.subs.map(s=>'· '+s).join('\n') : '· (Select contents in Step 1 to auto-fill)')+(u.extra?'\n· '+u.extra:''));
+    if(!p.expChecks.length) p.expChecks=['강의·설명','모둠·짝 활동','GDC·테크놀로지 실습'];
+    if(!p.diffChecks.length) p.diffChecks=['학습 스캐폴딩','심화·확장 학습'];
+    if(!p.atlChecks.length) p.atlChecks=atlFromBank(bk);
+    if(!p.langChecks.length) p.langChecks=['새 학습을 위한 스캐폴딩','연습을 통한 습득'];
+    if(!p.lpChecks.length) p.lpChecks=['탐구하는 사람','사고하는 사람','성찰하는 사람'];
+    loadPlanForm(); toast('English mode: 템플릿 항목만 영어로 채웠습니다. 탐구질문·TOK 등은 ④ AI 프롬프트로 영어 생성을 권장합니다.');
+    return;
+  }
+  fill('desc',`『${u.title||tn}』 단원. ${c.name} ${lv}의 ${tn} 영역을 다룬다. 총 ${u.hours||0}시간(약 ${les}교시). 주 교재: 교과서 해당 단원, GDC, Desmos/GeoGebra 활동 자료.`);
+  fill('dpAssess', u.topic==='T' ? `내부평가(IA) 수학적 탐구 — 준거 A~E(20점), 총점의 20%. ${lv} 기준 유의: 준거 E(수학의 활용)${lv==='HL'?'는 정교함·엄밀성 추가 요구':'는 과정 수준에 상응하면 만점 가능'}.` : `외부평가 출제 영역: ${ASSESS[c.code][lv].filter(r=>r[0].startsWith('Paper')).map(r=>r[0]).join(', ')} — 본 단원 내용 포함. 총괄평가는 해당 Paper 형식(단답+서술)을 반영해 설계.`);
+  fill('transfer',`· 학생들은 ${tn.replace(/^토픽 \d+\. /,'')}의 핵심 아이디어를 처음 보는 실생활 맥락에 적용하여 문제를 수학적으로 모델링하고 해결할 수 있다.\n· 학생들은 자신의 풀이와 결론을 근거를 들어 정당화하고, 수학적 표기 규범에 맞게 의사소통할 수 있다.`);
+  fill('essential',ES[u.topic]||ES[1]);
+  fill('miscon','· '+bk.mis.join('\n· '));
+  fill('inqF',bk.inqF.join('\n')); fill('inqC',bk.inqC.join('\n')); fill('inqD',bk.inqD.join('\n'));
+  fill('know',(u.subs.length? u.subs.map(s=>'· '+s).join('\n') : '· (아웃라인에서 학습 내용을 선택하면 자동으로 들어옵니다)')+(u.extra?'\n· '+u.extra:''));
+  fill('skills','· '+(SKILLS[u.topic]||SKILLS[1]).split(', ').join('\n· '));
+  fill('concepts','핵심 개념: '+(CONCEPT_CORE[u.topic]||CONCEPT_CORE[1]));
+  if(!p.expChecks.length) p.expChecks=['강의·설명','모둠·짝 활동','GDC·테크놀로지 실습'];
+  fill('expDetail','· '+bk.act.slice(0,3).join('\n· '));
+  fill('formative','· 매 차시 출구티켓(핵심 1문항+자신감 자가평가)\n· 2~3차시마다 개념 체크 퀴즈(GDC 허용/비허용 구분 연습)\n· 오개념 진단 문항: '+ (bk.mis[0]||'') );
+  fill('summative',u.topic==='T'? '· IA 마일스톤 평가(주제 제안서 → 초안 → 최종본)\n· 준거 A~E 루브릭 기반 자기·동료 평가 후 교사 평가':'· 단원평가: 모의 Paper 형식(Section A 단답 + Section B 서술)\n· 수행과제: '+(bk.act[0]||'탐구 과제')+' 결과 보고서(모델링 사이클 반영)');
+  if(!p.diffChecks.length) p.diffChecks=['학습 스캐폴딩','심화·확장 학습'];
+  fill('diffDetail','· 하위 수준: 단계 분할 활동지, 풀이 예시(worked example) 제공, GDC 절차 카드\n· 상위 수준: '+(lv==='HL'?'HL 심화 문항·증명 과제':'개방형 확장 문제')+', 또래 설명 역할 부여');
+  if(!p.atlChecks.length) p.atlChecks=atlFromBank(bk);
+  fill('atlDetail','· '+bk.atl.join('\n· '));
+  if(!p.langChecks.length) p.langChecks=['새 학습을 위한 스캐폴딩','연습을 통한 습득'];
+  fill('langDetail','핵심 용어 한·영 병기 단어벽 운영, 서술형 답안 문장 프레임 제공(…이므로 …이다).');
+  fill('tok','· '+bk.tok.join('\n· ')); fill('im','· '+bk.im.join('\n· '));
+  fill('cas', u.topic===4?'지역사회 설문·데이터 분석 봉사 프로젝트(Service)와 연계 가능':'해당 시 기록 (예: 수학 멘토링 봉사, 수학 동아리 활동과 연계)');
+  if(!p.lpChecks.length) p.lpChecks=['탐구하는 사람','사고하는 사람','성찰하는 사람'];
+  fill('resources','교과서 해당 단원, GDC(TI/카시오), Desmos·GeoGebra, 해당 토픽 기출 문항 세트, 교육청 IB 자료실 자료');
+  loadPlanForm(); toast('초안을 채웠습니다. 빈칸만 채우므로 이미 쓴 내용은 그대로 유지됩니다.');
+};
+
+/* ═══════════════ 차시 수업안 ═══════════════ */
+const LTYPE={intro:'개념 도입·탐구',practice:'연습·문제 해결',modeling:'모델링·탐구 활동',gdc:'GDC·테크놀로지 실습',ia:'IA(탐구보고서) 지도',review:'복습·평가'};
+function pick(arr,seed){return arr&&arr.length? arr[seed%arr.length] : '';}
+function lessonDraft(u,type,sub,note,seed){
+  const bk=BANK[u.topic]||BANK[1]; const min=state.meta.lessonMin||50;
+  const t=sub||((u.title||'').replace(/^단원 \d+\. /,''))||'이번 차시 주제';
+  const inq=pick(bk.inqC,seed)||'오늘의 핵심 질문';
+  const act=pick(bk.act,seed); const mis=pick(bk.mis,seed);
+  const base={
+   obj:`· ${t}의 핵심 개념/절차를 이해하고 기본 문제에 적용할 수 있다.\n· 자신의 풀이 과정을 수학적 표기에 맞게 설명할 수 있다.`,
+   inq:`· ${inq}\n· (사실적) ${pick(bk.inqF,seed)||''}`,
+   assess:`· 출구티켓: 오늘 배운 것 1문장 + 핵심 1문항\n· 과제: 교과서 연습문제(기본 필수·심화 선택 구분 제시)`,
+   atl:`· ${(atlFromBank(bk))[0]||'사고 기능'} — 활동 중 명시적으로 언급하고 성찰과 연결`,
+   prep:`· GDC(학생 1인 1대 또는 2인 1대), 활동지, 미니 화이트보드\n· ${note?('학생 특성 대응: '+note):'수준차 대비 심화·보충 과제 각 1세트'}`};
+  const dev={
+   intro:`· (5분) 개념의 필요성 유발: ${act||'실생활 상황 제시'}\n· (15분) 모둠 탐구: 구체적 사례 2~3개에서 규칙·성질 발견 → 모둠별 추측을 칠판에 기록\n· (7분) 전체 공유·정형화: 교사가 수학적 정의/표기로 정리, 용어 한·영 병기\n· (3분) 오개념 선제 처리: "${mis}" 사례를 함께 반박`,
+   practice:`· (10분) 예제 1 함께 풀기(교사 시범 → 사고 구술)\n· (15분) 수준별 문제 세트(기본 4·표준 3·도전 1) 개별/짝 풀이 — 교사 순회 피드백\n· (5분) 자주 나온 오류 공개 첨삭: "${mis}" 유형 집중`,
+   modeling:`· (8분) 모델링 사이클 소개(현실 문제 → 수학화 → 풀이 → 해석·검증)\n· (18분) 모둠 활동: ${act||'실측·데이터 기반 과제'} — 역할 분담(측정/기록/계산/발표)\n· (4분) 중간 점검: 모델의 가정과 한계 1가지씩 발표`,
+   gdc:`· (7분) GDC 기능 시범(교사 화면 미러링): 이번 차시 필수 기능 절차 카드 배부\n· (18분) 짝 활동: 동일 문제를 손계산 vs GDC로 나눠 풀고 결과 비교·검증\n· (5분) 시험 유의점: ${state.meta.course==='AA'?'Paper 1(비계산기)과 Paper 2(계산기)의 접근 차이':'전 시험 GDC 필수 — 입력·해석 오류 주의'} 정리`,
+   ia:`· (10분) 준거 하나 집중 해설(오늘: ${pick(IA_CRIT.map(x=>x[0]),seed)}) — 우수/미흡 사례 비교\n· (15분) 개인 작업: 자기 탐구에 해당 준거 자가 체크리스트 적용, 수정 계획 메모\n· (5분) 짝 피드백: 체크리스트 근거로 상호 코멘트 1가지씩`,
+   review:`· (10분) 단원 개념 지도(마인드맵) 모둠 완성 — 빈칸 버전 배부\n· (15분) 모의 Paper 미니 세트(단답 3+서술 1) 실전 조건 풀이\n· (5분) 자기 채점·마킹 스킴 읽는 법 안내`};
+  const intro={
+   intro:`· (3분) 전시 학습 1문항 미니 점검\n· (7분) 훅: "${inq}" 질문 게시 → 예상 답 포스트잇 부착(수업 끝에 재방문)`,
+   practice:`· (5분) 오늘 목표 문제 유형 안내, 지난 출구티켓 통계 피드백\n· (5분) 워밍업 기본 2문항(전원 화이트보드)`,
+   modeling:`· (5분) 실제 상황 영상/사진 제시: ${act? act.split('(')[0]:'실생활 문제'}\n· (5분) "수학으로 어떻게 답할 수 있을까?" 브레인스토밍`,
+   gdc:`· (5분) 손계산의 한계 체험 1문항(복잡한 계산) → GDC 필요성 공감\n· (5분) 기기 점검·기본 설정 통일`,
+   ia:`· (5분) IA 전체 일정에서 오늘 위치 확인(마일스톤 게시판)\n· (5분) 좋은 탐구 한 단락 낭독 — 무엇이 좋은지 한 가지씩 발언`,
+   review:`· (5분) 셀프 진단: 단원 체크리스트(할 수 있다/애매하다/모른다)\n· (5분) '애매하다' 최다 항목 즉석 미니 강의`};
+  const wrap={
+   intro:`· (5분) 포스트잇 재방문: 처음 예상과 지금 이해 비교 발표 2~3명\n· (5분) 출구티켓 + 다음 차시 예고(오늘 개념의 확장)`,
+   practice:`· (5분) 도전 문제 해법 공유(학생 발표)\n· (5분) 출구티켓: 오늘 유형 1문항 + 오답 원인 자가 분류`,
+   modeling:`· (7분) 모둠 결과 갤러리워크 — 별표 스티커 피드백\n· (3분) 성찰: 모델의 가정이 결과에 준 영향 1문장 쓰기`,
+   gdc:`· (5분) 절차 카드 빈칸 복원 퀴즈(짝 점검)\n· (5분) 손계산·GDC 각각 언제 쓸지 판단 기준 정리`,
+   ia:`· (5분) 오늘 수정 계획 1가지 공유(전원 한 줄)\n· (5분) 다음 마일스톤·마감 리마인드, 질문 수합`,
+   review:`· (5분) 마인드맵 최종본 사진 제출\n· (5분) 시험 전략 1가지씩 공유(시간 배분·검산 등)`};
+  return {obj: type==='ia'? '· 자신의 IA 탐구를 평가 준거에 비추어 점검하고 구체적 수정 계획을 세울 수 있다.' : type==='review'? `· ${t} 단원의 핵심 개념을 구조화하고 실전 형식 문제에 적용할 수 있다.` : base.obj,
+   inq:base.inq, intro:intro[type], dev:dev[type], wrap:wrap[type], assess: type==='ia'? '· 수정 계획 메모 제출(다음 면담 자료)\n· 마일스톤 진행률 체크':''+base.assess, atl:base.atl, prep:base.prep};
+}
+$('#btnLsGen').onclick=()=>{
+  const id=$('#ls-unitSel').value; if(!id){toast('먼저 ① 코스 아웃라인에서 단원을 구성하세요.'); return;}
+  const u=getUnit(id); const type=$('#ls-type').value;
+  const d=lessonDraft(u,type,$('#ls-sub').value.trim(),$('#ls-note').value.trim(),state.lessons.length+ (Math.random()*3|0));
+  $('#lsResultCard').style.display='block';
+  $('#lsResultTitle').textContent=`${u.title||'단원'} · ${$('#ls-no').value||'?차시'} · ${LTYPE[type]}`;
+  $('#ls-obj').value=d.obj; $('#ls-inq').value=d.inq; $('#ls-intro').value=d.intro; $('#ls-dev').value=d.dev; $('#ls-wrap').value=d.wrap; $('#ls-assess').value=d.assess; $('#ls-atl').value=d.atl; $('#ls-prep').value=d.prep;
+  $('#lsResultCard').scrollIntoView({behavior:'smooth',block:'start'});
+  toast('수업안 초안을 만들었습니다. 우리 반에 맞게 다듬으세요.');
+};
+function lessonText(l){return `[${l.unitTitle}] ${l.no} · ${LTYPE[l.type]}${l.sub?' · '+l.sub:''}\n\n■ 학습 목표\n${l.obj}\n\n■ 탐구 질문\n${l.inq}\n\n■ 도입 (${'약 10분'})\n${l.intro}\n\n■ 전개 (약 30분)\n${l.dev}\n\n■ 정리 (약 10분)\n${l.wrap}\n\n■ 형성평가·과제\n${l.assess}\n\n■ ATL 초점\n${l.atl}\n\n■ 준비물\n${l.prep}`;}
+function collectLessonForm(){
+  const id=$('#ls-unitSel').value; const u=getUnit(id);
+  return {id:uid(),unitId:id,unitTitle:(u&&u.title)||'단원',no:$('#ls-no').value||'?차시',type:$('#ls-type').value,sub:$('#ls-sub').value.trim(),
+   obj:$('#ls-obj').value,inq:$('#ls-inq').value,intro:$('#ls-intro').value,dev:$('#ls-dev').value,wrap:$('#ls-wrap').value,assess:$('#ls-assess').value,atl:$('#ls-atl').value,prep:$('#ls-prep').value};
+}
+$('#btnLsSave').onclick=()=>{state.lessons.push(collectLessonForm()); renderLessonList(); toast('차시를 저장했습니다.');};
+$('#btnLsCopy').onclick=()=>{copyText(lessonText(collectLessonForm())); };
+function renderLessonList(){
+  const el=$('#lessonList'); $('#lsCount').textContent=state.lessons.length? `총 ${state.lessons.length}차시`:'';
+  if(!state.lessons.length){el.innerHTML='<div class="empty-note">아직 저장된 차시가 없습니다. 위에서 수업안을 생성한 뒤 저장해 보세요.</div>'; return;}
+  el.innerHTML=state.lessons.map(l=>`<div class="lesson-item" data-lid="${l.id}"><span class="badge b-blue">${esc(l.no)}</span><b>${esc(l.unitTitle)}</b><span style="color:#64748b; font-size:12.5px">${LTYPE[l.type]}${l.sub?' · '+esc(l.sub):''}</span><span style="margin-left:auto; display:flex; gap:5px"><button class="btn btn-ghost btn-sm" data-lact="copy">복사</button><button class="btn btn-danger btn-sm" data-lact="del">삭제</button></span></div>`).join('');
+}
+$('#lessonList').addEventListener('click',e=>{
+  const item=e.target.closest('.lesson-item'); if(!item)return;
+  const l=state.lessons.find(x=>x.id===item.dataset.lid); if(!l)return;
+  const act=e.target.closest('button')?.dataset.lact;
+  if(act==='del'){state.lessons=state.lessons.filter(x=>x.id!==l.id); renderLessonList(); return;}
+  if(act==='copy'){copyText(lessonText(l)); return;}
+  $('#ls-unitSel').value=l.unitId; $('#ls-no').value=l.no; $('#ls-type').value=l.type; $('#ls-sub').value=l.sub;
+  $('#lsResultCard').style.display='block'; $('#lsResultTitle').textContent=`${l.unitTitle} · ${l.no} · ${LTYPE[l.type]}`;
+  ['obj','inq','intro','dev','wrap','assess','atl','prep'].forEach(k=>{$('#ls-'+k).value=l[k];});
+  $$('.lesson-item').forEach(x=>x.classList.toggle('sel',x.dataset.lid===l.id));
+});
+
+/* ═══════════════ AI 프롬프트 ═══════════════ */
+function outlineSummary(){
+  const m=state.meta;
+  const units=state.outline.units.map((u,i)=>`  ${i+1}. [Year ${u.year}] ${u.title||'무제'} — ${topicName(u.topic)}, ${u.hours||0}시간, 내용: ${u.subs.slice(0,5).join('; ')}${u.subs.length>5?` 외 ${u.subs.length-5}개`:''}${u.assess.length?` / 평가: ${u.assess.join(', ')}`:''}`).join('\n');
+  return `- 학교: ${m.school||'(미입력)'} / 교사: ${m.teacher||'(미입력)'} / 수업 언어: ${m.lang}\n- 과정: ${CUR().name}(${state.meta.course}) ${m.level} — 1교시 ${m.lessonMin}분, 주당 ${m.perWeek}교시, 기간 ${m.years||'(미입력)'}\n- 총 목표 시수: ${targetHours()}시간 (현재 배정 합계 ${Object.values(assignedByTopic()).reduce((a,b)=>a+b,0)}시간)\n- 단원 구성:\n${units||'  (단원 미구성)'}\n- IA 일정: ${state.outline.iaIntro||'(미입력)'} → ${state.outline.iaDue||'(미입력)'}`;
+}
+function planSummary(id){
+  const p=state.plans[id]; if(!p) return '(아직 작성된 내용 없음)';
+  const keys={desc:'단원 개요',transfer:'전이 목표',essential:'핵심 이해',inqF:'사실적 질문',inqC:'개념적 질문',inqD:'논쟁적 질문',know:'지식',skills:'기능',concepts:'개념',formative:'형성평가',summative:'총괄평가',atlDetail:'ATL',tok:'TOK',im:'국제적 소양'};
+  const out=[]; for(const k in keys){if(String(p[k]||'').trim()) out.push(`[${keys[k]}]\n${p[k]}`);}
+  return out.length? out.join('\n'):'(아직 작성된 내용 없음)';
+}
+const QUALITY=`## 품질 기준 (반드시 지킬 것)
+- 개념 기반 설계: 내용 나열이 아니라 개념적 이해(일반화 문장)가 중심이 되게 할 것. 한국 초보 IB 학교에서 가장 흔한 오류가 '교과서 목차 옮겨 적기'임.
+- 백워드 설계: 총괄평가를 먼저 확정하고, 학습 경험이 그 평가에 정렬되도록 할 것.
+- 모든 활동은 실제 교실에서 실행 가능한 수준으로 구체적으로(시간 배분, 발문 예시, 모둠 구성 포함).
+- 한국 공교육 교실 맥락 반영: 학급당 20~25명, GDC 도입 초기, 국가교육과정과 병행 운영.
+- 국가교육과정(2022 개정) 수학과와의 연계 지점을 최소 1곳 명시할 것.
+- IB 용어는 한국어로 쓰되 필요한 곳에 영어 병기. 근거 없는 IB 규정 인용은 하지 말 것.`;
+function buildPrompt(){
+  const type=$('#ai-type').value; const uid2=$('#ai-unitSel').value; const u=uid2?getUnit(uid2):null; const extra=$('#ai-extra').value.trim();
+  const head=`당신은 IB DP 수학을 20년 이상 가르치고 IB 교사 워크숍을 이끌어 온 수업 설계 전문가입니다. 한국 공교육 IB 학교의 수학 교사를 돕고 있습니다.\n\n## 수업 맥락\n${outlineSummary()}`;
+  if(type==='unitplan'){
+    if(!u) return null;
+    return `${head}\n\n## 과제\n아래 단원의 IB DP 유닛 플래너를 한국어로 완성도 높게 작성해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, Year ${u.year}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n\n## 이미 작성해 둔 내용 (그대로 존중하고, 빈 부분을 보완)\n${planSummary(uid2)}\n\n## 작성 항목 (IB 공식 DP unit planner 구조)\n1. 단원 개요와 텍스트  2. 관련 DP 평가  3. 전이 목표(2~3개)  4. 핵심 이해(일반화 문장 3~4개)  5. 예상 오개념  6. 탐구 질문(사실적/개념적/논쟁적 각 2개)  7. 지식·기능·개념  8. 학습 경험과 전략(차시 흐름 개요 포함)  9. 형성평가·총괄평가(백워드로 먼저 설계)  10. 차별화 전략  11. ATL(5범주 중 초점 2개와 구체 전략)  12. TOK 연계(토론 질문 포함)  13. CAS 연계  14. 국제적 소양  15. 학습자상 초점  16. 언어와 학습  17. 자료  18. 성찰 계획(수업 전·중·후 점검 질문)\n\n${QUALITY}\n${LANGLINE()}${extra?`\n\n## 추가 조건\n${extra}`:''}\n\n## 출력 형식\n마크다운. 각 항목을 제목으로 구분하고, 표가 효과적인 곳(평가 계획, 차시 흐름)은 표로.`;
+  }
+  if(type==='lesson'){
+    if(!u) return null;
+    return `${head}\n\n## 과제\n아래 단원의 차시별 수업안을 한국어로 상세 설계해 주세요.\n- 대상 단원: ${u.title||'무제'} (${topicName(u.topic)}, ${u.hours||0}시간 ≈ ${Math.ceil((u.hours||0)*60/(state.meta.lessonMin||50))}교시, 1교시 ${state.meta.lessonMin}분)\n- 단원 학습 내용: ${u.subs.join('; ')||'(미선택)'}\n- 유닛 플래너 요약:\n${planSummary(uid2)}\n${extra?`- 추가 조건: ${extra}`:''}\n\n## 각 차시에 반드시 포함\n① 학습 목표(도달 가능하고 관찰 가능하게)  ② 이 차시의 탐구 질문  ③ 도입(분 단위, 훅 포함)  ④ 전개(분 단위, 활동·발문 예시·예상 오답과 대응)  ⑤ 정리(성찰·출구티켓)  ⑥ 형성평가와 과제  ⑦ ATL 초점  ⑧ GDC/자료 활용  ⑨ 판서 계획 개요\n\n${QUALITY}\n${LANGLINE()}\n\n## 출력 형식\n차시별로 구분된 마크다운. 먼저 전체 차시 흐름표(1행=1차시)를 제시한 뒤, 각 차시 상세안을 작성.`;
+  }
+  if(type==='outline'){
+    return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족, 툴킷 30시간 확보 여부(검산 포함)\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course==='AA'?'AA':'AI'} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${ASSESS[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
+  }
+  /* ia */
+  return `${head}\n${u?`- 참고 단원: ${u.title} (${topicName(u.topic)})`:''}${extra?`\n- 학생 관심 분야: ${extra}`:''}\n\n## 과제\n${CUR().name} ${state.meta.level} 학생을 위한 IA(수학적 탐구) 주제 아이디어 15개를 제안해 주세요.\n\n## 각 주제마다 포함\n① 주제명(한 줄)  ② 탐구 질문 형태로 정제한 버전  ③ 사용될 핵심 수학(실라버스 토픽 연결)  ④ 데이터/자료 확보 방법  ⑤ 준거 E(수학의 활용) 관점 위험도: 수학이 과정 수준에 못 미치거나(너무 얕음) 감당 불가(너무 깊음)할 위험 평가  ⑥ 한국 학생이 접근하기 좋은 현지화 포인트\n\n## 조건\n- '너무 흔한 주제'(BMI, 피보나치와 황금비 등)는 피하거나 참신한 변형으로만.\n- 개인적 참여(준거 C)를 살릴 수 있는 주제 위주로.\n- 12~20쪽 분량으로 완결 가능한 범위로.\n\n## 출력 형식\n표(주제/질문/핵심 수학/데이터/위험도/현지화) + 상위 추천 3개에 대한 상세 코멘트.\n${LANGLINE()}`;
+}
+$('#ai-type').onchange=()=>{
+  const t=$('#ai-type').value;
+  $('#ai-unitWrap').style.display=(t==='outline')?'none':'block';
+  $('#ai-extraWrap').style.display=(t==='lesson'||t==='ia')?'block':'none';
+};
+$('#btnAiGen').onclick=()=>{
+  const p=buildPrompt();
+  if(p===null){toast('대상 단원을 먼저 선택하세요 (① 코스 아웃라인에서 단원 구성 필요).'); return;}
+  $('#aiResultCard').style.display='block'; $('#aiPromptBox').textContent=p;
+  $('#aiResultCard').scrollIntoView({behavior:'smooth'});
+};
+$('#btnAiCopy').onclick=()=>copyText($('#aiPromptBox').textContent);
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('복사했습니다. Claude(claude.ai)에 붙여넣으세요.')).catch(()=>fallbackCopy(t));}
+  else fallbackCopy(t);
+}
+function fallbackCopy(t){const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); toast('복사했습니다.');}catch(e){toast('복사 실패 — 텍스트를 직접 선택해 복사하세요.');} ta.remove();}
+
+/* ═══════════════ 내보내기 ═══════════════ */
+function mdOutline(){
+  const m=state.meta; const L=[];
+  L.push(`# Diploma Programme Course Outline — ${CUR().name} ${m.level}`);
+  L.push(`\n| 항목 | 내용 |\n|---|---|\n| 학교 | ${m.school||''} (${m.code||'-'}) |\n| 과목/레벨 | ${CUR().name} (${CUR().eng}) / ${m.level} |\n| 작성 교사 | ${m.teacher||''} |\n| 기간 | ${m.years||''} |\n| IB 연수 | ${m.training||''} |\n| 작성일 | ${m.date||''} |\n| 수업 | 1교시 ${m.lessonMin}분 · 주당 ${m.perWeek}교시 · ${m.lang} |`);
+  L.push(`\n## 1. Course outline (Year 1 / Year 2)`);
+  [1,2].forEach(y=>{
+    const us=state.outline.units.filter(u=>u.year===y); if(!us.length) return;
+    L.push(`\n### Year ${y}\n\n| 단원(토픽) | 학습 내용 | 시수 | 평가 도구 | 자료 |\n|---|---|---|---|---|`);
+    us.forEach(u=>L.push(`| ${u.title||''}<br>(${topicName(u.topic)}) | ${u.subs.join('; ')}${u.extra?'; '+u.extra:''} | ${u.hours||0} | ${u.assess.join(', ')} | ${u.res||''} |`));
+  });
+  const tot=Object.values(assignedByTopic()).reduce((a,b)=>a+b,0);
+  L.push(`\n**총 배정 시수: ${tot} / ${targetHours()}시간**`);
+  L.push(`\n## 2. 내부평가(IA) 계획\n- 첫 소개: ${state.outline.iaIntro||''}\n- 최종 마감: ${state.outline.iaDue||''}\n\n${state.outline.iaStages||''}`);
+  L.push(`\n## 3. TOK 연계\n${state.outline.tok||''}\n\n## 4. 학습접근방법(ATL)\n${state.outline.atl||''}\n\n## 5. 국제적 소양\n${state.outline.im||''}\n\n## 6. IB 학습자상\n초점: ${(state.outline.lpChecks||[]).join(', ')}\n\n${state.outline.lp||''}\n\n## 7. 자료\n${state.outline.resources||''}`);
+  L.push(`\n---\n*본 문서는 'IB티처스' 프로토타입으로 작성된 초안입니다. 제출 전 공식 양식·최신 가이드와 대조하세요. 본 도구는 IBO와 무관합니다.*`);
+  return L.join('\n');
+}
+function mdUnit(id){
+  const u=getUnit(id); const p=state.plans[id]||emptyPlan(); if(!u) return '';
+  const S=(t,v)=>`\n## ${t}\n${v||'_(미작성)_'}`;
+  return `# DP Unit Planner — ${u.title||'무제 단원'}\n\n| 교사 | 과목·과정 | 단원/토픽 | 레벨·학년 | 시수 |\n|---|---|---|---|---|\n| ${state.meta.teacher||''} | ${CUR().name} | ${topicName(u.topic)} | ${state.meta.level} · Year ${u.year} | ${u.hours||0}h |`+
+  S('단원 개요와 텍스트',p.desc)+S('관련 DP 평가',p.dpAssess)+
+  `\n\n# 탐구 INQUIRY`+S('전이 목표',p.transfer)+S('핵심 이해',p.essential)+S('예상 오개념',p.miscon)+S('탐구 질문 — 사실적',p.inqF)+S('탐구 질문 — 개념적',p.inqC)+S('탐구 질문 — 논쟁적',p.inqD)+
+  `\n\n# 실행 ACTION`+S('지식(내용)',p.know)+S('기능',p.skills)+S('개념',p.concepts)+S('학습 경험·전략 ('+(p.expChecks||[]).join(', ')+')',p.expDetail)+S('형성평가',p.formative)+S('총괄평가',p.summative)+S('차별화 ('+(p.diffChecks||[]).join(', ')+')',p.diffDetail)+S('ATL ('+(p.atlChecks||[]).join(', ')+')',p.atlDetail)+S('언어와 학습 ('+(p.langChecks||[]).join(', ')+')',p.langDetail)+S('TOK 연계',p.tok)+S('CAS 연계',p.cas)+S('국제적 소양',p.im)+S('학습자상',(p.lpChecks||[]).join(', '))+S('자료',p.resources)+
+  `\n\n# 성찰 REFLECTION`+S('수업 전',p.reflBefore)+S('수업 중',p.reflDuring)+S('수업 후',p.reflAfter)+
+  `\n\n---\n*IB티처스 프로토타입 초안 · IBO 비제휴*`;
+}
+$('#btnMdOutline').onclick=()=>copyText(mdOutline());
+$('#btnMdUnit').onclick=()=>{const id=$('#pr-unitSel').value; if(!id){toast('단원이 없습니다.');return;} copyText(mdUnit(id));};
+
+function buildOutlineDocHTML(){
+  const m=state.meta; const P=[];
+  P.push(`<h1>Diploma Programme Course Outline</h1><p class="pmeta">${esc(CUR().name)} (${esc(CUR().eng)}) · ${esc(m.level)} · ${esc(m.lang)}</p>`);
+  P.push(`<table><tr><th style="width:20%">학교</th><td>${esc(m.school||'')} ${m.code?('('+esc(m.code)+')'):''}</td><th style="width:20%">작성 교사</th><td>${esc(m.teacher||'')}</td></tr><tr><th>기간</th><td>${esc(m.years||'')}</td><th>작성일</th><td>${esc(m.date||'')}</td></tr><tr><th>IB 연수</th><td>${esc(m.training||'')}</td><th>수업</th><td>1교시 ${m.lessonMin}분 · 주당 ${m.perWeek}교시</td></tr></table>`);
+  P.push('<h2>1. Course outline</h2>');
+  [1,2].forEach(y=>{
+    const us=state.outline.units.filter(u=>u.year===y); if(!us.length)return;
+    P.push(`<h3 style="font-size:12px; margin:8px 0 4px">Year ${y}</h3><table><tr><th style="width:18%">단원(토픽)</th><th>학습 내용</th><th style="width:7%">시수</th><th style="width:18%">평가 도구</th><th style="width:15%">자료</th></tr>`);
+    us.forEach(u=>P.push(`<tr><td><b>${esc(u.title||'')}</b><br><span style="color:#475569">${esc(topicName(u.topic))}</span></td><td>${esc(u.subs.join('; '))}${u.extra?('; '+esc(u.extra)):''}</td><td style="text-align:right">${u.hours||0}</td><td>${esc(u.assess.join(', '))}</td><td>${esc(u.res||'')}</td></tr>`));
+    P.push('</table>');
+  });
+  const tot=Object.values(assignedByTopic()).reduce((a,b)=>a+b,0);
+  P.push(`<p class="pmeta"><b>총 배정 시수: ${tot} / ${targetHours()}시간</b> (공식 권장: SL 150 · HL 240, 툴킷 30시간 포함)</p>`);
+  P.push(`<h2>2. 내부평가(IA) 계획</h2><p><b>첫 소개:</b> ${esc(state.outline.iaIntro||'')}<br><b>최종 마감:</b> ${esc(state.outline.iaDue||'')}</p><p>${esc(state.outline.iaStages||'')}</p>`);
+  P.push(`<h2>3. TOK 연계</h2><p>${esc(state.outline.tok||'')}</p><h2>4. 학습접근방법(ATL)</h2><p>${esc(state.outline.atl||'')}</p><h2>5. 국제적 소양</h2><p>${esc(state.outline.im||'')}</p><h2>6. IB 학습자상</h2><p><b>초점:</b> ${esc((state.outline.lpChecks||[]).join(', '))}</p><p>${esc(state.outline.lp||'')}</p><h2>7. 자료</h2><p>${esc(state.outline.resources||'')}</p>`);
+  P.push(`<h2>평가 구조 (참고)</h2><table><tr><th>평가</th><th>시간/분량</th><th>계산기</th><th>비중</th><th>구성</th></tr>${ASSESS[m.course][m.level].map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table><p class="pmeta">IA 준거: ${IA_CRIT.map(x=>x[0]+' '+x[1]+'점').join(' · ')} = 20점</p>`);
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오 v0.3으로 작성된 초안 · 제출 전 최신 공식 가이드와 대조 필요 · 본 도구는 IBO와 무관하며 IBO의 승인·보증을 받지 않았습니다.</div>`);
+  return P.join('');
+}
+function printOutline(){$('#printArea').innerHTML=buildOutlineDocHTML(); window.print();}
+function buildUnitDocHTML(id){
+  const u=getUnit(id); if(!u){toast('단원이 없습니다.');return null;} const p=state.plans[id]||emptyPlan();
+  const R=(t,v)=>`<tr><th style="width:22%">${t}</th><td>${esc(v||'')}</td></tr>`;
+  const P=[`<h1>DP Unit Planner — ${esc(u.title||'무제 단원')}</h1><p class="pmeta">${esc(CUR().name)} ${esc(state.meta.level)} · ${esc(topicName(u.topic))} · Year ${u.year} · ${u.hours||0}시간 · 교사: ${esc(state.meta.teacher||'')}</p>`];
+  P.push(`<h2>탐구 INQUIRY — 단원의 목적</h2><table>${R('단원 개요·텍스트',p.desc)}${R('관련 DP 평가',p.dpAssess)}${R('전이 목표',p.transfer)}${R('핵심 이해',p.essential)}${R('예상 오개념',p.miscon)}${R('탐구 질문(사실)',p.inqF)}${R('탐구 질문(개념)',p.inqC)}${R('탐구 질문(논쟁)',p.inqD)}</table>`);
+  P.push(`<h2>실행 ACTION — 탐구를 통한 교수·학습</h2><table>${R('지식(내용)',p.know)}${R('기능',p.skills)}${R('개념',p.concepts)}${R('학습 경험·전략'+((p.expChecks||[]).length?` (${p.expChecks.join(', ')})`:''),p.expDetail)}${R('형성평가',p.formative)}${R('총괄평가',p.summative)}${R('차별화'+((p.diffChecks||[]).length?` (${p.diffChecks.join(', ')})`:''),p.diffDetail)}${R('ATL'+((p.atlChecks||[]).length?` (${p.atlChecks.join(', ')})`:''),p.atlDetail)}${R('언어와 학습',p.langDetail)}${R('TOK 연계',p.tok)}${R('CAS 연계',p.cas)}${R('국제적 소양',p.im)}${R('학습자상',(p.lpChecks||[]).join(', '))}${R('자료',p.resources)}</table>`);
+  P.push(`<h2>성찰 REFLECTION</h2><table>${R('수업 전',p.reflBefore)}${R('수업 중',p.reflDuring)}${R('수업 후',p.reflAfter)}</table>`);
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오 v0.3 초안 · IB 공식 DP unit planner 구조 기반 · 본 도구는 IBO와 무관합니다.</div>`);
+  return P.join('');
+}
+function printUnit(id){const h=buildUnitDocHTML(id); if(h==null)return; $('#printArea').innerHTML=h; window.print();}
+$('#btnPrintOutline').onclick=printOutline;
+$('#btnPrintUnit').onclick=()=>printUnit($('#pr-unitSel').value);
+function downloadDoc(html,name){
+  const doc=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11pt;line-height:1.5} h1{font-size:16pt;margin:0 0 4pt} h2{font-size:12pt;background:#eef2f7;padding:4pt 6pt;border-left:4pt solid #14304e;margin:12pt 0 6pt} h3{font-size:11pt;margin:8pt 0 4pt} table{border-collapse:collapse;width:100%;margin:6pt 0} th,td{border:1pt solid #808a96;padding:4pt 6pt;font-size:10pt;vertical-align:top;text-align:left} th{background:#f1f5f9} p{margin:3pt 0;white-space:pre-wrap} .pmeta{color:#445566;font-size:9pt} .pfoot{color:#666;font-size:8pt;margin-top:14pt;border-top:1pt solid #99a;padding-top:5pt}</style></head><body>${html}</body></html>`;
+  const blob=new Blob(['﻿',doc],{type:'application/msword'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+  toast('Word 문서(.doc)로 저장했습니다 — Word·한글에서 열립니다.');
+}
+$('#btnDocOutline').onclick=()=>downloadDoc(buildOutlineDocHTML(),`코스아웃라인_${state.meta.school||'무제'}_${state.meta.course}${state.meta.level}.doc`);
+$('#btnDocUnit').onclick=()=>{const id=$('#pr-unitSel').value; const h=buildUnitDocHTML(id); if(h==null)return; const u=getUnit(id); downloadDoc(h,`유닛플래너_${((u&&u.title)||'단원').replace(/[\\/:*?"<>|]/g,'')}.doc`);};
+
+/* ═══════════════ 저장·불러오기 ═══════════════ */
+function saveJson(){
+  const data=JSON.stringify(state,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  const d=new Date(); const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  a.href=URL.createObjectURL(blob);
+  a.download=`IB플래너_${state.meta.school||'무제'}_${state.meta.course}${state.meta.level}_${stamp}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('JSON 파일로 저장했습니다. 다음에 「불러오기」로 이어서 작업하세요.');
+}
+function applyState(d){
+  state=d; state.plans=state.plans||{}; state.lessons=state.lessons||[];
+  state.meta.docLang=state.meta.docLang||'한국어';
+  state.meta.hoursUnit=['시간','교시'].includes(state.meta.hoursUnit)?state.meta.hoursUnit:'시간';
+  state.outline={units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:'',...state.outline};
+  state.outline.lpChecks=state.outline.lpChecks||[];
+  let maxSeq=1; (state.outline.units||[]).forEach(u=>{const n=parseInt(String(u.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;}); (state.lessons||[]).forEach(l=>{const n=parseInt(String(l.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;}); uidSeq=maxSeq;
+  setCourse(state.meta.course||'AA'); setLevel(state.meta.level||'SL');
+  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist();
+}
+function loadJsonFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const d=JSON.parse(rd.result);
+    if(!d.meta||!d.outline) throw new Error('형식 오류');
+    snapshot();
+    applyState(d);
+    toast('불러오기 완료!');
+  }catch(e){toast('파일을 읽을 수 없습니다: '+e.message);}};
+  rd.readAsText(file);
+}
+$('#btnSaveJson').onclick=saveJson; $('#btnSaveJson2').onclick=saveJson;
+$('#btnLoadJson').onclick=()=>$('#fileInput').click(); $('#btnLoadJson2').onclick=()=>$('#fileInput').click();
+$('#fileInput').onchange=e=>{if(e.target.files[0]) handleImportFile(e.target.files[0]); e.target.value='';};
+
+/* ═══════════════ 문서 가져오기 · 범용 자동 파서 ═══════════════ */
+let importedText=''; let importedTables=null; let pendingImport=null;
+
+function decodeXmlEnt(s){return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,d)=>String.fromCharCode(Number(d)));}
+function xmlParas(x){
+  const out=[]; const re=/<w:p(?: [^>]*)?>([\s\S]*?)<\/w:p>/g; let m;
+  while((m=re.exec(x))){ let t=m[1].replace(/<w:tab[^>]*\/>/g,'\t').replace(/<w:br[^>]*\/>/g,'\n').replace(/<[^>]+>/g,''); out.push(decodeXmlEnt(t).trim()); }
+  return out;
+}
+async function extractDocx(buf){
+  const u8=new Uint8Array(buf); const dv=new DataView(buf);
+  let eocd=-1;
+  for(let i=u8.length-22;i>=Math.max(0,u8.length-70000);i--){if(dv.getUint32(i,true)===0x06054b50){eocd=i;break;}}
+  if(eocd<0) throw new Error('ZIP 구조를 찾을 수 없습니다 (.docx가 맞는지 확인)');
+  let off=dv.getUint32(eocd+16,true); const cnt=dv.getUint16(eocd+10,true);
+  let target=null;
+  for(let n=0;n<cnt;n++){
+    if(dv.getUint32(off,true)!==0x02014b50) break;
+    const method=dv.getUint16(off+10,true), comp=dv.getUint32(off+20,true), nameLen=dv.getUint16(off+28,true), extraLen=dv.getUint16(off+30,true), cmtLen=dv.getUint16(off+32,true), lho=dv.getUint32(off+42,true);
+    const name=new TextDecoder().decode(u8.subarray(off+46,off+46+nameLen));
+    if(name==='word/document.xml'){target={method,comp,lho};}
+    off+=46+nameLen+extraLen+cmtLen;
+  }
+  if(!target) throw new Error('word/document.xml이 없습니다');
+  const lnl=dv.getUint16(target.lho+26,true), lel=dv.getUint16(target.lho+28,true);
+  const start=target.lho+30+lnl+lel; const bytes=u8.subarray(start,start+target.comp);
+  let xmlBytes;
+  if(target.method===0){xmlBytes=bytes;}
+  else{
+    if(typeof DecompressionStream==='undefined') throw new Error('이 브라우저는 자동 추출을 지원하지 않습니다 — 내용을 복사해 붙여넣어 주세요');
+    const ds=new DecompressionStream('deflate-raw');
+    const resp=new Response(new Blob([bytes]).stream().pipeThrough(ds));
+    xmlBytes=new Uint8Array(await resp.arrayBuffer());
+  }
+  const xml=new TextDecoder('utf-8').decode(xmlBytes);
+  /* 표 구조 추출 */
+  const tables=[]; const tblRe=/<w:tbl(?: [^>]*)?>([\s\S]*?)<\/w:tbl>/g; let tm;
+  while((tm=tblRe.exec(xml))){
+    const rows=[]; const trRe=/<w:tr(?: [^>]*)?>([\s\S]*?)<\/w:tr>/g; let rm;
+    while((rm=trRe.exec(tm[1]))){
+      const cells=[]; const tcRe=/<w:tc(?: [^>]*)?>([\s\S]*?)<\/w:tc>/g; let cm;
+      while((cm=tcRe.exec(rm[1]))){
+        const ps=xmlParas(cm[1]).filter((p,i,a)=>p||a[i-1]);
+        cells.push(ps.join('\n').trim());
+      }
+      rows.push(cells);
+    }
+    tables.push(rows);
+  }
+  /* 평문 추출 */
+  let t=xml.replace(/<w:tab[^>]*\/>/g,'\t').replace(/<w:br[^>]*\/>/g,'\n');
+  t=t.replace(/<\/w:tc>/g,' | ').replace(/<\/w:tr>/g,'¶').replace(/<\/w:p>/g,'¶');
+  t=t.replace(/<[^>]+>/g,''); t=decodeXmlEnt(t);
+  const text=t.split('¶').map(s=>s.replace(/\s*\|\s*$/,'').trim()).filter((s,i,arr)=>s||arr[i-1]).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  return {text, tables};
+}
+function tablesFromText(text){
+  const rows=text.split('\n').map(l=> l.includes('\t')? l.split('\t') : (l.includes(' | ')? l.split(' | ') : [l])).map(r=>r.map(c=>(c||'').trim()));
+  return [rows];
+}
+
+/* ── 파서 본체 ── */
+const TOPIC_PAT={
+ 1:/number|algebra|sequence|series|binomial|proof|induction|complex|수와\s*대수|수열|급수|이항|증명|복소|금융/i,
+ 2:/function|quadratic|polynomial|rational|exponential|logarithm|linear model|model+ing|함수|다항|이차|유리식|지수와?\s*로그|모델링/i,
+ 3:/trigonometr|geometr|vector|triangle|voronoi|radian|기하|삼각|벡터|보로노이|호도법/i,
+ 4:/statistic|probabilit|distribution|regression|correlation|sampling|data|통계|확률|분포|회귀|상관|표집|자료/i,
+ 5:/calculus|derivative|differenti|integra|limit|kinematic|미분|적분|미적분|극한|운동학/i};
+function inferTopic(title,contents,prev){
+  if(/toolkit|툴킷|수학적\s*탐구|mathematical\s*exploration|(^|[^A-Za-z])IA([^A-Za-z]|$)/i.test(title)) return 'T';
+  const lines=String(contents||'').split(/\n|;/);
+  let best=0,bestK=0;
+  for(let k=1;k<=5;k++){
+    let s=(TOPIC_PAT[k].test(title)?3:0);
+    lines.forEach(L=>{if(TOPIC_PAT[k].test(L))s++;});
+    if(s>best){best=s;bestK=k;}
+  }
+  return best>0? bestK : (prev||1);
+}
+const HDR_LABELS=[['school',/school\s*name|학교명|학교\s*이름/i],['code',/school\s*code|학교\s*코드/i],['subject',/name of the dp subject|dp\s*과목|과목명/i],['teacher',/name of the teacher|작성\s*교사|교사명/i],['training',/date of ib training|ib\s*연수|연수\s*이수/i],['date',/outline was completed|작성\s*완료/i],['workshop',/name of workshop|워크숍/i]];
+function isLabelCell(v){const cc=v.replace(/\n/g,' '); return cc.length<90 && HDR_LABELS.some(([k,re])=>re.test(cc));}
+
+function parseOutlineDoc(tables,flatText){
+  tables=(tables&&tables.length)?tables:tablesFromText(flatText||'');
+  flatText=flatText||'';
+  const hdr={};
+  /* 헤더 필드 */
+  tables.forEach(tb=>tb.forEach(row=>{
+    row.forEach((c,i)=>{
+      const cc=(c||'').replace(/\n/g,' ');
+      HDR_LABELS.forEach(([key,re])=>{
+        if(re.test(cc)&&cc.length<90&&!(key in hdr)){
+          for(let j=i+1;j<row.length;j++){const v=(row[j]||'').trim(); if(v&&!isLabelCell(v)){hdr[key]=v.replace(/\n/g,' ').slice(0,120); break;}}
+        }
+      });
+      const ct=(c||'').trim();
+      if(/^higher$|^고급\s*수준?$/i.test(ct)&&(row[i+1]||'').trim().toUpperCase()==='X') hdr.levelX='HL';
+      if(/^standard( completed in two years)?$|^표준\s*수준?/i.test(ct)&&(row[i+1]||'').trim().toUpperCase()==='X') hdr.levelX=hdr.levelX||'SL';
+    });
+  }));
+  /* 단원 표 */
+  let units=[], lessonMin=null, perWeek=null, hoursUnitDetect=null, statedTotals=[], officialForm=false;
+  const parseUnitsTable=(tb,hi,roles)=>{
+    let curYear=1;
+    for(let r=hi+1;r<tb.length;r++){
+      const row=tb[r]; const joined=row.join(' ').replace(/\n/g,' ');
+      if(!joined.trim()) continue;
+      row.forEach(c=>{const m=(c||'').trim().match(/^year\s*([12])$|^([12])\s*년차$|^([12])\s*학년$/i); if(m) curYear=Number(m[1]||m[2]||m[3]);});
+      if(/one class is|1\s*교시(는|의)?\s*(수업)?\s*시간|한\s*교시/i.test(joined)){const m=joined.match(/(\d+)/); if(m) lessonMin=Number(m[1]); continue;}
+      if(/in one week|주당|일주일/i.test(joined)){const m=joined.match(/(\d+)/); if(m) perWeek=Number(m[1]); continue;}
+      const title=((row[roles.title]||'')+'').trim();
+      if(/^(total|합계|총계)/i.test(title)||/total class hours|총\s*(수업\s*)?(시수|시간|교시)/i.test(joined)){const m=joined.match(/(\d+)\s*(classes|교시|시간|hours)/i); if(m) statedTotals.push(Number(m[1])); continue;}
+      const contents=((row[roles.contents]||'')+'').trim();
+      const timeCell=((row[roles.time]||'')+'').trim();
+      const hm=timeCell.match(/(\d+(?:\.\d+)?)\s*(classes?|교시|차시|시간|hours?)?/i);
+      if(!title&&!contents) continue;
+      let hours=hm?Math.round(Number(hm[1])):0;
+      if(hm&&hm[2]){ hoursUnitDetect=/class|교시|차시/i.test(hm[2])?'교시':'시간'; }
+      const subs=contents.split(/\n|;\s+|;(?=\S)/).map(s=>s.trim()).filter(Boolean);
+      const assess=((row[roles.assess]||'')+'').split(/\n|;\s+|;(?=\S)/).map(s=>s.trim()).filter(Boolean);
+      const res=((row[roles.res]||'')+'').split(/\n/).map(s=>s.trim()).filter(Boolean).join('; ');
+      if(!title&&subs.length===0) continue;
+      const prevTopic=units.length?units[units.length-1].topic:1;
+      units.push({title:title||('단원 '+(units.length+1)), year:curYear, topic:inferTopic(title,contents,prevTopic), hours, subs, assess, res, extra:''});
+    }
+  };
+  tables.forEach(tb=>{
+    const hi=tb.findIndex(rw=>{const j=rw.join(' ').replace(/\n/g,' '); return /topic\s*\/?\s*unit|단원(명)?/i.test(j)&&/contents|내용/i.test(j);});
+    if(hi<0) return;
+    officialForm=true;
+    const hrow=tb[hi]; const roles={};
+    hrow.forEach((c,i)=>{const cc=(c||'').replace(/\n/g,' ');
+      if(roles.title===undefined&&/topic|unit|단원/i.test(cc)) roles.title=i;
+      else if(roles.contents===undefined&&/content|내용/i.test(cc)) roles.contents=i;
+      else if(roles.time===undefined&&/time|hour|시수|시간|교시|차시/i.test(cc)) roles.time=i;
+      else if(roles.assess===undefined&&/assess|평가/i.test(cc)) roles.assess=i;
+      else if(roles.res===undefined&&/resource|자료/i.test(cc)) roles.res=i;});
+    if(roles.title===undefined)roles.title=1; if(roles.contents===undefined)roles.contents=roles.title+1;
+    if(roles.time===undefined)roles.time=roles.contents+1; if(roles.assess===undefined)roles.assess=roles.time+1; if(roles.res===undefined)roles.res=roles.assess+1;
+    parseUnitsTable(tb,hi,roles);
+  });
+  /* 일반 형식(헤더 없는 표) 휴리스틱 */
+  if(!units.length){
+    let curYear=1;
+    tables.forEach(tb=>tb.forEach(row=>{
+      const joined=row.join(' ');
+      row.forEach(c=>{const m=(c||'').trim().match(/^year\s*([12])$|^([12])\s*년차$/i); if(m) curYear=Number(m[1]||m[2]);});
+      if(row.length<3) return;
+      const ti=row.findIndex(c=>/(\d+(?:\.\d+)?)\s*(classes?|교시|차시|시간|hours?)(?![A-Za-z가-힣])/i.test(c||''));
+      if(ti<0) return;
+      if(/one class|in one week|주당|total|합계/i.test(joined)) return;
+      const hm=(row[ti]||'').match(/(\d+(?:\.\d+)?)\s*(classes?|교시|차시|시간|hours?)/i);
+      const others=row.map((c,i)=>({c:(c||'').trim(),i})).filter(o=>o.i!==ti&&o.c&&!/^year\s*[12]$|^[12]\s*년차$|^[12]\s*학년$/i.test(o.c));
+      if(!others.length) return;
+      const title=others[0].c.split('\n')[0].slice(0,120);
+      const rest=others.slice(1).map(o=>o.c);
+      const contents=rest.sort((a,b)=>b.length-a.length)[0]||'';
+      if(hm[2]) hoursUnitDetect=/class|교시|차시/i.test(hm[2])?'교시':'시간';
+      units.push({title, year:curYear, topic:inferTopic(title,contents,units.length?units[units.length-1].topic:1), hours:Math.round(Number(hm[1])), subs:contents.split(/\n|;\s*/).map(s=>s.trim()).filter(Boolean), assess:[], res:'', extra:''});
+    }));
+  }
+  if(!units.length) return null;
+  /* 연계 섹션: 2열 표 우선 */
+  const sec={};
+  tables.forEach(tb=>{
+    if(tb.length>=2&&tb[0].length>=2){
+      const h=tb[0].join(' ').replace(/\n/g,' ');
+      const body=tb.slice(1).map(rw=>('Topic: '+((rw[0]||'').trim())+'\n'+((rw[1]||'').trim())).trim()).join('\n\n').trim();
+      if(/link with tok|TOK\s*연계/i.test(h)) sec.tok=body;
+      else if(/approaches to learning|학습접근/i.test(h)) sec.atl=body;
+      else if(/international mindedness|국제적\s*소양/i.test(h)) sec.im=body;
+      else if(/learner profile|학습자상/i.test(h)) sec.lp=body;
+    }
+    if(tb.length===1&&tb[0].length===1){
+      const v=tb[0][0];
+      if(!sec.ia&&v.length>80&&/exploration|IA\b|내부\s*평가|수학적\s*탐구/i.test(v)) sec.ia=v;
+      else if(v.length>80&&/resource|GDC|calculator|text|교과서|자료|계산기/i.test(v)) sec.resources=v;
+    }
+  });
+  /* 평문 순차 캡처 (표에서 못 찾은 섹션 보완) */
+  let cursor=0;
+  const grabSeq=(startRe,endRes)=>{
+    const rel=flatText.slice(cursor).search(startRe); if(rel<0) return '';
+    const abs=cursor+rel;
+    let seg=flatText.slice(abs);
+    seg=seg.slice((seg.split('\n')[0]||'').length);
+    let cut=seg.length;
+    endRes.forEach(er=>{const e=seg.search(er); if(e>=0&&e<cut) cut=e;});
+    const out=seg.slice(0,cut);
+    cursor=abs+1;
+    return out
+      .replace(/Briefly explain how and when[\s\S]*?due\./,'')
+      .replace(/You are expected to explore links[\s\S]*?plan the lesson\./,'')
+      .replace(/Every IB course should contribute[\s\S]*?(research\)\.|goal\.)/,'')
+      .replace(/Through the course it is also expected[\s\S]*?identify\./,'')
+      .replace(/Describe the resources[\s\S]*?needed\./,'')
+      .replace(/^\s*\|?\s*Topic\s*$/gim,'')
+      .replace(/^\s*\|\s*(Link with TOK|Contribution to the development)[^\n]*$/gim,'')
+      .replace(/\n{3,}/g,'\n\n').trim();
+  };
+  const iaFlat=grabSeq(/IB internal assessment requirement|내부\s*평가\s*(계획|요건)/i,[/Links to TOK|TOK\s*연계/i]);
+  const tokFlat=grabSeq(/Links to TOK|TOK\s*연계/i,[/Approaches to learning|학습접근/i]);
+  const atlFlat=grabSeq(/Approaches to learning|학습접근/i,[/International mindedness|국제적\s*소양/i]);
+  const imFlat=grabSeq(/International mindedness|국제적\s*소양/i,[/learner profile|학습자상/i]);
+  const lpFlat=grabSeq(/Development of the IB learner profile|학습자상/i,[/^Resources$/m]);
+  const resFlat=grabSeq(/^Resources$/m,[/a^/]);
+  const ia=sec.ia||iaFlat, tok=sec.tok||tokFlat, atl=sec.atl||atlFlat, im=sec.im||imFlat, lpTxt=sec.lp||lpFlat, resourcesTxt=sec.resources||resFlat;
+  const iaLines=(ia||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  const iaIntro=(iaLines.find(l=>/introduc|awareness|first|choice|선정|소개|시작/i.test(l))||'').slice(0,220);
+  const iaDue=(iaLines.find(l=>/final|due|최종|마감|제출/i.test(l))||'').slice(0,220);
+  const LP_MAP=[['탐구하는 사람',/inquirer|탐구하는/i],['지식이 풍부한 사람',/knowledgeable|지식이/i],['사고하는 사람',/thinker|사고하는/i],['소통하는 사람',/communicator|소통하는/i],['원칙을 지키는 사람',/principled|원칙/i],['열린 마음을 지닌 사람',/open-?minded|열린/i],['배려하는 사람',/caring|배려/i],['도전하는 사람',/risk-?taker|도전/i],['균형 잡힌 사람',/balanced|균형/i],['성찰하는 사람',/reflective|성찰하는/i]];
+  const lpChecks=LP_MAP.filter(([k,re])=>re.test(lpTxt||'')).map(([k])=>k);
+  const subj=hdr.subject||'';
+  const course=/응용과?\s*해석|applications|interpretation/i.test(subj+flatText.slice(0,400))?'AI':'AA';
+  const level=/HL/i.test(subj)?'HL':(/SL/i.test(subj)?'SL':(hdr.levelX||'SL'));
+  const sampleTxt=units.map(u=>u.title+' '+u.subs.join(' ')).join(' ').slice(0,600);
+  const hangul=(sampleTxt.match(/[가-힣]/g)||[]).length;
+  return {meta:{course,level,school:hdr.school||'',code:hdr.code||'',teacher:hdr.teacher||'',years:'',
+    training:[hdr.workshop,hdr.training].filter(Boolean).join(' / '),date:hdr.date||'',
+    lessonMin:lessonMin||50,perWeek:perWeek||4,lang:'한국어',
+    docLang:(hangul>sampleTxt.length*0.15)?'한국어':'English',
+    hoursUnit:hoursUnitDetect||'시간'},
+   outline:{units,iaIntro,iaDue,iaStages:ia||'',tok:tok||'',atl:atl||'',im:im||'',lp:lpTxt||'',lpChecks,resources:resourcesTxt||''},
+   plans:{},lessons:[],_info:{officialForm,statedTotals}};
+}
+
+/* ── 미리보기 UI ── */
+function showParsePreview(parsed,srcName){
+  pendingImport=parsed;
+  const box=$('#im-parseBox'); box.style.display='block';
+  const us=parsed.outline.units;
+  const u1=us.filter(u=>u.year===1), u2=us.filter(u=>u.year===2);
+  const s1=u1.reduce((a,u)=>a+(u.hours||0),0), s2=u2.reduce((a,u)=>a+(u.hours||0),0);
+  const hu=parsed.meta.hoursUnit;
+  const secs=[['IA 일정',parsed.outline.iaStages],['TOK',parsed.outline.tok],['ATL',parsed.outline.atl],['국제적 소양',parsed.outline.im],['학습자상',parsed.outline.lp],['자료',parsed.outline.resources]];
+  const secBadges=secs.map(x=>`<span class="badge ${x[1]?'b-green':'b-gray'}">${x[0]} ${x[1]?'✓':'—'}</span>`).join(' ');
+  const rows=us.map(u=>`<tr><td><span class="badge ${u.year===2?'b-green':'b-blue'}">Y${u.year}</span></td><td>${esc(u.title)}</td><td class="num-cell">${u.hours}${hu==='교시'?'교시':'h'}</td><td style="color:#64748b">${esc(topicName(u.topic)).replace('토픽 ','T')}</td><td class="num-cell">${u.subs.length}</td></tr>`).join('');
+  box.innerHTML=`
+    <div class="callout good" style="margin-top:10px"><b>✅ 자동 인식 완료</b> — ${esc(srcName||'붙여넣은 내용')} · ${parsed._info.officialForm?'공식 IB 양식으로 인식됨':'일반 표 형식으로 인식됨(정확도 확인 필요)'}</div>
+    <table class="tbl" style="margin-bottom:8px">
+      <tr><th>과목/레벨</th><td>${esc(SYLLABUS[parsed.meta.course].name)} · <b>${parsed.meta.level}</b></td><th>학교/교사</th><td>${esc(parsed.meta.school||'—')} / ${esc(parsed.meta.teacher||'—')}</td></tr>
+      <tr><th>수업</th><td>1교시 ${parsed.meta.lessonMin}분 · 주당 ${parsed.meta.perWeek}회 · ${hu} 단위</td><th>문서 언어</th><td>${parsed.meta.docLang}</td></tr>
+      <tr><th>단원</th><td colspan="3">Year 1: <b>${u1.length}개 · ${s1}${hu==='교시'?'교시':'h'}</b> &nbsp;/&nbsp; Year 2: <b>${u2.length}개 · ${s2}${hu==='교시'?'교시':'h'}</b> &nbsp;/&nbsp; 합계 ${s1+s2}${hu==='교시'?'교시':'h'}${hu==='교시'?` ≈ ${Math.round((s1+s2)*(parsed.meta.lessonMin||50)/60)}h`:''}</td></tr>
+    </table>
+    <div style="margin-bottom:8px">${secBadges}</div>
+    <div style="max-height:220px; overflow:auto; border:1px solid var(--line); border-radius:10px; margin-bottom:10px">
+      <table class="tbl"><tr><th></th><th>단원</th><th style="text-align:right">시수</th><th>토픽(자동 추정)</th><th style="text-align:right">내용 수</th></tr>${rows}</table>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <button class="btn btn-primary" id="im-btnApplyParsed">✅ 이대로 불러오기</button>
+      <button class="btn btn-ghost btn-sm" id="im-btnDiscard">취소</button>
+    </div>
+    <p class="hint" style="margin-top:6px">토픽 추정이나 시수가 어긋난 부분은 불러온 뒤 ① 코스 아웃라인에서 바로 고칠 수 있습니다.</p>`;
+  $('#im-btnApplyParsed').onclick=()=>{
+    snapshot();
+    applyState(normalizeImported(pendingImport));
+    showStep('course');
+    toast('가져오기 완료! 인식된 내용을 확인·수정하세요.');
+  };
+  $('#im-btnDiscard').onclick=()=>{box.style.display='none'; pendingImport=null;};
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function setImported(text,srcName){
+  importedText=(text||'').trim();
+  $('#im-status').innerHTML=importedText? `<span class="badge b-green">읽기 완료</span> ${srcName?esc(srcName)+' — ':''}${importedText.length.toLocaleString()}자 추출` : '<span class="badge b-amber">추출된 텍스트가 없습니다</span> 내용을 직접 붙여넣어 주세요.';
+}
+async function handleImportFile(file){
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  if(ext==='json'){loadJsonFile(file); return;}
+  showStep('export');
+  $('#im-parseBox').style.display='none';
+  $('#im-status').innerHTML='<span class="badge b-blue">읽는 중…</span> '+esc(file.name);
+  try{
+    let text='', tables=null;
+    if(ext==='docx'){const r=await extractDocx(await file.arrayBuffer()); text=r.text; tables=r.tables;}
+    else if(ext==='doc'){$('#im-status').innerHTML='<span class="badge b-amber">.doc(구형식) 미지원</span> Word에서 .docx로 다시 저장하거나, 내용을 복사해 붙여넣어 주세요.'; return;}
+    else{text=await file.text();}
+    importedText=text; importedTables=tables;
+    setImported(text,file.name);
+    const parsed=parseOutlineDoc(tables,text);
+    if(parsed&&parsed.outline.units.length){ showParsePreview(parsed,file.name); }
+    else{ $('#im-status').innerHTML+=' · <span class="badge b-amber">표 구조 자동 인식 실패</span> 아래 AI 변환 프롬프트를 이용하세요.'; }
+  }catch(e){ $('#im-status').innerHTML=`<span class="badge b-amber">읽기 실패</span> ${esc(e.message)} — 내용을 복사해 붙여넣기 칸에 넣어주세요.`; }
+}
+/* 드래그&드롭 가져오기 */
+['dragover','drop'].forEach(ev=>document.addEventListener(ev,e=>{
+  e.preventDefault();
+  if(ev==='drop'){const fl=e.dataTransfer&&e.dataTransfer.files; if(fl&&fl[0]) handleImportFile(fl[0]);}
+}));
+/* 미리보기(iframe) 환경 안내 */
+try{ if(window.self!==window.top){ $('#im-frameNote').innerHTML='<br><b>⚠️ 지금 사이드바/채팅 미리보기로 보고 계시다면</b> 보안 정책상 파일 선택 창이 열리지 않을 수 있습니다. 이 경우 파일을 내려받아 크롬/엣지에서 직접 여세요 — 모든 기능이 동작합니다.'; } }catch(_e){}
+
+function importSource(){const t=$('#im-paste').value.trim()||importedText; return t? t.slice(0,20000):'';}
+
+function promptDocConvert(){
+  const t=importSource(); if(!t){toast('먼저 파일을 읽거나 내용을 붙여넣으세요.'); return null;}
+  return `당신은 IB DP 과정 문서 구조화 전문가입니다. 아래 [원본 문서]는 한 교사의 DP 수학 코스아웃라인입니다(한국어 또는 영어). 이를 'IB티처스' 수업설계 도구의 JSON 스키마로 변환해 주세요.\n\n## JSON 스키마\n{\n "meta": {"course":"AA"|"AI", "level":"SL"|"HL", "school":"", "teacher":"", "years":"", "training":"", "date":"", "lessonMin":50, "perWeek":4, "lang":"한국어"|"영어"|"한국어+영어", "docLang":"한국어"|"English", "hoursUnit":"시간"|"교시"},\n "outline": {\n  "units":[{"title":"", "year":1, "topic":1, "hours":0, "subs":["소주제"], "assess":["평가도구"], "res":"자료", "extra":""}],\n  "iaIntro":"", "iaDue":"", "iaStages":"", "tok":"", "atl":"", "im":"", "lp":"", "lpChecks":[], "resources":""\n }\n}\n\n## 변환 규칙\n1. topic 값: 1=수와 대수(Number and algebra), 2=함수(Functions), 3=기하와 삼각법(Geometry and trigonometry), 4=통계와 확률(Statistics and probability), 5=미적분(Calculus), "T"=수학 툴킷·IA(toolkit/exploration). 여러 토픽에 걸치면 비중이 가장 큰 토픽으로.\n2. year 값: 1 또는 2. 문서에 구분이 없으면 전반부=1, 후반부=2로 추정하고 해당 단원 title 끝에 " (추정)"을 붙일 것.\n3. 원문이 영어면 필드 값은 영어 그대로 두고 docLang="English"로 설정.\n4. 문서에 없는 정보는 빈 문자열/빈 배열/0으로 두고 절대 지어내지 말 것.\n5. AA/AI·SL/HL은 문서 내용으로 판단하되 불명확하면 "AA","SL".\n6. 표(| 구분)로 된 부분은 열 의미를 해석해 units에 매핑할 것 (단원명·내용·시수·평가·자료).\n7. 시수가 '교시/classes' 단위로 기재된 문서면 hoursUnit="교시"로 설정하고 hours에는 교시 수를 그대로 넣을 것 (시간 환산 금지).\n\n## 출력\n설명 없이 JSON 코드블록 하나만 출력하세요.\n\n## 원본 문서\n"""\n${t}\n"""`;
+}
+function promptDocReview(){
+  const t=importSource(); if(!t){toast('먼저 파일을 읽거나 내용을 붙여넣으세요.'); return null;}
+  return `당신은 IB DP 인증 심사 경험이 있는 수학 교육 전문가입니다. 아래 [원본 문서]는 한 교사가 작성한 DP 수학 코스아웃라인입니다. IB 제출 관점에서 냉정하게 진단해 주세요.\n\n## 진단 기준\n1. 공식 양식 요구 섹션 충족: Year 1/2 단원표(단원·내용·시수·평가도구·자료), IA 일정(첫 소개·단계·마감), TOK 연계, ATL, 국제적 소양, 학습자상, 자료\n2. 시수 검산: 합계가 SL 150 / HL 240 (수학 툴킷 30시간 포함)에 부합하는지\n3. 단원 배열의 논리성(선수학습 관계)과 평가-실제 시험 구조의 정렬\n4. TOK·ATL·국제적 소양·학습자상이 '토픽 하나를 골라 구체적으로 서술'이라는 양식 요구를 충족하는지\n5. 개념기반·백워드 설계 관점의 약점\n\n## 출력 형식\n${state.meta.docLang==='English'?'Respond in English.':'한국어로 답하세요.'} ① 섹션별 진단표(양호/보완/미흡 + 근거) ② 심사자가 지적할 Top 5 약점 ③ 수정 전→후 예시 3개 ④ 총평(10점 만점)\n\n## 원본 문서\n"""\n${t}\n"""`;
+}
+function parseJsonLoose(s){s=String(s||'').trim(); const m=s.match(/```(?:json)?\s*([\s\S]*?)```/); if(m)s=m[1].trim(); const i=s.indexOf('{'), j=s.lastIndexOf('}'); if(i<0||j<=i) throw new Error('JSON 객체가 없습니다'); return JSON.parse(s.slice(i,j+1));}
+function normalizeImported(d){
+  const base={meta:{course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어'},outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},plans:{},lessons:[]};
+  const out={...base, meta:{...base.meta,...(d.meta||{})}, outline:{...base.outline,...(d.outline||{})}, plans:d.plans||{}, lessons:Array.isArray(d.lessons)?d.lessons:[]};
+  if(!['AA','AI'].includes(out.meta.course)) out.meta.course='AA';
+  if(!['SL','HL'].includes(out.meta.level)) out.meta.level='SL';
+  out.meta.lessonMin=Number(out.meta.lessonMin)||50; out.meta.perWeek=Number(out.meta.perWeek)||4;
+  if(!['시간','교시'].includes(out.meta.hoursUnit)) out.meta.hoursUnit='시간';
+  out.outline.units=(out.outline.units||[]).map(u=>({id:(typeof u.id==='string'&&u.id)?u.id:uid(), year:(Number(u.year)===2?2:1), term:'1', title:String(u.title||''), topic:(u.topic==='T'?'T':([1,2,3,4,5].includes(Number(u.topic))?Number(u.topic):1)), hours:Number(u.hours)||0, subs:Array.isArray(u.subs)?u.subs.map(String):[], extra:String(u.extra||''), assess:Array.isArray(u.assess)?u.assess.map(String):[], res:String(u.res||'')}));
+  out.outline.lpChecks=Array.isArray(out.outline.lpChecks)?out.outline.lpChecks:[];
+  return out;
+}
+$('#im-btnFile').onclick=()=>$('#fileInput').click();
+function showImPrompt(p){if(!p)return; $('#im-promptBox').style.display='block'; $('#im-promptBox').textContent=p; $('#im-btnCopy').style.display='inline-flex'; toast('프롬프트 생성 완료 — 복사해서 Claude에 붙여넣으세요.');}
+let _pasteTimer=null;
+$('#im-paste').addEventListener('input',()=>{
+  clearTimeout(_pasteTimer);
+  _pasteTimer=setTimeout(()=>{
+    const t=$('#im-paste').value.trim();
+    if(t.length<60){ if(!t) $('#im-parseBox').style.display='none'; return; }
+    const parsed=parseOutlineDoc(null,t);
+    if(parsed&&parsed.outline.units.length){ $('#im-status').innerHTML=`<span class="badge b-blue">붙여넣기 감지</span> ${t.length.toLocaleString()}자 — 자동 분석했습니다.`; showParsePreview(parsed,'붙여넣은 내용'); }
+    else{ $('#im-parseBox').style.display='none'; $('#im-status').innerHTML=`<span class="badge b-amber">표 구조 인식 실패</span> 단원 표가 포함되게 붙여넣거나, 아래 '고급'의 AI 변환을 이용하세요.`; }
+  },700);
+});
+$('#im-btnConvert').onclick=()=>showImPrompt(promptDocConvert());
+$('#im-btnReview').onclick=()=>showImPrompt(promptDocReview());
+$('#im-btnCopy').onclick=()=>copyText($('#im-promptBox').textContent);
+$('#im-btnApply').onclick=()=>{
+  try{
+    const d=normalizeImported(parseJsonLoose($('#im-jsonIn').value));
+    if(!d.outline.units.length && !d.meta.school) throw new Error('변환된 내용이 비어 있습니다');
+    snapshot();
+    applyState(d);
+    showStep('course');
+    toast('가져오기 완료! ① 코스 아웃라인에서 내용을 확인·수정하세요.');
+  }catch(e){toast('JSON을 읽을 수 없습니다: '+e.message);}
+};
+
+/* ═══════════════ 제출 전 자동 점검 ═══════════════ */
+function renderChecklist(){
+  const el=$('#chkList'); if(!el)return;
+  const o=state.outline; const tot=Object.values(assignedByTopic()).reduce((a,b)=>a+b,0); const tgt=targetHours();
+  const items=[
+    ['단원 구성 존재', o.units.length>0, o.units.length? `${o.units.length}개 단원`:'단원이 없습니다 — ①에서 자동 구성'],
+    ['총 시수 ≥ 목표 시수', Math.round(tot*hourFactor())>=tgt-1, `${state.meta.hoursUnit==='교시'? `${tot}교시 ≈ ${Math.round(tot*hourFactor())}h`:`${tot}h`} / 목표 ${tgt}h`],
+    ['Year 1·2 모두 배치', o.units.some(u=>u.year===1)&&o.units.some(u=>u.year===2), '2개년 계획이 양식 요구사항'],
+    ['모든 단원에 학습 내용', o.units.length>0&&o.units.every(u=>u.subs.length>0||(u.extra||'').trim()), ''],
+    ['모든 단원에 평가 도구', o.units.length>0&&o.units.every(u=>u.assess.length>0), ''],
+    ['수학 툴킷·IA 30시간 배정', (assignedByTopic()['T']||0)*hourFactor()>=29, '공식 요구: 30시간(IA 10~15시간 포함) — 별도 단원 또는 분산 배정'],
+    ['IA 일정(소개·단계·마감) 작성', !!(o.iaIntro.trim()&&o.iaDue.trim()&&o.iaStages.trim()), ''],
+    ['TOK 연계 서술', !!o.tok.trim(), '토픽 1개를 골라 구체적으로'],
+    ['ATL 서술', !!o.atl.trim(), ''],
+    ['국제적 소양 서술', !!o.im.trim(), ''],
+    ['학습자상 선택+서술', (o.lpChecks||[]).length>0&&!!o.lp.trim(), ''],
+    ['자료(Resources) 서술', !!o.resources.trim(), ''],
+    ['기본 정보 입력(학교·교사·연수)', !!(state.meta.school&&state.meta.teacher&&state.meta.training), 'IB 연수 이수 정보는 양식 필수 항목']
+  ];
+  const ok=items.filter(i=>i[1]).length;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="pbar" style="flex:1"><div style="width:${Math.round(ok/items.length*100)}%"></div></div><b style="color:var(--navy)">${ok}/${items.length} 통과</b></div>`+
+   items.map(i=>`<div style="display:flex;gap:8px;padding:4px 2px;font-size:13.5px;align-items:baseline"><span>${i[1]?'✅':'⬜'}</span><span style="${i[1]?'':'color:#b45309;font-weight:700'}">${i[0]}</span><span class="hint" style="margin:0">${i[2]||''}</span></div>`).join('')+
+   `<p class="hint" style="margin-top:8px">체크리스트는 형식 요건 자동 점검입니다. 내용의 질은 ④ AI 검토 프롬프트로 진단하세요.</p>`;
+}
+window.addEventListener('beforeunload',e=>{if(state.outline.units.length){e.preventDefault(); e.returnValue='';}});
+
+/* ═══════════════ 샘플 데이터 ═══════════════ */
+$('#btnSample').onclick=()=>{
+  if(state.outline.units.length&&!confirm('현재 내용을 지우고 샘플을 불러올까요? (상단 되돌리기로 복구 가능)'))return;
+  snapshot();
+  uidSeq=1;
+  state={meta:{course:'AA',level:'SL',school:'한국IB고등학교(샘플)',code:'0000',teacher:'김영우',years:'2027.3 ~ 2029.2',training:'DP Mathematics: AA Cat.1 / 2026.01',date:'2026.08.07',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
+   outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:OUTLINE_EX.tok.replace('예: ',''),atl:OUTLINE_EX.atl.replace('예: ',''),im:OUTLINE_EX.im.replace('예: ',''),lp:'탐구하는 사람: 모든 단원을 탐구 질문으로 열고 닫는다. 사고하는 사람: 풀이 전략 비교 토론을 정례화한다. 도전하는 사람: 도전 문제와 IA에서 안전지대를 벗어난 시도를 격려하고 실패를 성찰로 연결한다.',lpChecks:['탐구하는 사람','사고하는 사람','도전하는 사람'],resources:'Haese Mathematics AA SL 교과서, 공학용 그래픽 계산기(TI-Nspire) 1인 1대, Desmos·GeoGebra, 토픽별 기출 문항 세트, 교육청 IB 자료실 번역 자료, 학교 수학탐구실'},
+   plans:{}, lessons:[]};
+  const c=SYLLABUS.AA;
+  state.outline.units=[
+    makeUnit(1,1,'단원 1. 수와 대수 — 패턴에서 일반화로',19,[...c.topics[0].slItems]),
+    makeUnit(2,1,'단원 2. 함수 — 관계의 언어',21,[...c.topics[1].slItems]),
+    makeUnit(3,1,'단원 3. 기하와 삼각법 — 공간의 수학',25,[...c.topics[2].slItems]),
+    makeUnit(4,2,'단원 4. 통계와 확률 — 불확실성 다루기',27,[...c.topics[3].slItems]),
+    makeUnit(5,2,'단원 5. 미적분 — 변화의 수학',28,[...c.topics[4].slItems]),
+    makeUnit('T',2,'수학 툴킷 & IA 탐구',30,[...TOOLKIT.items])
+  ];
+  state.outline.units.forEach(u=>{u.assess=u.topic==='T'?['IA 마일스톤','수행·탐구 과제']:['쪽지시험·퀴즈','단원평가(서술형)','모의 Paper 1','모의 Paper 2']; u.res='교과서 해당 단원, 토픽 기출 세트';});
+  $('#btnIaPreset').onclick.call();
+  setCourse('AA'); setLevel('SL'); refreshStaticFields(); renderUnitList(); renderLessonList();
+  /* 단원 1 유닛플래너 초안 자동 생성 */
+  $('#up-unitSel').value=state.outline.units[0].id; loadPlanForm(); $('#btnUpDraft').onclick();
+  /* 샘플 차시 1개 */
+  $('#ls-unitSel').value=state.outline.units[0].id; $('#ls-no').value='3/23'; $('#ls-type').value='intro'; $('#ls-sub').value='등비수열의 합';
+  $('#btnLsGen').onclick(); $('#btnLsSave').onclick();
+  showStep('course'); window.scrollTo({top:0,behavior:'smooth'});
+  toast('샘플을 불러왔습니다. ①→⑤ 순서로 둘러보세요!');
+};
+
+/* ═══════════════ 용어집·내비게이션·초기화 ═══════════════ */
+$('#glossary').innerHTML=GLOSSARY.map(g=>`<details class="gloss"><summary>${esc(g[0])}</summary><p>${esc(g[1])}</p></details>`).join('');
+function showStep(name){
+  $$('.step-btn').forEach(b=>b.classList.toggle('on',b.dataset.step===name));
+  $$('.step-panel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+name));
+  if(name==='unit') loadPlanForm();
+  if(name==='export') renderChecklist();
+  window.scrollTo({top:0});
+}
+$$('.step-btn').forEach(b=>{b.onclick=()=>showStep(b.dataset.step);});
+
+$('#btnUndo').onclick=()=>{
+  if(!lastSnapshot){toast('되돌릴 내용이 없습니다.'); return;}
+  const cur=JSON.parse(JSON.stringify(state));
+  applyState(lastSnapshot); lastSnapshot=cur;
+  toast('되돌렸습니다. 한 번 더 누르면 다시 복원됩니다.');
+};
+bindStaticFields();
+renderCourseInfo();
+renderUnitList();
+refreshStaticFields();
+renderLessonList();
+$('#ai-type').onchange();
+</script>
+</body>
+</html>

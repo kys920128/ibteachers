@@ -666,8 +666,15 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div id="rubricBox"></div>
     </div>
     <div class="card">
-      <h3><span class="chip">준비 중</span>평가 문항 틀 생성기</h3>
-      <div class="callout info">단원별 형성평가 문항 세트·모의 시험 틀 생성기가 이 자리에 들어옵니다. 개발 순서는 파일럿 의견을 반영해 정합니다 — 필요한 기능을 <a href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener" style="color:var(--blue); font-weight:700">파일럿 설문</a>으로 알려주세요.</div>
+      <h3><span class="chip">문항 틀</span>평가 문항 틀 만들기 <span class="eng">Question frame</span></h3>
+      <p class="hint" style="margin-bottom:8px">시험 구조에 맞는 문항 틀을 Word로 내보냅니다 — <b>문항 내용은 빈칸</b>이고, 형식 메모·배점 칸·채점 기준 메모가 준비된 상태로 시작합니다.</p>
+      <div class="grid3">
+        <div class="field"><label class="f-label">평가 항목</label><select id="qfExam"></select></div>
+        <div class="field"><label class="f-label">대상 단원 (선택)</label><select id="qfUnit"></select></div>
+        <div class="field"><label class="f-label">문항 수</label><input id="qfCount" type="number" value="8" min="1" max="30"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="exportExamDoc()">📝 문항 틀 → Word</button>
+      <p class="hint" style="margin-top:8px">더 필요한 평가 도구가 있으면 <a href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener" style="color:var(--blue); font-weight:700">파일럿 설문</a>으로 알려주세요.</p>
     </div>
   </section>
 
@@ -1883,6 +1890,35 @@ function renderAssessMap(){
       <button class="btn btn-primary btn-sm" onclick="exportRubricDoc()">📝 채점 기록표 틀 → Word</button>`;
     }
   }
+  const qe=$('#qfExam');
+  if(qe){ const rows2=SUBJ().assess[CUR().code]&&SUBJ().assess[CUR().code][state.meta.level]||[];
+    qe.innerHTML=rows2.map((r,i)=>`<option value="${i}">${esc(r[0])}</option>`).join('')+`<option value="F">형성평가 퀴즈 (자체)</option><option value="E">출구티켓 (자체)</option>`;
+  }
+  const qu=$('#qfUnit');
+  if(qu){ qu.innerHTML='<option value="">(공통 — 단원 미지정)</option>'+state.outline.units.map((x,i)=>`<option value="${x.id}">${esc(x.title||('단원 '+(i+1)))}</option>`).join(''); }
+}
+function exportExamDoc(){
+  const pk=SUBJ(), c=CUR(), lv=state.meta.level;
+  const sel=$('#qfExam'); const idx=sel?sel.value:'F';
+  const uSel=$('#qfUnit'); const u=(uSel&&uSel.value)?getUnit(uSel.value):null;
+  const nQ=Math.max(1,Math.min(30,Number(($('#qfCount')||{}).value)||8));
+  let title='형성평가 퀴즈', meta='', row=null;
+  const rows=pk.assess[c.code]&&pk.assess[c.code][lv]||[];
+  if(idx!=='F'&&idx!=='E'&&rows[Number(idx)]){ row=rows[Number(idx)]; title=row[0]+' (모의)'; meta=`${row[1]} · ${row[2]} · 비중 ${row[3]}`; }
+  if(idx==='E') title='출구티켓';
+  const P=[`<h1>${esc(c.name)} ${esc(lv)} — ${esc(title)} 틀</h1><p class="pmeta">${esc(meta)}${u?` · 단원: ${esc(u.title||'')}`:''} · 교사: ${esc(state.meta.teacher||'')} · 학생(번호·익명 라벨): ______ · 날짜: ______</p>`];
+  if(row) P.push(`<p><b>형식 메모:</b> ${esc(row[4]||'')}</p>`);
+  if(u&&u.subs.length) P.push(`<p><b>출제 범위:</b> ${esc(u.subs.slice(0,8).join('; '))}${u.subs.length>8?' 외':''}</p>`);
+  if(idx==='E'){
+    P.push(`<table><tr><th>오늘 배운 것 한 문장</th></tr><tr><td><br><br></td></tr></table>
+    <table><tr><th>핵심 확인 1문항 (교사 작성)</th></tr><tr><td><br><br><br><br></td></tr></table>
+    <table><tr><th>자신감 자가평가</th></tr><tr><td>□ 할 수 있다 &nbsp;&nbsp; □ 애매하다 &nbsp;&nbsp; □ 더 연습이 필요하다</td></tr></table>`);
+  } else {
+    P.push(`<table><tr><th style="width:8%">문항</th><th>문항 내용 (교사 작성)</th><th style="width:8%">배점</th></tr>${Array.from({length:nQ},(_,i)=>`<tr><td>${i+1}</td><td><br><br><br></td><td></td></tr>`).join('')}<tr><td colspan="2" style="text-align:right"><b>합계</b></td><td></td></tr></table>`);
+    P.push(`<h2>채점 기준 메모 (학생 배부용에서는 제거)</h2><table><tr><th style="width:8%">문항</th><th>채점 포인트</th></tr>${Array.from({length:Math.min(nQ,10)},(_,i)=>`<tr><td>${i+1}</td><td><br></td></tr>`).join('')}</table>`);
+  }
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 작성된 틀 · 실제 시험 형식·규정은 최신 공식 가이드·시험 안내와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`);
+  downloadDoc(P.join(''),`문항틀_${title.replace(/[\\/:*?"<>|]/g,'')}_${c.code}${lv}.doc`);
 }
 function exportRubricDoc(){
   const pk=SUBJ(), c=CUR(), lv=state.meta.level;

@@ -225,8 +225,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
     <button class="btn btn-ghost-dark btn-sm" id="btnUndo" style="display:none">↩ 되돌리기</button>
     <button class="btn btn-ghost-dark btn-sm" id="btnSample">✨ 샘플 불러오기</button>
-    <button class="btn btn-ghost-dark btn-sm" id="btnSaveJson">💾 저장</button>
-    <button class="btn btn-ghost-dark btn-sm" id="btnLoadJson">📂 불러오기</button>
+    <button class="btn btn-ghost-dark btn-sm" id="btnSaveJson" title="작업 파일(.json)을 내려받습니다. 다음에 '이어서 작업'으로 열면 지금 상태 그대로 이어집니다. Word 문서로 뽑으려면 왼쪽 '가져오기·내보내기'를 쓰세요.">💾 작업 저장 (.json)</button>
+    <button class="btn btn-ghost-dark btn-sm" id="btnLoadJson" title="지난번에 저장한 작업 파일(.json)을 열어 이어서 작업합니다.">📂 이어서 작업</button>
     <input type="file" id="fileInput" accept=".json,.docx,.doc,.txt,.md" style="display:none">
   </div>
 </header>
@@ -633,7 +633,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
         <button class="btn btn-primary" id="btnDocUnit">📝 유닛 플래너 → Word</button>
         <button class="btn btn-ghost" id="btnPrintUnit">🖨️ 인쇄·PDF</button>
       </div>
-      <p class="hint">Word 저장은 .doc 형식(Word·한글에서 열림), 인쇄에서 'PDF로 저장'을 선택하면 PDF가 됩니다. IB 제출 양식과 유사한 표 형식입니다.</p>
+      <p class="hint">Word 저장은 <b>.docx 형식</b>(Word·한글·구글 문서에서 열림), 인쇄에서 'PDF로 저장'을 선택하면 PDF가 됩니다. IB 제출 양식과 유사한 표 형식입니다.</p>
     </div>
     <div class="card">
       <h3><span class="chip">마크다운</span>다른 문서로 옮기기</h3>
@@ -644,7 +644,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
     <div class="card">
       <h3><span class="chip">데이터 파일</span>저장·백업 (중요)</h3>
-      <div class="callout warn">이 프로토타입은 서버가 없어 <b>새로고침하면 입력 내용이 사라집니다.</b> 작업을 마칠 때마다 JSON 파일로 저장해 두고, 다음에 '불러오기'로 이어서 작업하세요. (정식 버전: 자동 클라우드 저장)</div>
+      <div class="callout warn">이 프로토타입은 서버가 없어 <b>새로고침하면 입력 내용이 사라집니다.</b> 작업을 마칠 때마다 작업 파일(.json)로 저장해 두고, 다음에 '이어서 작업'으로 여세요. (정식 버전: 자동 클라우드 저장)</div>
+      <div class="callout info" style="font-size:12.5px"><b>두 가지 저장을 구분하세요.</b> <b>작업 파일(.json)</b>은 이 도구가 다시 읽어 이어서 작업하는 용도라 Word로는 열리지 않습니다. 사람이 읽고 제출할 문서는 위의 <b>Word(.docx)·PDF 내보내기</b>를 쓰세요.</div>
       <div style="display:flex; gap:8px; flex-wrap:wrap">
         <button class="btn btn-primary" id="btnSaveJson2">💾 JSON으로 저장</button>
         <button class="btn btn-ghost" id="btnLoadJson2">📂 JSON 불러오기</button>
@@ -710,9 +711,10 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
         <div class="field" style="margin:0"><label class="f-label">학생 수</label><input id="gr-count" type="number" value="24" min="1" max="60" style="width:110px"></div>
         <button class="btn btn-primary btn-sm" onclick="makeRoster()">명단 만들기 (01~NN)</button>
         <button class="btn btn-ghost btn-sm" onclick="addStudent()">+ 학생 한 명 추가</button>
+        <button class="btn btn-danger btn-sm" onclick="clearRoster()">명단 비우기</button>
       </div>
       <div id="grRoster"></div>
-      <p class="hint" style="margin-top:8px">라벨을 눌러 직접 고칠 수 있습니다(최대 12자). 이 파일 하나가 한 학급입니다 — 반이 여러 개면 반별로 JSON을 따로 저장하세요.</p>
+      <p class="hint" style="margin-top:8px">라벨을 눌러 직접 고칠 수 있습니다(최대 12자). 인원을 잘못 넣었으면 <b>학생 수를 고쳐 「명단 만들기」를 다시 누르면</b> 그 인원으로 새로 만들어집니다. 이 파일 하나가 한 학급입니다 — 반이 여러 개면 반별로 작업 파일을 따로 저장하세요.</p>
     </div>
     <div class="card">
       <h3><span class="chip">채점표</span>채점표 목록</h3>
@@ -1450,14 +1452,113 @@ function buildUnitDocHTML(id){
 function printUnit(id){const h=buildUnitDocHTML(id); if(h==null)return; $('#printArea').innerHTML=h; window.print();}
 $('#btnPrintOutline').onclick=printOutline;
 $('#btnPrintUnit').onclick=()=>printUnit($('#pr-unitSel').value);
-function downloadDoc(html,name){
-  const doc=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:11pt;line-height:1.5} h1{font-size:16pt;margin:0 0 4pt} h2{font-size:12pt;background:#eef2f7;padding:4pt 6pt;border-left:4pt solid #14304e;margin:12pt 0 6pt} h3{font-size:11pt;margin:8pt 0 4pt} table{border-collapse:collapse;width:100%;margin:6pt 0} th,td{border:1pt solid #808a96;padding:4pt 6pt;font-size:10pt;vertical-align:top;text-align:left} th{background:#f1f5f9} p{margin:3pt 0;white-space:pre-wrap} .pmeta{color:#445566;font-size:9pt} .pfoot{color:#666;font-size:8pt;margin-top:14pt;border-top:1pt solid #99a;padding-top:5pt}</style></head><body>${html}</body></html>`;
-  const blob=new Blob(['﻿',doc],{type:'application/msword'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
-  toast('Word 문서(.doc)로 저장했습니다 — Word·한글에서 열립니다.');
+/* ═══════════════ Word(.docx) 내보내기 ═══════════════
+   예전에는 HTML에 .doc 확장자만 붙여 내보냈는데, 최신 Word(2016 이후)는 보안 정책상
+   이런 파일을 열지 않는다. 그래서 실제 Office Open XML(.docx) 패키지를 직접 만든다.
+   구조: [Content_Types].xml + _rels/.rels + word/document.xml 을 ZIP(무압축)으로 묶음. */
+const CRC_TBL=(()=>{const t=new Uint32Array(256);
+  for(let i=0;i<256;i++){let c=i; for(let k=0;k<8;k++) c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1); t[i]=c>>>0;} return t;})();
+function crc32(buf){let c=0xFFFFFFFF; for(let i=0;i<buf.length;i++) c=CRC_TBL[(c^buf[i])&0xFF]^(c>>>8); return (c^0xFFFFFFFF)>>>0;}
+function zipStore(files){
+  const enc=new TextEncoder(), parts=[], central=[]; let offset=0;
+  const u16=n=>[n&0xFF,(n>>8)&0xFF], u32=n=>[n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>24)&0xFF];
+  files.forEach(f=>{
+    const nameB=enc.encode(f.name), data=enc.encode(f.data), crc=crc32(data);
+    const local=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0),
+      ...u32(crc),...u32(data.length),...u32(data.length),...u16(nameB.length),...u16(0),...nameB]);
+    parts.push(local,data);
+    central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0),
+      ...u32(crc),...u32(data.length),...u32(data.length),...u16(nameB.length),...u16(0),...u16(0),...u16(0),...u16(0),
+      ...u32(0),...u32(offset),...nameB]));
+    offset+=local.length+data.length;
+  });
+  const cdSize=central.reduce((a,c)=>a+c.length,0);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),
+    ...u32(cdSize),...u32(offset),...u16(0)]);
+  const all=[...parts,...central,end];
+  const total=all.reduce((a,c)=>a+c.length,0), out=new Uint8Array(total);
+  let p=0; all.forEach(c=>{out.set(c,p); p+=c.length;});
+  return out;
 }
-$('#btnDocOutline').onclick=()=>downloadDoc(buildOutlineDocHTML(),`코스아웃라인_${state.meta.school||'무제'}_${state.meta.course}${state.meta.level}.doc`);
-$('#btnDocUnit').onclick=()=>{const id=$('#pr-unitSel').value; const h=buildUnitDocHTML(id); if(h==null)return; const u=getUnit(id); downloadDoc(h,`유닛플래너_${((u&&u.title)||'단원').replace(/[\\/:*?"<>|]/g,'')}.doc`);};
+const xesc=t=>String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const W_FONT='<w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic"/>';
+/* 텍스트 한 덩어리 → run들. 줄바꿈은 <w:br/>로 (기존 HTML은 white-space:pre-wrap에 기대고 있었다) */
+function wRuns(text,opt){
+  const o=opt||{};
+  const rpr=`<w:rPr>${W_FONT}${o.b?'<w:b/>':''}${o.sz?`<w:sz w:val="${o.sz}"/><w:szCs w:val="${o.sz}"/>`:''}${o.color?`<w:color w:val="${o.color}"/>`:''}</w:rPr>`;
+  return String(text).split('\n').map((line,i)=>
+    `<w:r>${rpr}${i?'<w:br/>':''}<w:t xml:space="preserve">${xesc(line)}</w:t></w:r>`).join('');
+}
+function wInline(node,opt){
+  const o=opt||{};
+  let out='';
+  node.childNodes.forEach(n=>{
+    if(n.nodeType===3){ if(n.nodeValue) out+=wRuns(n.nodeValue,o); return; }
+    if(n.nodeType!==1) return;
+    const tag=n.tagName.toLowerCase();
+    if(tag==='br'){ out+=`<w:r><w:rPr>${W_FONT}</w:rPr><w:br/></w:r>`; return; }
+    if(tag==='b'||tag==='strong'){ out+=wInline(n,{...o,b:true}); return; }
+    out+=wInline(n,o);
+  });
+  return out;
+}
+function wPara(node,opt){
+  const o=opt||{};
+  const inner=wInline(node,o);
+  if(!inner&&!o.keepEmpty) return `<w:p><w:pPr><w:spacing w:before="0" w:after="60"/></w:pPr></w:p>`;
+  return `<w:p><w:pPr><w:spacing w:before="${o.before||0}" w:after="${o.after||60}"/>${o.shd?`<w:shd w:val="clear" w:fill="${o.shd}"/>`:''}${o.border?'<w:pBdr><w:top w:val="single" w:sz="6" w:color="9999AA"/></w:pBdr>':''}</w:pPr>${inner}</w:p>`;
+}
+function wTable(tbl){
+  const rows=[...tbl.querySelectorAll('tr')];
+  if(!rows.length) return '';
+  let cols=0; rows.forEach(r=>{ let c=0; [...r.children].forEach(td=>{c+=Number(td.getAttribute('colspan')||1);}); if(c>cols)cols=c; });
+  const grid=Array.from({length:cols},()=>'<w:gridCol w:w="'+Math.floor(9360/cols)+'"/>').join('');
+  const body=rows.map(r=>{
+    const cells=[...r.children].map(td=>{
+      const isTh=td.tagName.toLowerCase()==='th';
+      const span=Number(td.getAttribute('colspan')||1);
+      const inner=wInline(td,{b:isTh,sz:20})||`<w:r><w:rPr>${W_FONT}</w:rPr><w:t xml:space="preserve"></w:t></w:r>`;
+      return `<w:tc><w:tcPr><w:tcW w:w="${Math.floor(9360/cols)*span}" w:type="dxa"/>${span>1?`<w:gridSpan w:val="${span}"/>`:''}${isTh?'<w:shd w:val="clear" w:fill="F1F5F9"/>':''}</w:tcPr><w:p><w:pPr><w:spacing w:before="20" w:after="20"/></w:pPr>${inner}</w:p></w:tc>`;
+    }).join('');
+    return `<w:tr>${cells}</w:tr>`;
+  }).join('');
+  const bd=['top','left','bottom','right','insideH','insideV'].map(s=>`<w:${s} w:val="single" w:sz="6" w:color="808A96"/>`).join('');
+  return `<w:tbl><w:tblPr><w:tblW w:w="5000" w:type="pct"/><w:tblBorders>${bd}</w:tblBorders></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${body}</w:tbl>`;
+}
+/* 기존 내보내기 6종이 만들어 두는 HTML을 그대로 받아 WordprocessingML로 옮긴다.
+   덕분에 각 내보내기 함수는 손대지 않아도 된다. */
+function htmlToOoxml(html){
+  const doc=new DOMParser().parseFromString('<body>'+html+'</body>','text/html');
+  let out='';
+  [...doc.body.children].forEach(el=>{
+    const tag=el.tagName.toLowerCase(), cls=el.className||'';
+    if(tag==='h1') out+=wPara(el,{b:true,sz:32,after:80});
+    else if(tag==='h2') out+=wPara(el,{b:true,sz:24,before:240,after:80,shd:'EEF2F7'});
+    else if(tag==='h3') out+=wPara(el,{b:true,sz:22,before:160,after:60});
+    else if(tag==='table') out+=wTable(el)+'<w:p><w:pPr><w:spacing w:after="60"/></w:pPr></w:p>';
+    else if(tag==='br'){ if(/page-break/.test(el.getAttribute('style')||'')) out+=`<w:p><w:r><w:br w:type="page"/></w:r></w:p>`; }
+    else if(tag==='div'&&/pfoot/.test(cls)) out+=wPara(el,{sz:16,color:'666666',before:280,border:true});
+    else if(tag==='p'&&/pmeta/.test(cls)) out+=wPara(el,{sz:18,color:'445566'});
+    else out+=wPara(el,{sz:22});
+  });
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${out}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+}
+function downloadDoc(html,name){
+  const file=String(name).replace(/\.docx?$/i,'')+'.docx';
+  const pkg=zipStore([
+    {name:'[Content_Types].xml', data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`},
+    {name:'_rels/.rels', data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`},
+    {name:'word/document.xml', data:htmlToOoxml(html)}
+  ]);
+  const blob=new Blob([pkg],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=file; a.click(); URL.revokeObjectURL(a.href);
+  toast('Word 문서(.docx)로 저장했습니다 — Word·한글·구글 문서에서 열립니다.');
+}
+$('#btnDocOutline').onclick=()=>downloadDoc(buildOutlineDocHTML(),`코스아웃라인_${state.meta.school||'무제'}_${state.meta.course}${state.meta.level}.docx`);
+$('#btnDocUnit').onclick=()=>{const id=$('#pr-unitSel').value; const h=buildUnitDocHTML(id); if(h==null)return; const u=getUnit(id); downloadDoc(h,`유닛플래너_${((u&&u.title)||'단원').replace(/[\\/:*?"<>|]/g,'')}.docx`);};
 
 /* ═══════════════ 저장·불러오기 ═══════════════ */
 function saveJson(){
@@ -1469,8 +1570,8 @@ function saveJson(){
   a.href=URL.createObjectURL(blob);
   a.download=`IB플래너_${state.meta.school||'무제'}_${state.meta.course}${state.meta.level}_${stamp}.json`;
   a.click(); URL.revokeObjectURL(a.href);
-  toast(G().sheets.length? 'JSON 파일로 저장했습니다 — 채점 데이터(점수·메모)도 함께 담깁니다. 보관·공유에 유의하세요.'
-                          : 'JSON 파일로 저장했습니다. 다음에 「불러오기」로 이어서 작업하세요.');
+  toast(G().sheets.length? '작업 파일(.json)로 저장했습니다 — 채점 데이터(점수·메모)도 함께 담깁니다. Word 문서는 「가져오기·내보내기」에서 뽑으세요.'
+                          : '작업 파일(.json)로 저장했습니다 — 이어서 작업할 때 쓰는 파일입니다. Word 문서는 「가져오기·내보내기」에서 뽑으세요.');
 }
 function applyState(d){
   state=d; state.plans=state.plans||{}; state.lessons=state.lessons||[];
@@ -2052,7 +2153,7 @@ function exportExamDoc(){
     P.push(`<h2>채점 기준 메모 (학생 배부용에서는 제거)</h2><table><tr><th style="width:8%">문항</th><th>채점 포인트</th></tr>${Array.from({length:Math.min(nQ,10)},(_,i)=>`<tr><td>${i+1}</td><td><br></td></tr>`).join('')}</table>`);
   }
   P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 작성된 틀 · 실제 시험 형식·규정은 최신 공식 가이드·시험 안내와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`);
-  downloadDoc(P.join(''),`문항틀_${title.replace(/[\\/:*?"<>|]/g,'')}_${c.code}${lv}.doc`);
+  downloadDoc(P.join(''),`문항틀_${title.replace(/[\\/:*?"<>|]/g,'')}_${c.code}${lv}.docx`);
 }
 function exportRubricDoc(){
   const pk=SUBJ(), c=CUR(), lv=state.meta.level;
@@ -2063,7 +2164,7 @@ function exportRubricDoc(){
     P.push(`<table><tr><th style="width:30%">학생(번호·익명 라벨)</th><th style="width:10%">점수 (/10)</th><th>근거 메모</th><th style="width:22%">피드백 요점</th></tr>${Array.from({length:12},()=>'<tr><td><br></td><td></td><td></td><td></td></tr>').join('')}</table>`);
   }
   P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 작성된 틀 · 수준 기술·채점 세부는 반드시 최신 공식 가이드와 대조하세요 · 학생 이름 대신 번호·익명 라벨 사용을 권장합니다 · 본 도구는 IBO와 무관합니다.</div>`);
-  downloadDoc(P.join(''),`루브릭틀_${c.code}${lv}.doc`);
+  downloadDoc(P.join(''),`루브릭틀_${c.code}${lv}.docx`);
 }
 /* ═══════════════ ⑤ 채점·피드백 (교사용 채점 도우미) ═══════════════
    설계 원칙
@@ -2153,6 +2254,17 @@ function makeRoster(){
   g.roster=Array.from({length:n},(_,i)=>({id:uid(),label:String(i+1).padStart(2,'0')}));
   g.sheets.forEach(s=>{s.scores={}; s.memos={}; s.feedback={};});
   renderGradingUI(); toast(`${n}명 명단을 만들었습니다. 번호 대신 가명을 쓰려면 라벨을 눌러 고치세요.`);
+}
+function clearRoster(){
+  const g=G();
+  if(!g.roster.length){ toast('명단이 이미 비어 있습니다.'); return; }
+  const hasWork=g.sheets.some(s=>Object.keys(s.scores).length||Object.keys(s.feedback).length);
+  if(!confirm(`학생 명단 ${g.roster.length}명을 모두 지울까요?${hasWork?'\n입력해 둔 점수·근거 메모·피드백 문장도 함께 지워집니다.':''}\n(채점표 자체는 남습니다 · 상단 되돌리기로 복구 가능)`)) return;
+  snapshot();
+  g.roster=[];
+  g.sheets.forEach(s=>{s.scores={}; s.memos={}; s.feedback={};});
+  gradingUI.openMemo=null;
+  renderGradingUI(); toast('명단을 비웠습니다. 학생 수를 넣고 「명단 만들기」로 다시 시작하세요.');
 }
 function addStudent(){
   snapshot(); const g=G();
@@ -2484,7 +2596,7 @@ function renderClassProfile(){
   ${iaCheck}
   <div class="card"><h3><span class="chip">내보내기</span>학급 프로파일 문서</h3>
     <button class="btn btn-primary btn-sm" onclick="exportProfileDoc()">📊 학급 프로파일 → Word</button>
-    <p class="hint" style="margin-top:8px">학생은 익명 라벨로만 표기됩니다. 조정 전 가채점 기준의 참고 자료입니다.</p>
+    <p class="hint" style="margin-top:8px">학생은 선생님이 지정한 라벨로 표기됩니다(번호·가명 권장). 조정 전 가채점 기준의 참고 자료입니다.</p>
   </div>`;
 }
 
@@ -2623,7 +2735,7 @@ function exportFeedbackDoc(sid){
       <h2>학생 소감·질문</h2><table><tr><td><br><br><br></td></tr></table>
       <p class="pmeta">확인: 학생 ______________ · 교사 ______________</p>${GR_FOOT_FB}`);
   });
-  downloadDoc(P.join(''),`피드백지_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}_${sid?list[0].label:'전체'}.doc`);
+  downloadDoc(P.join(''),`피드백지_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}_${sid?list[0].label:'전체'}.docx`);
 }
 function exportProfileDoc(){
   const s=curSheet(); if(!s){toast('채점표를 먼저 선택하세요.'); return;}
@@ -2649,7 +2761,7 @@ function exportProfileDoc(){
     ${st.memoMissing.length?`<h2>점수 근거 메모가 없는 학생</h2><p>${st.memoMissing.map(x=>esc(x.label)).join(', ')}</p>`:''}
     <h2>교사 코멘트 — 다음 수업에 반영할 점</h2><table><tr><td><br><br><br></td></tr></table>
     ${GR_FOOT_PF}`];
-  downloadDoc(P.join(''),`학급프로파일_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}.doc`);
+  downloadDoc(P.join(''),`학급프로파일_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}.docx`);
 }
 
 /* ── ⑤ 전체 렌더 ── */

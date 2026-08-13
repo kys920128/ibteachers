@@ -725,6 +725,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div class="chips" style="margin-bottom:10px">
         <label><input type="radio" name="grKind" value="ia" checked onchange="renderNewSheetForm()"> 내부평가 (팩 준거 자동)</label>
         <label><input type="radio" name="grKind" value="exam" onchange="renderNewSheetForm()"> 모의 시험 (총점)</label>
+        <label><input type="radio" name="grKind" value="items" onchange="renderNewSheetForm()"> 모의 시험 (문항별)</label>
         <label><input type="radio" name="grKind" value="custom" onchange="renderNewSheetForm()"> 자체 평가 (직접 입력)</label>
       </div>
       <div id="grNewForm"></div>
@@ -2325,6 +2326,7 @@ function renderNewSheetForm(){
   /* 폼 내용이 실제로 의존하는 값만 서명에 넣는다 — 자체 평가는 과목·레벨과 무관하므로
      레벨을 바꿨다고 입력해 둔 준거가 지워지면 안 된다 */
   const sig=kind==='custom'? 'custom'
+          : kind==='items'? 'items'
           : kind==='ia'? ['ia',state.meta.subject,state.meta.course].join('|')
           : ['exam',state.meta.subject,state.meta.course,state.meta.level].join('|');
   if(gradingUI.formSig===sig&&el.innerHTML.trim()) return;
@@ -2338,8 +2340,17 @@ function renderNewSheetForm(){
     const rows=examRows();
     el.innerHTML=`<div class="grid2"><div class="field"><label class="f-label">평가 항목</label><select id="gr-exam">${rows.map((r,i)=>`<option value="${i}">${esc(r[0])}</option>`).join('')}</select></div>
       <div class="field"><label class="f-label">만점 (공식 배점을 확인해 고치세요)</label><input id="gr-examMax" type="number" min="1" max="500" value="${examMaxGuess(0)}"></div></div>
-      <p class="hint" style="margin:0">모의 시험은 총점 한 칸으로 기록합니다. 문항별 채점은 다음 버전 과제입니다.</p>`;
+      <p class="hint" style="margin:0">총점 한 칸으로만 기록합니다. 어느 문항에서 무너졌는지 보려면 <b>「모의 시험 (문항별)」</b>을 쓰세요.</p>`;
     const es=$('#gr-exam'); if(es) es.onchange=()=>{ const m=$('#gr-examMax'); if(m) m.value=examMaxGuess(Number(es.value)); };
+  } else if(kind==='items'){
+    el.innerHTML=`<div class="grid3">
+      <div class="field"><label class="f-label">문항 수</label><input id="gr-itemCount" type="number" min="1" max="60" value="10"></div>
+      <div class="field"><label class="f-label">문항당 배점 (일괄)</label><input id="gr-itemMark" type="number" min="1" max="50" value="6"></div>
+      <div class="field"><label class="f-label">첫 문항 번호</label><input id="gr-itemStart" type="number" min="1" max="99" value="1"></div>
+      </div>
+      <div class="field"><label class="f-label">문항별 배점을 따로 줄 때 (선택 — 쉼표로 구분, 위 「문항 수·일괄 배점」보다 우선)</label>
+        <input id="gr-itemMarks" placeholder="예: 4,4,6,6,8,8,10,12"></div>
+      <p class="hint" style="margin:0">문항마다 한 칸씩 만들어집니다. 채점을 마치면 <b>③ 학급 프로파일</b>에 <b>문항 분석</b>이 생겨 어느 문항이 무너졌는지 보여 줍니다.</p>`;
   } else {
     el.innerHTML=`<div class="field"><label class="f-label">준거 (한 줄에 「이름, 만점」 — 비워 두면 총점 100점 한 칸)</label>
       <textarea id="gr-customCrit" placeholder="예)&#10;내용의 정확성, 10&#10;근거 활용, 10&#10;표현·구성, 5"></textarea></div>
@@ -2374,6 +2385,20 @@ function createSheet(){
     const mx=Math.max(1,Math.min(500,Number(($('#gr-examMax')||{}).value)||100));
     crit=[[(r&&r[0])||'총점',mx]]; holistic=true; critLabel='총점';
     title=title||`${(r&&r[0])||'모의 시험'} (모의)`;
+  } else if(kind==='items'){
+    /* 문항별 채점 — crit 한 칸이 문항 하나. 격자·프로파일·피드백은 준거와 같은 경로를 탄다. */
+    const raw=String(($('#gr-itemMarks')||{}).value||'').trim();
+    const start=Math.max(1,Math.min(99,Number(($('#gr-itemStart')||{}).value)||1));
+    if(raw){
+      crit=raw.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean).slice(0,60)
+        .map((x,i)=>[`${start+i}번`, Math.max(1,Math.min(50,Number(x)||1))]);
+    }
+    if(!crit.length){
+      const n=Math.max(1,Math.min(60,Number(($('#gr-itemCount')||{}).value)||10));
+      const per=Math.max(1,Math.min(50,Number(($('#gr-itemMark')||{}).value)||6));
+      crit=Array.from({length:n},(_,i)=>[`${start+i}번`,per]);
+    }
+    critLabel='문항별 배점'; title=title||'모의 시험 (문항별)';
   } else {
     const raw=String(($('#gr-customCrit')||{}).value||'').trim();
     if(raw){
@@ -2389,6 +2414,8 @@ function createSheet(){
   const s={ id:uid(), title, kind,
     subject:state.meta.subject, course:state.meta.course, level:state.meta.level,
     critLabel, holistic, crit,
+    /* 문항별 표는 학습 내용 꼬리표(topics)를 달 수 있다 — 문항 분석에서 '어느 내용이 약한지'로 이어진다 */
+    itemMode:kind==='items', topics:kind==='items'? crit.map(()=>'') : undefined,
     unitId:($('#gr-unit')||{}).value||'', date:($('#gr-date')||{}).value||'',
     scores:{}, memos:{}, feedback:{} };
   g.sheets.push(s); gradingUI.sheetId=s.id;
@@ -2584,11 +2611,13 @@ function renderClassProfile(){
       <div>${st.memoMissing.length?'⬜':'✅'} 점수 근거 메모 ${st.memoMissing.length?`<span style="color:#b45309; font-weight:700">— 메모 없음 ${st.memoMissing.length}명: ${st.memoMissing.slice(0,12).map(x=>esc(x.label)).join(', ')}${st.memoMissing.length>12?' 외':''}</span>`:''}</div>
     </div>
     <p class="hint" style="margin-top:8px">표본 검토(moderation)에 대비해 모든 학생의 점수 근거를 남겨 두면 안전합니다.</p></div>`:'';
-  el.innerHTML=`<div class="card"><h3><span class="chip">프로파일</span>학급 준거 프로파일</h3>${pickSel}
+  /* 문항별 표에서는 위의 문항 분석표가 같은 내용을 더 잘 보여 주므로 준거 막대 카드를 생략한다 */
+  const profileCard=s.itemMode? '' : `<div class="card"><h3><span class="chip">프로파일</span>학급 준거 프로파일</h3>${pickSel}
     <p class="hint" style="margin-bottom:10px">${esc(s.title)} · 채점 완료 ${st.complete}/${st.roster.length}명 기준 (입력된 점수만 평균)</p>
     ${bars}
     ${gapNote}
-  </div>
+  </div>`;
+  el.innerHTML=`${itemAnalysisHtml(s,st,pickSel)}${profileCard}
   <div class="card"><h3><span class="chip">분포</span>총점 분포 (원점수 기준)</h3>
     ${st.totals.length? dist : '<div class="empty-note">전 준거를 다 채운 학생이 아직 없습니다.</div>'}
     <p class="hint" style="margin-top:8px">채점을 마친 ${st.totals.length}명의 원점수 분포입니다. 7등급·A~E 환산은 제공하지 않습니다 — 등급 경계는 시험 세션마다 IB가 새로 정하므로 어떤 환산표도 정확할 수 없습니다.</p>
@@ -2598,6 +2627,62 @@ function renderClassProfile(){
     <button class="btn btn-primary btn-sm" onclick="exportProfileDoc()">📊 학급 프로파일 → Word</button>
     <p class="hint" style="margin-top:8px">학생은 선생님이 지정한 라벨로 표기됩니다(번호·가명 권장). 조정 전 가채점 기준의 참고 자료입니다.</p>
   </div>`;
+}
+
+/* ── 문항 분석(QLA) — 문항별 채점표에서만 ──
+   문항별로 점수를 넣는 수고에 대한 보상. '어느 문항에서 무너졌나'를 정답률 낮은 순으로 세우고,
+   문항마다 학습 내용 꼬리표를 달면 다음 수업에서 무엇을 다시 가르칠지가 바로 나온다. */
+function setItemTopic(ci,v){
+  const s=curSheet(); if(!s) return;
+  s.topics=s.topics||s.crit.map(()=>'');
+  s.topics[ci]=String(v||'').slice(0,60);
+}
+function itemAnalysisHtml(s,st,pickSel){
+  if(!s.itemMode) return '';
+  if(!st.filled) return `<div class="card"><h3><span class="chip">문항 분석</span>어느 문항이 약한가</h3>${pickSel}
+    <div class="empty-note">아직 입력된 점수가 없습니다.<br><br><button class="btn btn-primary btn-sm" onclick="showTab('grading','input')">2. 점수 입력으로 →</button></div></div>`;
+  const items=st.per.map((p,i)=>({i, name:s.crit[i][0], max:s.crit[i][1],
+    avg:p.cnt? p.sum/p.cnt:0, rate:p.cnt? p.sum/p.cnt/(s.crit[i][1]||1):0, cnt:p.cnt,
+    topic:(s.topics&&s.topics[i])||''}));
+  const rated=items.filter(x=>x.cnt);
+  const weak=rated.slice().sort((a,b)=>a.rate-b.rate).slice(0,3);
+  const rows=items.slice().sort((a,b)=>a.rate-b.rate).map(x=>{
+    const pctv=Math.round(x.rate*100);
+    const cls=!x.cnt?'b-gray':x.rate>=0.75?'b-green':x.rate>=0.45?'b-amber':'b-gray';
+    return `<tr><td style="white-space:nowrap"><b>${esc(x.name)}</b></td>
+      <td class="num-cell" style="white-space:nowrap">${x.cnt? x.avg.toFixed(1):'—'} / ${x.max}</td>
+      <td style="width:34%"><div class="pbar"><div style="width:${x.cnt?pctv:0}%"></div></div></td>
+      <td class="num-cell"><span class="badge ${cls}">${x.cnt? pctv+'%':'미채점'}</span></td>
+      <td><input value="${esc(x.topic)}" maxlength="60" placeholder="이 문항이 물은 내용 (예: 등비수열의 합)" style="font-size:12.5px; padding:5px 8px" oninput="setItemTopic(${x.i},this.value)"></td></tr>`;
+  }).join('');
+  const weakLine=weak.length? weak.map(x=>`<b>${esc(x.name)}</b>(${Math.round(x.rate*100)}%)${x.topic?` — ${esc(x.topic)}`:''}`).join(' · '):'';
+  return `<div class="card"><h3><span class="chip">문항 분석</span>어느 문항이 약한가 <span class="eng">Question-level analysis</span></h3>${pickSel}
+    <p class="hint" style="margin-bottom:10px">${esc(s.title)} · 정답률이 낮은 문항부터 정렬했습니다. 채점을 마친 학생의 점수만 평균에 들어갑니다.</p>
+    <div style="overflow-x:auto"><table class="tbl" style="min-width:640px"><tr><th>문항</th><th style="text-align:right">평균</th><th>정답률</th><th style="text-align:right">%</th><th>물은 내용 (직접 입력)</th></tr>${rows}</table></div>
+    ${weakLine?`<div class="callout warn" style="margin-top:10px">가장 낮은 문항: ${weakLine}<br>이 문항들이 물은 내용을 <b>③ 차시 수업안</b>에서 다시 다루면 가장 효과가 큽니다.
+      <button class="btn btn-soft btn-sm" style="margin-left:6px" onclick="showStep('lesson')">③ 차시 수업안으로 ›</button></div>`:''}
+    <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="exportItemDoc()">📊 문항 분석표 → Word</button>
+  </div>`;
+}
+function exportItemDoc(){
+  const s=curSheet(); if(!s||!s.itemMode){toast('문항별 채점표에서만 쓸 수 있습니다.'); return;}
+  const st=sheetStats(s);
+  if(!st.filled){ toast('입력된 점수가 없습니다.'); return; }
+  if(!nameRiskConfirm('문항 분석표')) return;
+  const pk=SUBJECTS[s.subject]||SUBJ();
+  const cname=(pk.courses[s.course]&&pk.courses[s.course].name)||'';
+  const bar=r=>'▇'.repeat(Math.round(r*20))||'·';
+  const items=st.per.map((p,i)=>({name:s.crit[i][0], max:s.crit[i][1], cnt:p.cnt,
+    avg:p.cnt? p.sum/p.cnt:0, rate:p.cnt? p.sum/p.cnt/(s.crit[i][1]||1):0,
+    topic:(s.topics&&s.topics[i])||''})).sort((a,b)=>a.rate-b.rate);
+  const P=[`<h1>${esc(cname)} ${esc(s.level)} — ${esc(s.title)} 문항 분석</h1>
+    <p class="pmeta">채점 완료 ${st.complete}/${st.roster.length}명 · 실시일: ${esc(s.date||'____')} · 교사: ${esc(state.meta.teacher||'')}</p>
+    <p>정답률이 낮은 문항부터 정렬했습니다. 다음 수업에서 다시 다룰 내용을 고르는 데 쓰세요.</p>
+    <table><tr><th style="width:12%">문항</th><th style="width:12%">평균</th><th style="width:10%">정답률</th><th style="width:26%">분포</th><th>물은 내용</th></tr>
+    ${items.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.cnt? x.avg.toFixed(1):'—'} / ${x.max}</td><td>${x.cnt? Math.round(x.rate*100)+'%':'—'}</td><td>${x.cnt? bar(x.rate):''}</td><td>${esc(x.topic)}</td></tr>`).join('')}</table>
+    <h2>다음 수업 계획 — 다시 다룰 내용</h2><table><tr><td><br><br><br></td></tr></table>
+    ${GR_FOOT_PF}`];
+  downloadDoc(P.join(''),`문항분석_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}.docx`);
 }
 
 /* ── 피드백 문장 ──

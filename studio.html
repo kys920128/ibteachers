@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.8)</title>
+<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.9)</title>
 <meta name="description" content="IB DP 코스아웃라인·유닛플래너·차시 수업안을 브라우저에서 바로 작성하고 Word·PDF로 내보내는 도구. 설치·가입 없이 무료.">
 <link rel="canonical" href="https://ibteachers.kr/studio.html">
 <meta property="og:title" content="IB티처스 스튜디오 — IB 수업설계 도구">
@@ -239,7 +239,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     <button class="step-btn flow" data-step="unit"><span class="num">2</span> <span>유닛 플래너<span class="sub" data-rail="unit"></span></span></button>
     <button class="step-btn flow" data-step="lesson"><span class="num">3</span> <span>차시 수업안<span class="sub" data-rail="lesson"></span></span></button>
     <button class="step-btn flow dashed" data-step="assess"><span class="num">4</span> <span>평가 설계<span class="sub" data-rail="assess"></span></span></button>
-    <button class="step-btn flow last soon" data-step="grading"><span class="num">5</span> <span>채점·피드백<span class="sub">준비 중</span></span></button>
+    <button class="step-btn flow last" data-step="grading"><span class="num">5</span> <span>채점·피드백<span class="sub" data-rail="grading"></span></span></button>
     <div class="side-divider"></div>
     <div class="side-group">도구</div>
     <button class="step-btn" data-step="ai"><span class="num">🤖</span> AI 초안 만들기</button>
@@ -553,11 +553,17 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
           <option value="lesson">차시 수업안 상세 설계</option>
           <option value="outline">코스 아웃라인 검토(제출 관점)</option>
           <option value="ia">IA 탐구 주제 아이디어</option>
+          <option value="feedback">채점 결과 → 피드백 문장 다듬기</option>
         </select></div>
         <div class="field" id="ai-unitWrap"><label class="f-label">대상 단원</label><select id="ai-unitSel"></select></div>
         <div class="field" id="ai-extraWrap" style="display:none"><label class="f-label">추가 조건 (선택)</label><input id="ai-extra" placeholder="예: 3차시 분량, 모둠활동 중심"></div>
       </div>
       <button class="btn btn-primary" id="btnAiGen">🤖 프롬프트 조립하기</button>
+      <div class="callout warn" id="aiFbWarn" style="display:none">
+        <b>주의 — 이 프롬프트에는 학급의 점수·메모가 담깁니다.</b> 복사해서 claude.ai 등 외부 AI에 붙여넣는 순간, 그 내용은 선생님 브라우저 밖으로 나갑니다.
+        붙여넣기 전에 ① 학생이 전원 익명 라벨인지 ② 메모·피드백에 이름·식별 정보가 없는지 확인하세요. (학교명·교사명은 이 프롬프트에 넣지 않습니다.)
+        외부 전송이 곤란하면 ⑤ 피드백지 탭의 <b>「전체 초안 생성」</b>(외부 전송 없음)을 쓰세요.
+      </div>
       <div class="callout info" style="margin-top:12px">사용법: ① 프롬프트 복사 → ② <b>claude.ai</b> 접속(무료 가능) → ③ 붙여넣기 → ④ 결과를 이 도구의 해당 칸에 붙여 다듬기. <b>정식 버전에서는 버튼 한 번으로 자동 생성됩니다(API 연동 예정).</b></div>
     </div>
 
@@ -678,21 +684,79 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
   </section>
 
-  <!-- ═══════════ STEP 5 : 채점·피드백 (준비 중) ═══════════ -->
+  <!-- ═══════════ STEP 5 : 채점·피드백 ═══════════ -->
   <section class="step-panel" id="panel-grading">
     <div class="page-head">
-      <h2>⑤ 채점·피드백 <span class="eng">Marking & Feedback</span></h2>
-      <p>교사용 채점 도우미가 이 자리에 들어옵니다.</p>
+      <h2>⑤ 채점·피드백 <span class="eng">Marking &amp; Feedback</span> <button class="btn btn-soft btn-sm" style="float:right" onclick="goAI('feedback')">🤖 피드백 다듬기 프롬프트</button></h2>
+      <p>준거별로 점수를 넣으면 학급 프로파일과 피드백지가 만들어집니다. 평가 하나당 「채점표」 한 장을 만들어 쓰세요.</p>
     </div>
-    <div class="card" style="border-style:dashed; text-align:center; padding:40px 20px">
-      <div style="font-size:34px; margin-bottom:10px">🧮</div>
-      <h3 style="font-size:17px; margin-bottom:12px">준비 중 — 교사용 채점 도우미</h3>
-      <p style="color:var(--ink2); font-size:14px; max-width:560px; margin:0 auto 16px; text-align:left; line-height:1.8">
-      · 준거(수학 IA · 국어 개별 구술 평가 등)별 점수 입력과 근거 메모<br>
-      · 학급 전체 준거 프로파일 — 우리 반이 어느 준거에서 약한지 한눈에<br>
-      · 준거 기반 피드백 문장 초안 → Word 피드백지 출력<br><br>
-      모든 계산은 지금처럼 <b>선생님 브라우저 안에서만</b> 처리됩니다(학생 정보 서버 전송 없음). ④ 평가 설계의 준거표와 ③ 차시 기록이 여기로 이어집니다.</p>
-      <a class="btn btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener">이 기능이 필요하신가요? 파일럿 의견 보내기</a>
+    <div class="callout warn">
+      <b>학생은 번호·가명(익명 라벨)로만 입력하세요</b> — 이름 칸은 따로 두지 않았습니다. 실명처럼 보이면 경고가 뜨지만, 판단은 선생님 몫입니다.<br>
+      점수·메모는 서버로 전송되지 않지만, <b>저장(JSON) 파일에는 함께 담깁니다.</b> 파일을 공유 폴더·메신저에 올릴 때 학급 평가 자료임을 유의하세요.<br>
+      여기 점수는 <b>선생님의 가채점</b>입니다 — 내부평가는 IB 조정(moderation)을 거쳐 달라질 수 있고, 시험 1·2 등 외부평가는 IB 채점관이 채점합니다.
+    </div>
+
+    <div class="tabbar" data-tabs="grading">
+      <button class="tab-btn" data-tab="setup">1. 명단·채점표<span class="miss" style="display:none"></span></button>
+      <button class="tab-btn" data-tab="input">2. 점수 입력<span class="miss" style="display:none"></span></button>
+      <button class="tab-btn" data-tab="profile">3. 학급 프로파일</button>
+      <button class="tab-btn" data-tab="feedback">4. 피드백지<span class="miss" style="display:none"></span></button>
+    </div>
+
+    <div class="tab-panel" data-tabs="grading" data-tab="setup">
+    <div class="card">
+      <h3><span class="chip">명단</span>학생 명단 (익명 라벨)</h3>
+      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px">
+        <div class="field" style="margin:0"><label class="f-label">학생 수</label><input id="gr-count" type="number" value="24" min="1" max="60" style="width:110px"></div>
+        <button class="btn btn-primary btn-sm" onclick="makeRoster()">명단 만들기 (01~NN)</button>
+        <button class="btn btn-ghost btn-sm" onclick="addStudent()">+ 학생 한 명 추가</button>
+      </div>
+      <div id="grRoster"></div>
+      <p class="hint" style="margin-top:8px">라벨을 눌러 직접 고칠 수 있습니다(최대 12자). 이 파일 하나가 한 학급입니다 — 반이 여러 개면 반별로 JSON을 따로 저장하세요.</p>
+    </div>
+    <div class="card">
+      <h3><span class="chip">채점표</span>채점표 목록</h3>
+      <div id="grSheetList"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">새로 만들기</span>채점표 추가</h3>
+      <div class="chips" style="margin-bottom:10px">
+        <label><input type="radio" name="grKind" value="ia" checked onchange="renderNewSheetForm()"> 내부평가 (팩 준거 자동)</label>
+        <label><input type="radio" name="grKind" value="exam" onchange="renderNewSheetForm()"> 모의 시험 (총점)</label>
+        <label><input type="radio" name="grKind" value="custom" onchange="renderNewSheetForm()"> 자체 평가 (직접 입력)</label>
+      </div>
+      <div id="grNewForm"></div>
+      <div class="grid3" style="margin-top:10px">
+        <div class="field"><label class="f-label">채점표 이름</label><input id="gr-title" placeholder="예: IA 1차 채점"></div>
+        <div class="field"><label class="f-label">연결할 단원 (선택)</label><select id="gr-unit"></select></div>
+        <div class="field"><label class="f-label">실시일 (선택)</label><input id="gr-date" placeholder="예: 2027.10.15"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="createSheet()">➕ 채점표 만들기</button>
+    </div>
+    <div class="card">
+      <h3><span class="chip">정리</span>채점 데이터 관리</h3>
+      <p class="hint" style="margin-bottom:8px">학년도가 끝나 파일을 넘겨줄 때, 점수·메모만 지우고 수업 설계는 남길 수 있습니다.</p>
+      <button class="btn btn-danger btn-sm" onclick="clearGrading()">🗑 채점 데이터 전체 비우기</button>
+    </div>
+    </div>
+
+    <div class="tab-panel" data-tabs="grading" data-tab="input">
+    <div class="card">
+      <h3><span class="chip">점수</span>준거별 점수 입력<span id="grInputTitle" style="margin-left:auto; font-size:12.5px; color:#94a3b8; font-weight:600"></span></h3>
+      <div style="margin-bottom:10px"><select id="grSheetSel" style="width:auto; min-width:260px" onchange="pickSheet(this.value)"></select></div>
+      <div id="grProgress"></div>
+      <div id="grGridWrap" style="overflow-x:auto"></div>
+      <p class="hint" style="margin-top:8px">Enter(또는 ↓)로 같은 준거의 다음 학생으로 이동합니다. 📝를 누르면 준거별 근거 메모 칸이 열립니다 — IB 조정(moderation) 표본 제출에 대비해 점수 근거를 남겨 두세요.</p>
+      <div class="callout info" style="font-size:12.5px">7등급·A~E 환산은 제공하지 않습니다. 등급 경계는 시험 세션마다 IB가 새로 정하므로 어떤 환산표도 정확할 수 없고, 잘못된 기대만 만듭니다. 이 화면은 원점수와 달성률까지만 보여줍니다.</div>
+    </div>
+    </div>
+
+    <div class="tab-panel" data-tabs="grading" data-tab="profile">
+    <div id="grProfile"></div>
+    </div>
+
+    <div class="tab-panel" data-tabs="grading" data-tab="feedback">
+    <div id="grFeedback"></div>
     </div>
   </section>
 
@@ -704,7 +768,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
     </div>
     <div class="card">
       <h3><span class="chip">이 도구의 사용 순서</span></h3>
-      <div class="callout good">상단에서 <b>과목·과정·레벨</b>을 고르고 → <b>① 코스 아웃라인</b>의 「단원 구성」 탭에서 '공식 토픽으로 자동 구성' → <b>② 유닛 플래너</b>에서 단원별 '초안 자동 생성' 후 다듬기 → <b>③ 차시 수업안</b> 생성 → <b>④ 평가 설계</b>에서 평가 지도·루브릭·문항 틀 확인 → 도구의 <b>가져오기·내보내기</b>에서 점검 후 Word/PDF 출력. 진행 상황은 <b>🏠 진행 현황</b>에서 한눈에, 각 단계의 🤖 버튼으로 AI 정교화. 처음이라면 상단 <b>'샘플 불러오기'</b>로 완성 예시를 먼저 보세요.</div>
+      <div class="callout good">상단에서 <b>과목·과정·레벨</b>을 고르고 → <b>① 코스 아웃라인</b>의 「단원 구성」 탭에서 '공식 토픽으로 자동 구성' → <b>② 유닛 플래너</b>에서 단원별 '초안 자동 생성' 후 다듬기 → <b>③ 차시 수업안</b> 생성 → <b>④ 평가 설계</b>에서 평가 지도·루브릭·문항 틀 확인 → 수업이 끝나면 <b>⑤ 채점·피드백</b>에서 준거별 점수·학급 프로파일·피드백지 → 도구의 <b>가져오기·내보내기</b>에서 점검 후 Word/PDF 출력. 진행 상황은 <b>🏠 진행 현황</b>에서 한눈에, 각 단계의 🤖 버튼으로 AI 정교화. 처음이라면 상단 <b>'샘플 불러오기'</b>로 완성 예시를 먼저 보세요.</div>
+      <div class="callout warn" style="font-size:12.5px">⑤ 채점·피드백은 <b>학생을 번호·가명(익명 라벨)로만</b> 다룹니다. 점수·메모는 서버로 전송되지 않지만 저장(JSON) 파일에는 함께 담기므로, 파일 공유 시 학급 평가 자료임을 유의하세요. 여기 점수는 <b>교사의 가채점</b>이며 7등급 환산은 제공하지 않습니다.</div>
     </div>
     <div class="card">
       <h3><span class="chip">용어사전</span></h3>
@@ -847,9 +912,13 @@ let uidSeq=1; const uid=()=>'u'+(uidSeq++);
 let state={
   meta:{subject:'math',course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
   outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},
-  plans:{}, lessons:[]
+  plans:{}, lessons:[],
+  /* ⑤ 채점·피드백 — roster(익명 라벨 명단) + sheets(채점표, 준거는 생성 시점 스냅숏) */
+  grading:{v:1,roster:[],sheets:[]}
 };
 let lastSnapshot=null;
+/* ⑤ 현재 열어 둔 채점표 — 화면 상태이므로 저장 파일(state)에 넣지 않음 (uiTab과 같은 방식) */
+let gradingUI={sheetId:null, openMemo:null};
 function snapshot(){ lastSnapshot=JSON.parse(JSON.stringify(state)); const b=$('#btnUndo'); if(b) b.style.display='inline-flex'; }
 /* 과목 팩 접근자 — SUBJECTS 레지스트리는 스크립트 하단에 정의(호출 시점에는 항상 존재) */
 const SUBJ=()=>SUBJECTS[state.meta.subject]||SUBJECTS.math;
@@ -863,6 +932,8 @@ const hoursSuffix=()=> (state.meta.hoursUnit==='교시')?'교시':'시간';
 const unitLessons=u=> (state.meta.hoursUnit==='교시')? (Number(u.hours)||0) : Math.max(1,Math.ceil((Number(u.hours)||0)*60/(Number(state.meta.lessonMin)||50)));
 const unitHoursLabel=u=> (state.meta.hoursUnit==='교시')? `${u.hours||0}교시(≈${Math.round((u.hours||0)*hourFactor())}h)` : `${u.hours||0}시간(약 ${unitLessons(u)}교시)`;
 
+/* 채점 데이터 방어 접근자 — 구 JSON에는 grading이 없으므로 모든 채점 코드는 G()로만 접근 */
+const G=()=>state.grading||(state.grading={v:1,roster:[],sheets:[]});
 function emptyPlan(){return {desc:'',dpAssess:'',transfer:'',essential:'',miscon:'',inqF:'',inqC:'',inqD:'',know:'',skills:'',concepts:'',expChecks:[],expDetail:'',formative:'',summative:'',diffChecks:[],diffDetail:'',atlChecks:[],atlDetail:'',langChecks:[],langDetail:'',tok:'',cas:'',im:'',lpChecks:[],resources:'',reflBefore:'',reflDuring:'',reflAfter:''};}
 
 /* ═══════════════ 칩 그룹 렌더 ═══════════════ */
@@ -885,8 +956,8 @@ function refreshStaticFields(){
 }
 
 /* ═══════════════ 과정·레벨 선택 ═══════════════ */
-function setCourse(c){state.meta.course=c; renderSubjectUI(); $$('#segCourse button').forEach(b=>b.classList.toggle('on',b.dataset.c===c)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
-function setLevel(l){state.meta.level=l; $$('#segLevel button').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects();}
+function setCourse(c){state.meta.course=c; renderSubjectUI(); $$('#segCourse button').forEach(b=>b.classList.toggle('on',b.dataset.c===c)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects(); renderNewSheetForm();}
+function setLevel(l){state.meta.level=l; $$('#segLevel button').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); renderCourseInfo(); renderHours(); renderUnitList(); refreshUnitSelects(); renderNewSheetForm();}
 $('#segCourse').addEventListener('click',e=>{if(e.target.dataset.c) setCourse(e.target.dataset.c);});
 $('#segLevel').addEventListener('click',e=>{if(e.target.dataset.l) setLevel(e.target.dataset.l);});
 
@@ -1263,6 +1334,23 @@ function buildPrompt(){
   if(type==='outline'){
     return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족${TK()?`, ${TK().name} ${TK().sl}시간 확보 여부(검산 포함)`:''}\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${SUBJ().assess[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
   }
+  if(type==='feedback'){
+    const s=curSheet();
+    if(!s) return null;
+    const g=G();
+    const scored=g.roster.filter(x=>Object.keys(s.scores[x.id]||{}).length);
+    if(!scored.length) return null;
+    const lines=scored.map(stu=>{
+      const sc=s.scores[stu.id]||{}, mm=s.memos[stu.id]||{};
+      const per=s.crit.map((c,i)=>`${c[0]} ${typeof sc[String(i)]==='number'?sc[String(i)]:'미채점'}/${c[1]}${String(mm[String(i)]||'').trim()?`(메모: ${String(mm[String(i)]).trim()})`:''}`).join(' · ');
+      const gsc=studentScore(s,stu.id);
+      return `- ${stu.label}: ${per} → ${gsc.complete? `합계 ${gsc.tot}/${sheetMax(s)}` : `현재 ${gsc.tot}점 (준거 ${gsc.missing}개 미채점 — 총점 미확정)`}`;
+    }).join('\n');
+    /* 점수와 함께 학교명·교사명까지 외부로 나갈 이유가 없다 — 과목 맥락만 싣는다 */
+    const pkF=SUBJ();
+    const slim=`${pkF.persona||'당신은 IB DP 과정을 20년 이상 가르쳐 온 수업 설계 전문가입니다.'}\n\n## 수업 맥락\n- 과정: ${CUR().name}(${state.meta.course}) ${state.meta.level}`;
+    return `${slim}\n\n## 과제\n아래는 「${s.title}」(${s.critLabel||'준거'}, 만점 ${sheetMax(s)}점) 채점 결과입니다. 학생별 피드백 문장을 한국어로 작성해 주세요.\n\n## 반드시 지킬 것\n(1) 학생은 제공된 익명 라벨로만 지칭할 것 — 이름을 지어내지 말 것.\n(2) IB 등급(1~7, A~E)이나 등급 경계를 추정하지 말 것.\n(3) IB 공식 문서의 수준 기술(descriptor) 문구를 인용·복원하지 말고 당신 자신의 표현으로 쓸 것.\n(4) 점수를 바꾸거나 재채점하지 말 것 — 피드백 문장 작성·다듬기만 할 것.\n(5) 학생이 직접 읽는 글이므로 존중하는 어조로, 잘한 점 1가지 + 다음에 할 일 1~2가지를 구체적으로.\n\n## 채점 결과\n${lines}\n\n## 출력 형식\n학생 라벨별로 4~6문장. 준거명을 그대로 사용해 어느 영역 이야기인지 분명히 하고, 교사 메모가 있으면 그 내용을 반영할 것.${extra?`\n\n## 추가 조건\n${extra}`:''}\n${LANGLINE()}`;
+  }
   /* ia */
   return (SUBJ().iaIdeasPrompt||mathIaPrompt)(head,u,extra);
 }
@@ -1271,16 +1359,27 @@ function mathIaPrompt(head,u,extra){
 }
 $('#ai-type').onchange=()=>{
   const t=$('#ai-type').value;
-  $('#ai-unitWrap').style.display=(t==='outline')?'none':'block';
-  $('#ai-extraWrap').style.display=(t==='lesson'||t==='ia')?'block':'none';
+  $('#ai-unitWrap').style.display=(t==='outline'||t==='feedback')?'none':'block';
+  $('#ai-extraWrap').style.display=(t==='lesson'||t==='ia'||t==='feedback')?'block':'none';
+  const w=$('#aiFbWarn'); if(w) w.style.display=(t==='feedback')?'block':'none';
 };
 $('#btnAiGen').onclick=()=>{
   const p=buildPrompt();
+  if(p===null&&$('#ai-type').value==='feedback'){toast('먼저 ⑤ 채점·피드백에서 채점표를 만들고 점수를 입력하세요.'); return;}
   if(p===null){toast('대상 단원을 먼저 선택하세요 (① 코스 아웃라인에서 단원 구성 필요).'); return;}
   $('#aiResultCard').style.display='block'; $('#aiPromptBox').textContent=p;
   revealAndScroll($('#aiResultCard'));
 };
-$('#btnAiCopy').onclick=()=>copyText($('#aiPromptBox').textContent);
+$('#btnAiCopy').onclick=()=>{
+  if($('#ai-type').value==='feedback'){
+    if(!nameRiskConfirm('외부 AI로 붙여넣을 프롬프트')) return;
+    const t=$('#aiPromptBox').textContent;
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(()=>toast('복사했습니다 — 점수·메모가 포함된 내용입니다. 붙여넣기 전 실명이 없는지 확인하세요.')).catch(()=>fallbackCopy(t));
+    else fallbackCopy(t);
+    return;
+  }
+  copyText($('#aiPromptBox').textContent);
+};
 function copyText(t){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('복사했습니다. Claude(claude.ai)에 붙여넣으세요.')).catch(()=>fallbackCopy(t));}
   else fallbackCopy(t);
@@ -1362,6 +1461,7 @@ $('#btnDocUnit').onclick=()=>{const id=$('#pr-unitSel').value; const h=buildUnit
 
 /* ═══════════════ 저장·불러오기 ═══════════════ */
 function saveJson(){
+  if(G().sheets.length&&!nameRiskConfirm('저장하는 JSON 파일')) return;
   const data=JSON.stringify(state,null,2);
   const blob=new Blob([data],{type:'application/json'});
   const a=document.createElement('a');
@@ -1369,7 +1469,8 @@ function saveJson(){
   a.href=URL.createObjectURL(blob);
   a.download=`IB플래너_${state.meta.school||'무제'}_${state.meta.course}${state.meta.level}_${stamp}.json`;
   a.click(); URL.revokeObjectURL(a.href);
-  toast('JSON 파일로 저장했습니다. 다음에 「불러오기」로 이어서 작업하세요.');
+  toast(G().sheets.length? 'JSON 파일로 저장했습니다 — 채점 데이터(점수·메모)도 함께 담깁니다. 보관·공유에 유의하세요.'
+                          : 'JSON 파일로 저장했습니다. 다음에 「불러오기」로 이어서 작업하세요.');
 }
 function applyState(d){
   state=d; state.plans=state.plans||{}; state.lessons=state.lessons||[];
@@ -1379,10 +1480,22 @@ function applyState(d){
   state.meta.hoursUnit=['시간','교시'].includes(state.meta.hoursUnit)?state.meta.hoursUnit:'시간';
   state.outline={units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:'',...state.outline};
   state.outline.lpChecks=state.outline.lpChecks||[];
-  let maxSeq=1; (state.outline.units||[]).forEach(u=>{const n=parseInt(String(u.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;}); (state.lessons||[]).forEach(l=>{const n=parseInt(String(l.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;}); uidSeq=maxSeq;
+  /* ⑤ 채점 데이터 하위호환 — 구 파일에는 grading이 없음 */
+  state.grading=state.grading||{v:1,roster:[],sheets:[]};
+  state.grading.v=state.grading.v||1;
+  state.grading.roster=state.grading.roster||[];
+  state.grading.sheets=(state.grading.sheets||[]).map(s=>({unitId:'',date:'',holistic:false,critLabel:'',kind:'custom',...s,
+    crit:s.crit||[], scores:s.scores||{}, memos:s.memos||{}, feedback:s.feedback||{}}));
+  /* 열어 둔 채점표가 복원본에도 있으면 그대로 유지 — 되돌리기 후 다른 표로 옮겨가면 남의 점수를 덮어쓴다 */
+  gradingUI.sheetId=state.grading.sheets.some(s=>s.id===gradingUI.sheetId)? gradingUI.sheetId : null;
+  gradingUI.openMemo=null;
+  let maxSeq=1; const scanId=x=>{const n=parseInt(String(x&&x.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;};
+  (state.outline.units||[]).forEach(scanId); (state.lessons||[]).forEach(scanId);
+  state.grading.roster.forEach(scanId); state.grading.sheets.forEach(scanId);
+  uidSeq=maxSeq;
   renderSubjectUI();
   setCourse(SUBJ().courses[state.meta.course]? state.meta.course : SUBJ().defaultCourse); setLevel(state.meta.level||'SL');
-  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist();
+  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist(); renderGradingUI();
 }
 function loadJsonFile(file){
   const rd=new FileReader();
@@ -1770,16 +1883,17 @@ function renderChecklist(){
    items.map(i=>`<div style="display:flex;gap:8px;padding:4px 2px;font-size:13.5px;align-items:baseline"><span>${i[1]?'✅':'⬜'}</span><span style="${i[1]?'':'color:#b45309;font-weight:700'}">${i[0]}</span><span class="hint" style="margin:0">${i[2]||''}</span></div>`).join('')+
    `<p class="hint" style="margin-top:8px">체크리스트는 형식 요건 자동 점검입니다. 내용의 질은 ④ AI 검토 프롬프트로 진단하세요.</p>`;
 }
-window.addEventListener('beforeunload',e=>{if(state.outline.units.length){e.preventDefault(); e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(state.outline.units.length||G().sheets.length||G().roster.length){e.preventDefault(); e.returnValue='';}});
 
 /* ═══════════════ 샘플 데이터 ═══════════════ */
 $('#btnSample').onclick=()=>{
-  if(state.outline.units.length&&!confirm('현재 내용을 지우고 샘플을 불러올까요? (상단 되돌리기로 복구 가능)'))return;
+  const hasWork=state.outline.units.length||G().sheets.length||G().roster.length;
+  if(hasWork&&!confirm(`현재 내용을 지우고 샘플을 불러올까요?${G().sheets.length||G().roster.length?'\n⑤ 채점 데이터(명단·채점표·점수·메모)도 함께 지워집니다.':''}\n(상단 되돌리기로 복구 가능)`))return;
   snapshot();
   uidSeq=1;
   state={meta:{subject:'math',course:'AA',level:'SL',school:'한국IB고등학교(샘플)',code:'0000',teacher:'김영우',years:'2027.3 ~ 2029.2',training:'DP Mathematics: AA Cat.1 / 2026.01',date:'2026.08.07',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
    outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:OUTLINE_EX.tok.replace('예: ',''),atl:OUTLINE_EX.atl.replace('예: ',''),im:OUTLINE_EX.im.replace('예: ',''),lp:'탐구하는 사람: 모든 단원을 탐구 질문으로 열고 닫는다. 사고하는 사람: 풀이 전략 비교 토론을 정례화한다. 도전하는 사람: 도전 문제와 IA에서 안전지대를 벗어난 시도를 격려하고 실패를 성찰로 연결한다.',lpChecks:['탐구하는 사람','사고하는 사람','도전하는 사람'],resources:'Haese Mathematics AA SL 교과서, 공학용 그래픽 계산기(TI-Nspire) 1인 1대, Desmos·GeoGebra, 토픽별 기출 문항 세트, 교육청 IB 자료실 번역 자료, 학교 수학탐구실'},
-   plans:{}, lessons:[]};
+   plans:{}, lessons:[], grading:{v:1,roster:[],sheets:[]}};
   const c=SYLLABUS.AA;
   state.outline.units=[
     makeUnit(1,1,'단원 1. 수와 대수 — 패턴에서 일반화로',19,[...c.topics[0].slItems]),
@@ -1791,7 +1905,8 @@ $('#btnSample').onclick=()=>{
   ];
   state.outline.units.forEach(u=>{u.assess=u.topic==='T'?['IA 마일스톤','수행·탐구 과제']:['쪽지시험·퀴즈','단원평가(서술형)','모의 Paper 1','모의 Paper 2']; u.res='교과서 해당 단원, 토픽 기출 세트';});
   $('#btnIaPreset').onclick.call();
-  renderSubjectUI(); setCourse('AA'); setLevel('SL'); refreshStaticFields(); renderUnitList(); renderLessonList();
+  gradingUI.sheetId=null; gradingUI.openMemo=null;
+  renderSubjectUI(); setCourse('AA'); setLevel('SL'); refreshStaticFields(); renderUnitList(); renderLessonList(); renderGradingUI();
   /* 단원 1 유닛플래너 초안 자동 생성 */
   $('#up-unitSel').value=state.outline.units[0].id; loadPlanForm(); $('#btnUpDraft').onclick();
   /* 샘플 차시 1개 */
@@ -1812,6 +1927,9 @@ function showTab(group,tab){
   bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
   $$(`.tab-panel[data-tabs="${group}"]`).forEach(p=>p.classList.toggle('on',p.dataset.tab===tab));
   if(group==='export'&&tab==='check') renderChecklist();
+  if(group==='grading'&&tab==='setup') renderSheetList();
+  if(group==='grading'&&tab==='profile') renderClassProfile();
+  if(group==='grading'&&tab==='feedback') renderFeedbackTab();
   updateTabBadges();
 }
 document.addEventListener('click',e=>{
@@ -1820,7 +1938,7 @@ document.addEventListener('click',e=>{
   showTab(bar.dataset.tabs, tb.dataset.tab);
 });
 function revealAndScroll(el){ if(!el) return; const p=el.closest('.tab-panel'); if(p&&!p.classList.contains('on')) showTab(p.dataset.tabs,p.dataset.tab); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-function initTabs(){ showTab('course', state.outline.units.length?'units':'basic'); showTab('unit','inquiry'); showTab('export','import'); }
+function initTabs(){ showTab('course', state.outline.units.length?'units':'basic'); showTab('unit','inquiry'); showTab('export','import'); showTab('grading','setup'); }
 /* 탭 라벨 미작성 배지 (코스 아웃라인) */
 function updateTabBadges(){
   const o=state.outline, m=state.meta;
@@ -1835,6 +1953,18 @@ function updateTabBadges(){
     const n=miss[b.dataset.tab]||0;
     el.style.display=n?'inline-block':'none'; el.textContent=n;
   });
+  /* ⑤ 채점 탭 배지 */
+  const g=G(), cs=curSheet();
+  const gm={
+    setup:(g.roster.length?0:1)+(g.sheets.length?0:1),
+    input:g.sheets.filter(s=>sheetStats(s).notScored.length).length,
+    feedback:cs? g.roster.filter(st=>Object.keys(cs.scores[st.id]||{}).length&&!String(cs.feedback[st.id]||'').trim()).length : 0
+  };
+  document.querySelectorAll('.tabbar[data-tabs="grading"] .tab-btn').forEach(b=>{
+    const el=b.querySelector('.miss'); if(!el) return;
+    const n=gm[b.dataset.tab]||0;
+    el.style.display=n?'inline-block':'none'; el.textContent=n;
+  });
 }
 /* 사이드바 파이프라인 요약 */
 function renderRail(){
@@ -1846,6 +1976,8 @@ function renderRail(){
   set('unit', u.length? `${u.length}개 중 ${filled}개 작성`:'—');
   set('lesson', state.lessons.length? `${state.lessons.length}차시 저장`:'—');
   set('assess', u.length? `평가도구 ${withAssess}/${u.length} 단원`:'—');
+  const gs=gradingSummary();
+  set('grading', gs.sheets? `채점표 ${gs.sheets}개 · ${!gs.roster?'명단 없음':gs.notScored?`미채점 ${gs.notScored}명`:'완료'}`:'—');
 }
 /* 전역 단원 컨텍스트 (②③④ 공유) */
 function syncUnitCtx(){
@@ -1884,10 +2016,12 @@ function renderAssessMap(){
     if(pk2.iaCrit){
       rb.innerHTML=`<p class="hint" style="margin-bottom:8px">${esc(pk2.iaCritLabel||'IA 준거')} 기반의 채점표 틀입니다. <b>수준 기술은 빈칸</b>으로 나갑니다 — 공식 가이드의 채점 기준과 대조해 선생님이 직접 채우세요(원문 복제 금지 원칙).</p>
       <table class="tbl"><tr><th>기준</th><th style="width:10%">만점</th><th>수준 기술 (직접 작성)</th><th style="width:10%">점수</th></tr>${pk2.iaCrit.map(x=>`<tr><td><b>${esc(x[0])}</b></td><td class="num-cell">${x[1]}</td><td style="color:#cbd5e1">(공식 가이드 대조 후 작성)</td><td></td></tr>`).join('')}<tr><td><b>합계</b></td><td class="num-cell"><b>${pk2.iaCrit.reduce((a,x)=>a+x[1],0)}</b></td><td></td><td></td></tr></table>
-      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="exportRubricDoc()">📝 루브릭 틀 → Word</button>`;
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="exportRubricDoc()">📝 루브릭 틀 → Word</button>
+      <button class="btn btn-soft btn-sm" style="margin-top:10px" onclick="showStep('grading','setup')">⑤ 이 준거로 채점 시작 ›</button>`;
     } else {
       rb.innerHTML=`<p class="hint" style="margin-bottom:8px">이 과목의 내부평가는 준거표 없이 <b>총체적 채점</b>입니다(${esc(CUR().name)} — 10점). 총점 기준의 기록표 틀을 내보낼 수 있습니다.</p>
-      <button class="btn btn-primary btn-sm" onclick="exportRubricDoc()">📝 채점 기록표 틀 → Word</button>`;
+      <button class="btn btn-primary btn-sm" onclick="exportRubricDoc()">📝 채점 기록표 틀 → Word</button>
+      <button class="btn btn-soft btn-sm" onclick="showStep('grading','setup')">⑤ 채점 시작 ›</button>`;
     }
   }
   const qe=$('#qfExam');
@@ -1931,6 +2065,607 @@ function exportRubricDoc(){
   P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 작성된 틀 · 수준 기술·채점 세부는 반드시 최신 공식 가이드와 대조하세요 · 학생 이름 대신 번호·익명 라벨 사용을 권장합니다 · 본 도구는 IBO와 무관합니다.</div>`);
   downloadDoc(P.join(''),`루브릭틀_${c.code}${lv}.doc`);
 }
+/* ═══════════════ ⑤ 채점·피드백 (교사용 채점 도우미) ═══════════════
+   설계 원칙
+   · 학생은 익명 라벨만 — roster에는 id·label 외 어떤 필드도 두지 않는다(식별 정보 유입 통로 차단).
+   · 채점표(sheet)는 자기 완결적 — 생성 시점의 준거를 스냅숏으로 복사한다.
+     팩을 참조하지 않으므로 과목 전환·가이드 개정·팩 수정에도 지난 채점 기록이 깨지지 않는다.
+   · 준거 인덱스가 점수의 키이므로, 점수가 하나라도 입력된 표는 준거 구조를 바꾸지 않는다.
+   · 점수 없음(키 부재)과 0점을 구분한다.
+   · 등급(1~7·A~E) 환산은 만들지 않는다 — 등급 경계는 세션마다 IB가 새로 정한다.
+   · 피드백 문장은 전부 자체 문구 — 공식 가이드의 수준 기술은 참조하지 않는다. */
+const SURNAMES=['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','류','전','홍','고','문','양','손','배','백','허','유','남','심','노','하','곽','성','차','주','우','구','민','진','지','엄','채','원','천','방','공','현','함','변','염','여','추','도','소','석','선','설','마','길','연','위','표','명','기','반','왕','금','옥','육','인','맹','제','모','장','탁','국','여','진','어','은','편'];
+/* 라벨 전체가 아니라 '01 김철수'·'김철수(01)'처럼 섞여 있어도 잡아야 한다.
+   한글 덩어리를 잘라 각 토막의 첫 글자가 성씨인지 본다. 가명(하늘·강물)도 걸릴 수 있는
+   느슨한 경고이며 입력을 막지는 않는다 — 놓치는 쪽이 훨씬 위험하다. */
+function looksLikeName(text){
+  const t=String(text||'').trim();
+  const chunks=t.match(/[가-힣]{2,4}(?![가-힣])/g);
+  if(!chunks) return false;
+  return chunks.some(c=>{
+    if(!SURNAMES.includes(c[0])) return false;
+    /* 라벨 안에 섞인 두 글자 덩어리('A모둠')까지 잡으면 경고가 너무 잦다.
+       두 글자는 라벨 전체가 그것일 때만(김구 등) 의심한다. */
+    return c.length>=3 || c===t;
+  });
+}
+/* 실명이 섞였을 수 있는 곳을 모두 훑는다 — 라벨뿐 아니라 메모·피드백 본문도 문서로 나간다 */
+function nameRiskScan(){
+  const g=G(), hits=[];
+  g.roster.forEach(s=>{ if(looksLikeName(s.label)) hits.push(`학생 라벨 「${s.label}」`); });
+  g.sheets.forEach(s=>{
+    g.roster.forEach(st=>{
+      Object.values(s.memos[st.id]||{}).forEach(m=>{ if(looksLikeName(m)) hits.push(`「${s.title}」 ${st.label}의 근거 메모`); });
+      if(looksLikeName(s.feedback[st.id])) hits.push(`「${s.title}」 ${st.label}의 피드백 문장`);
+    });
+  });
+  return [...new Set(hits)];
+}
+function sheetMax(s){return (s.crit||[]).reduce((a,x)=>a+(Number(x[1])||0),0);}
+/* 격자 머리글용 짧은 준거명 — 영어 병기 괄호를 접는다(전체 이름은 title 툴팁·출력물에 그대로) */
+function critShort(n){return String(n||'').replace(/\s*\([^)]*\)\s*$/,'');}
+/* 학생 1명의 합계 — 미입력 준거가 있으면 complete=false.
+   합계만 따로 쓰면 미입력이 0점으로 읽히므로, 표시하는 쪽은 반드시 complete를 함께 본다. */
+function studentScore(s,sid){
+  const sc=s.scores[sid]||{}, C=s.crit||[];
+  let n=0, tot=0;
+  C.forEach((c,i)=>{ const v=sc[String(i)]; if(typeof v==='number'){ n++; tot+=v; } });
+  return {n, tot, count:C.length, missing:C.length-n, complete:!!C.length&&n===C.length, any:n>0};
+}
+/* 합계 표기 — 미완성이면 점수를 단정적으로 쓰지 않는다 */
+function scoreLabel(s,sid){
+  const g=studentScore(s,sid);
+  if(!g.any) return '미채점';
+  return g.complete? `${g.tot} / ${sheetMax(s)}` : `${g.tot}점 (미완성 — ${g.missing}개 준거 미입력)`;
+}
+/* 채점표 1장의 진행·평균·합계 — 프로파일·배지·레일·홈이 모두 이 함수를 쓴다 */
+function sheetStats(s){
+  const R=G().roster, C=s.crit||[], per=C.map(()=>({sum:0,cnt:0}));
+  let filled=0, complete=0, memoMissing=[], notScored=[], totals=[];
+  R.forEach(st=>{
+    const sc=s.scores[st.id]||{}, mm=s.memos[st.id]||{};
+    let n=0, tot=0;
+    C.forEach((c,i)=>{ const v=sc[String(i)];
+      if(typeof v==='number'){ n++; tot+=v; per[i].sum+=v; per[i].cnt++; } });
+    filled+=n;
+    if(n===C.length&&C.length){ complete++; totals.push(tot); }
+    else notScored.push(st);
+    if(n>0 && !Object.values(mm).some(t=>String(t||'').trim())) memoMissing.push(st);
+  });
+  return {roster:R, crit:C, per, filled, cells:R.length*C.length, complete, notScored, memoMissing, totals, max:sheetMax(s)};
+}
+/* 전 채점표 요약 — 학생은 채점표마다 중복 계상하지 않는다(한 명이라도 미완성인 표가 있으면 1명) */
+function gradingSummary(){
+  const g=G(); const pending=new Set();
+  g.sheets.forEach(s=>{ sheetStats(s).notScored.forEach(st=>pending.add(st.id)); });
+  return {sheets:g.sheets.length, roster:g.roster.length, notScored:pending.size,
+          ready:!!g.sheets.length&&!!g.roster.length&&!pending.size};
+}
+const curSheet=()=>G().sheets.find(s=>s.id===gradingUI.sheetId)||null;
+function ensureSheet(){ const g=G(); if(!curSheet()&&g.sheets.length) gradingUI.sheetId=g.sheets[0].id; return curSheet(); }
+
+/* ── 명단 ── */
+function makeRoster(){
+  const n=Math.max(1,Math.min(60,Number(($('#gr-count')||{}).value)||24));
+  const g=G();
+  if(g.roster.length&&!confirm(`현재 명단(${g.roster.length}명)을 지우고 01~${String(n).padStart(2,'0')} 번호로 새로 만들까요?\n\n모든 채점표의 점수·근거 메모·작성해 둔 피드백 문장이 함께 지워집니다.\n(학생 수만 늘리려면 「+ 학생 한 명 추가」를 쓰세요)\n(상단 되돌리기로 복구 가능)`)) return;
+  snapshot();
+  g.roster=Array.from({length:n},(_,i)=>({id:uid(),label:String(i+1).padStart(2,'0')}));
+  g.sheets.forEach(s=>{s.scores={}; s.memos={}; s.feedback={};});
+  renderGradingUI(); toast(`${n}명 명단을 만들었습니다. 번호 대신 가명을 쓰려면 라벨을 눌러 고치세요.`);
+}
+function addStudent(){
+  snapshot(); const g=G();
+  /* 라벨은 문서에서 학생을 가리키는 유일한 표시 — 삭제 후 추가해도 겹치지 않게 가장 큰 번호 다음으로 */
+  let n=0; g.roster.forEach(s=>{const m=String(s.label||'').match(/\d+/); if(m&&Number(m[0])>n) n=Number(m[0]);});
+  let label=String(n+1).padStart(2,'0'), k=1;
+  while(g.roster.some(s=>s.label===label)) label=String(n+1+k++).padStart(2,'0');
+  g.roster.push({id:uid(),label}); renderGradingUI();
+}
+function delStudent(sid){
+  const g=G(), st=g.roster.find(x=>x.id===sid); if(!st) return;
+  const hasScore=g.sheets.some(s=>Object.keys(s.scores[sid]||{}).length||String(s.feedback[sid]||'').trim());
+  if(hasScore&&!confirm(`「${st.label}」의 점수·근거 메모·피드백 문장이 모든 채점표에서 함께 지워집니다. 계속할까요? (상단 되돌리기로 복구 가능)`)) return;
+  snapshot();
+  g.roster=g.roster.filter(x=>x.id!==sid);
+  g.sheets.forEach(s=>{delete s.scores[sid]; delete s.memos[sid]; delete s.feedback[sid];});
+  renderGradingUI();
+}
+function setLabel(sid,v){
+  const st=G().roster.find(x=>x.id===sid); if(!st) return;
+  st.label=String(v||'').slice(0,12);
+  const w=document.querySelector(`[data-namewarn="${sid}"]`);
+  if(w) w.style.display=looksLikeName(st.label)?'inline-block':'none';
+  const note=$('#grRosterNote'); if(note) note.innerHTML=rosterNoteHtml();
+}
+/* 라벨 편집을 마쳤을 때 — 명단 목록 자체는 다시 그리지 않는다.
+   다시 그리면 편집 중이던 칸이 사라져 Tab·Enter로 다음 학생으로 넘어갈 수 없다. */
+function afterLabelEdit(){
+  if(uiTab.grading==='input') renderScoreGrid();
+  if(uiTab.grading==='feedback') renderFeedbackTab();
+  renderSheetList(); updateTabBadges(); renderRail();
+}
+function rosterNoteHtml(){
+  const g=G();
+  return `현재 ${g.roster.length}명${g.roster.some(s=>looksLikeName(s.label))?' · <b style="color:var(--amber)">실명처럼 보이는 라벨이 있습니다 — 번호·가명으로 바꿔 주세요. (원래 가명이면 그대로 두셔도 됩니다)</b>':''}`;
+}
+function renderRoster(){
+  const el=$('#grRoster'); if(!el) return;
+  const g=G();
+  if(!g.roster.length){ el.innerHTML='<div class="empty-note">아직 명단이 없습니다. 학생 수를 넣고 「명단 만들기」를 누르면 01, 02… 번호가 만들어집니다.<br>번호 대신 가명을 쓰려면 만든 뒤 라벨을 눌러 고치세요.</div>'; return; }
+  el.innerHTML=`<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px">`+
+    g.roster.map(s=>`<div style="display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:9px; padding:4px 6px; background:#fff">
+      <input value="${esc(s.label)}" maxlength="12" placeholder="번호·가명만" style="border:0; padding:4px; font-size:13px; font-weight:700" oninput="setLabel('${s.id}',this.value)" onchange="afterLabelEdit()">
+      <span class="badge b-amber" data-namewarn="${s.id}" style="display:${looksLikeName(s.label)?'inline-block':'none'}" title="실명처럼 보입니다. 학생 이름 대신 번호·가명(익명 라벨)을 사용해 주세요. 이 라벨은 저장(JSON) 파일과 Word 출력물에 그대로 남습니다.">실명?</span>
+      <button class="btn btn-ghost btn-sm" style="padding:2px 6px" onclick="delStudent('${s.id}')" title="삭제">✕</button>
+    </div>`).join('')+`</div>
+    <p class="hint" style="margin-top:8px" id="grRosterNote">${rosterNoteHtml()}</p>`;
+}
+
+/* ── 채점표 ── */
+function examRows(){ const pk=SUBJ(), c=CUR(); return (pk.assess[c.code]&&pk.assess[c.code][state.meta.level])||[]; }
+/* 폼은 종류·과목·과정·레벨이 바뀔 때만 다시 그린다.
+   무조건 다시 그리면 아직 저장하지 않은 자체 준거·만점 입력이 조용히 사라진다. */
+function renderNewSheetForm(){
+  const el=$('#grNewForm'); if(!el) return;
+  const kind=(document.querySelector('[name="grKind"]:checked')||{}).value||'ia';
+  const pk=SUBJ();
+  /* 폼 내용이 실제로 의존하는 값만 서명에 넣는다 — 자체 평가는 과목·레벨과 무관하므로
+     레벨을 바꿨다고 입력해 둔 준거가 지워지면 안 된다 */
+  const sig=kind==='custom'? 'custom'
+          : kind==='ia'? ['ia',state.meta.subject,state.meta.course].join('|')
+          : ['exam',state.meta.subject,state.meta.course,state.meta.level].join('|');
+  if(gradingUI.formSig===sig&&el.innerHTML.trim()) return;
+  gradingUI.formSig=sig;
+  if(kind==='ia'){
+    const crit=pk.iaCrit;
+    el.innerHTML=crit
+      ? `<p class="hint" style="margin:0">${esc(pk.iaCritLabel||'IA 준거')} — ${crit.map(x=>`${esc(x[0])} ${x[1]}점`).join(' · ')} = <b>${crit.reduce((a,x)=>a+x[1],0)}점</b>. 이 준거가 채점표에 복사되어 저장됩니다.</p>${CUR().verified===false?'<p class="hint" style="color:var(--amber)">※ 이 과정 데이터는 공식 가이드 대조 전 초안입니다.</p>':''}`
+      : `<p class="hint" style="margin:0">${esc(CUR().name)}의 내부평가는 준거표 없이 <b>총체적 채점(10점)</b>입니다. 총점 한 칸짜리 채점표가 만들어집니다.</p>`;
+  } else if(kind==='exam'){
+    const rows=examRows();
+    el.innerHTML=`<div class="grid2"><div class="field"><label class="f-label">평가 항목</label><select id="gr-exam">${rows.map((r,i)=>`<option value="${i}">${esc(r[0])}</option>`).join('')}</select></div>
+      <div class="field"><label class="f-label">만점 (공식 배점을 확인해 고치세요)</label><input id="gr-examMax" type="number" min="1" max="500" value="${examMaxGuess(0)}"></div></div>
+      <p class="hint" style="margin:0">모의 시험은 총점 한 칸으로 기록합니다. 문항별 채점은 다음 버전 과제입니다.</p>`;
+    const es=$('#gr-exam'); if(es) es.onchange=()=>{ const m=$('#gr-examMax'); if(m) m.value=examMaxGuess(Number(es.value)); };
+  } else {
+    el.innerHTML=`<div class="field"><label class="f-label">준거 (한 줄에 「이름, 만점」 — 비워 두면 총점 100점 한 칸)</label>
+      <textarea id="gr-customCrit" placeholder="예)&#10;내용의 정확성, 10&#10;근거 활용, 10&#10;표현·구성, 5"></textarea></div>
+      <p class="hint" style="margin:0">최대 8개까지 만들 수 있습니다.</p>`;
+  }
+}
+/* 배점 칸은 자유 서술이라 형태가 제각각이다 — '55점 (1A 30 + 1B 25)'는 앞의 총점,
+   '듣기 25점 · 읽기 40점'은 합, 수학처럼 배점이 아닌 칸('GDC 불허')은 추정 불가.
+   어차피 교사가 확인·수정하는 값이므로 실패하면 100으로 두고 넘긴다. */
+function examMaxGuess(i){
+  const r=examRows()[i]; if(!r) return 100;
+  const raw=String(r[2]||'');
+  const ok=n=>(n>0&&n<=500)? n : 100;
+  const head=raw.match(/^\s*(\d+)\s*점/);
+  if(head) return ok(Number(head[1]));
+  const parts=raw.match(/(\d+)\s*점/g);
+  if(parts&&parts.length) return ok(parts.reduce((a,p)=>a+parseInt(p,10),0));
+  const any=raw.match(/\d+/);
+  return any? ok(Number(any[0])) : 100;
+}
+function createSheet(){
+  const g=G(), pk=SUBJ();
+  if(!g.roster.length){ toast('먼저 학생 명단을 만들어 주세요.'); return; }
+  const kind=(document.querySelector('[name="grKind"]:checked')||{}).value||'ia';
+  let crit=[], holistic=false, critLabel=pk.iaCritLabel||'준거', title=($('#gr-title')||{}).value.trim();
+  if(kind==='ia'){
+    if(pk.iaCrit){ crit=pk.iaCrit.map(x=>[x[0],x[1]]); }
+    else { crit=[['총체적 채점',10]]; holistic=true; }
+    title=title||(pk.iaTitle? pk.iaTitle.replace(/^내부평가 계획 — /,'') : '내부평가');
+  } else if(kind==='exam'){
+    const i=Number(($('#gr-exam')||{}).value)||0, r=examRows()[i];
+    const mx=Math.max(1,Math.min(500,Number(($('#gr-examMax')||{}).value)||100));
+    crit=[[(r&&r[0])||'총점',mx]]; holistic=true; critLabel='총점';
+    title=title||`${(r&&r[0])||'모의 시험'} (모의)`;
+  } else {
+    const raw=String(($('#gr-customCrit')||{}).value||'').trim();
+    if(raw){
+      crit=raw.split('\n').map(l=>l.trim()).filter(Boolean).slice(0,8).map(l=>{
+        const m=l.match(/^(.*?)[,\s]+(\d+)\s*$/);
+        return m? [m[1].trim(), Math.max(1,Math.min(200,Number(m[2])))] : [l,10];
+      });
+    }
+    if(!crit.length){ crit=[['총점',100]]; holistic=true; }
+    critLabel='자체 준거'; title=title||'자체 평가';
+  }
+  snapshot();
+  const s={ id:uid(), title, kind,
+    subject:state.meta.subject, course:state.meta.course, level:state.meta.level,
+    critLabel, holistic, crit,
+    unitId:($('#gr-unit')||{}).value||'', date:($('#gr-date')||{}).value||'',
+    scores:{}, memos:{}, feedback:{} };
+  g.sheets.push(s); gradingUI.sheetId=s.id;
+  const t=$('#gr-title'); if(t) t.value='';
+  renderGradingUI(); showTab('grading','input');
+  toast(`「${s.title}」 채점표를 만들었습니다. 점수를 입력하세요.`);
+}
+function delSheet(id){
+  const g=G(), s=g.sheets.find(x=>x.id===id); if(!s) return;
+  if(!confirm(`「${s.title}」 채점표를 지울까요? 입력한 점수·메모가 모두 사라집니다.\n(상단 되돌리기로 복구 가능)`)) return;
+  snapshot();
+  g.sheets=g.sheets.filter(x=>x.id!==id);
+  if(gradingUI.sheetId===id) gradingUI.sheetId=null;
+  gradingUI.openMemo=null;
+  renderGradingUI();
+}
+function pickSheet(id){ gradingUI.sheetId=id; gradingUI.openMemo=null; renderGradingUI(); }
+function openSheet(id){ pickSheet(id); showTab('grading','input'); }
+function clearGrading(){
+  const g=G();
+  if(!g.sheets.length&&!g.roster.length){ toast('지울 채점 데이터가 없습니다.'); return; }
+  if(!confirm('채점표와 명단을 모두 지웁니다. 코스 아웃라인·유닛플래너·차시안은 그대로 남습니다.\n(상단 되돌리기로 복구 가능) 계속할까요?')) return;
+  snapshot();
+  state.grading={v:1,roster:[],sheets:[]}; gradingUI.sheetId=null;
+  renderGradingUI(); toast('채점 데이터를 비웠습니다.');
+}
+function renderSheetList(){
+  const el=$('#grSheetList'); if(!el) return;
+  const g=G();
+  if(!g.sheets.length){ el.innerHTML='<div class="empty-note">아직 채점표가 없습니다. 아래에서 평가 종류를 고르고 「채점표 만들기」를 누르세요.<br>④ 평가 설계의 준거표가 그대로 여기로 이어집니다.</div>'; return; }
+  el.innerHTML=`<table class="tbl"><tr><th>채점표</th><th>준거</th><th style="width:22%">진행</th><th style="width:130px"></th></tr>`+
+   g.sheets.map(s=>{
+     const st=sheetStats(s), pct=st.cells? Math.round(st.filled/st.cells*100):0;
+     const other=s.subject!==state.meta.subject;
+     const pk=SUBJECTS[s.subject];
+     const u=s.unitId? state.outline.units.find(x=>x.id===s.unitId):null;
+     const orphan=s.unitId&&!u; /* 연결한 단원이 지워졌거나 과목이 바뀐 경우 */
+     return `<tr><td><b>${esc(s.title)}</b> ${s.kind==='ia'?'<span class="badge b-blue">내부평가</span>':s.kind==='exam'?'<span class="badge b-gray">모의</span>':'<span class="badge b-gray">자체</span>'}
+       ${other?`<span class="badge b-gray" title="다른 과목에서 만든 채점표입니다">${esc((pk&&pk.short)||s.subject)}</span>`:''}
+       ${orphan?'<span class="badge b-amber" title="연결했던 단원이 삭제되었거나 과목이 바뀌었습니다. 점수는 그대로 있고, 홈 진행 현황의 단원별 ⑤ 칸에만 잡히지 않습니다.">단원 연결 끊김</span>':''}
+       <br><span style="color:#94a3b8; font-size:11.5px">${esc(s.critLabel||'')} · 만점 ${sheetMax(s)}점${u?` · ${esc(u.title||'단원')}`:' · 코스 공통'}${s.date?` · ${esc(s.date)}`:''}</span></td>
+       <td style="font-size:12.5px">${s.crit.map(c=>esc(c[0])).join('<br>')}</td>
+       <td><div class="pbar"><div style="width:${pct}%"></div></div><span style="font-size:11.5px; color:#94a3b8">${st.complete}/${st.roster.length}명 완료</span></td>
+       <td><button class="btn btn-soft btn-sm" onclick="openSheet('${s.id}')">열기</button> <button class="btn btn-danger btn-sm" onclick="delSheet('${s.id}')">삭제</button></td></tr>`;
+   }).join('')+`</table>`;
+}
+function renderSheetPicker(){
+  const sel=$('#grSheetSel'); if(!sel) return;
+  const g=G(); ensureSheet();
+  sel.innerHTML=g.sheets.length? g.sheets.map(s=>`<option value="${s.id}" ${s.id===gradingUI.sheetId?'selected':''}>${esc(s.title)}</option>`).join('')
+                               : '<option value="">(채점표 없음)</option>';
+}
+
+/* ── 점수 입력 격자 ── */
+function renderScoreGrid(){
+  const wrap=$('#grGridWrap'), prog=$('#grProgress'), ttl=$('#grInputTitle'); if(!wrap) return;
+  const s=ensureSheet(); const g=G();
+  if(ttl) ttl.textContent='';
+  if(!s){ wrap.innerHTML='<div class="empty-note">채점표가 없습니다. 「1. 명단·채점표」 탭에서 먼저 만들어 주세요.</div>'; if(prog) prog.innerHTML=''; return; }
+  if(!g.roster.length){ wrap.innerHTML='<div class="empty-note">학생 명단이 없습니다. 「1. 명단·채점표」 탭에서 만들어 주세요.</div>'; if(prog) prog.innerHTML=''; return; }
+  const st=sheetStats(s);
+  if(ttl) ttl.textContent=`${esc(s.critLabel||'')} · 만점 ${st.max}점`;
+  updateGradeProgress();
+  const rows=g.roster.map((stu,ri)=>{
+    const sc=s.scores[stu.id]||{}, mm=s.memos[stu.id]||{};
+    const cells=s.crit.map((c,ci)=>{
+      const v=sc[String(ci)];
+      return `<td style="padding:4px 6px"><input type="number" inputmode="numeric" min="0" max="${c[1]}" step="1" value="${typeof v==='number'?v:''}" data-sid="${stu.id}" data-ci="${ci}" style="width:64px; padding:5px 6px; text-align:right"></td>`;
+    }).join('');
+    const gsc=studentScore(s,stu.id);
+    const hasMemo=Object.values(mm).some(t=>String(t||'').trim());
+    const sumTxt=gsc.complete? `${gsc.tot} / ${st.max}` : `<span style="color:var(--amber); font-size:12px">${gsc.missing}칸 남음</span>`;
+    const memoRow=(gradingUI.openMemo===stu.id)? `<tr data-memorow="${stu.id}"><td colspan="${s.crit.length+3}" style="background:#f8fafc">
+      <div style="font-size:12.5px; font-weight:700; color:var(--navy); margin-bottom:6px">「${esc(stu.label)}」 준거별 근거 메모</div>
+      ${s.crit.map((c,ci)=>`<div class="field" style="margin-bottom:6px"><label class="f-label">${esc(c[0])}</label>
+        <textarea data-memo-sid="${stu.id}" data-memo-ci="${ci}" style="min-height:48px" placeholder="이 점수를 준 근거 — 메모에도 학생 이름을 쓰지 마세요">${esc(mm[String(ci)]||'')}</textarea></div>`).join('')}
+      <p class="hint" style="margin:0">메모는 피드백지에 함께 인쇄되고, IB 조정(moderation) 표본 제출 시 점수 근거로 쓸 수 있습니다.</p></td></tr>`:'';
+    return `<tr data-sid="${stu.id}"><td style="position:sticky; left:0; background:#fff; font-weight:700">${esc(stu.label)}${looksLikeName(stu.label)?' <span class="badge b-amber">실명?</span>':''}</td>
+      ${cells}<td class="num-cell" data-sum="${stu.id}" style="font-weight:700; white-space:nowrap">${sumTxt}</td>
+      <td><button class="btn btn-ghost btn-sm" style="padding:3px 7px" onclick="toggleMemo('${stu.id}')" title="근거 메모">📝${hasMemo?' <span class="badge b-blue" style="padding:0 4px">•</span>':''}</button></td></tr>${memoRow}`;
+  }).join('');
+  wrap.innerHTML=`<table class="tbl" style="min-width:${300+s.crit.length*96}px"><tr><th style="position:sticky; left:0; background:#f1f5f9">학생</th>
+    ${s.crit.map(c=>`<th style="text-align:right; white-space:normal; max-width:110px" title="${esc(c[0])}">${esc(critShort(c[0]))}<br><span style="font-weight:600; color:#94a3b8">/${c[1]}</span></th>`).join('')}
+    <th style="text-align:right">합계</th><th>메모</th></tr>${rows}</table>`;
+}
+/* 진행 요약줄만 따로 갱신 — 격자를 다시 그리면 입력 중 포커스가 날아간다 */
+function updateGradeProgress(){
+  const prog=$('#grProgress'); if(!prog) return;
+  const s=curSheet(); if(!s){prog.innerHTML=''; return;}
+  const st=sheetStats(s), pct=st.cells? Math.round(st.filled/st.cells*100):0;
+  prog.innerHTML=`<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px"><div class="pbar" style="flex:1"><div style="width:${pct}%"></div></div>
+    <span style="font-size:12.5px; color:var(--ink2); font-weight:700; white-space:nowrap">채점 완료 ${st.complete}/${st.roster.length}명${st.memoMissing.length?` · 근거 메모 없음 ${st.memoMissing.length}명`:''}</span></div>`;
+}
+function toggleMemo(sid){ gradingUI.openMemo=(gradingUI.openMemo===sid)?null:sid; renderScoreGrid(); }
+document.addEventListener('input',e=>{
+  const inp=e.target;
+  if(inp.dataset&&inp.dataset.sid!=null&&inp.dataset.ci!=null&&inp.closest('#grGridWrap')){
+    const s=curSheet(); if(!s) return;
+    const sid=inp.dataset.sid, ci=String(inp.dataset.ci), max=Number(s.crit[Number(ci)][1])||0;
+    const raw=inp.value.trim();
+    s.scores[sid]=s.scores[sid]||{};
+    if(raw===''){ delete s.scores[sid][ci]; }
+    else{
+      let v=Math.round(Number(raw));
+      if(!isFinite(v)){ delete s.scores[sid][ci]; }
+      else{
+        if(v>max){ v=max; toast(`「${s.crit[Number(ci)][0]}」의 만점은 ${max}점입니다.`); }
+        if(v<0) v=0;
+        /* 정수로 보정된 값을 칸에도 반영 — 화면과 저장값이 어긋나면 안 된다 */
+        if(String(v)!==raw) inp.value=v;
+        s.scores[sid][ci]=v;
+      }
+    }
+    const cell=document.querySelector(`[data-sum="${sid}"]`);
+    if(cell){
+      const g2=studentScore(s,sid);
+      cell.innerHTML=g2.complete? `${g2.tot} / ${sheetMax(s)}` : `<span style="color:var(--amber); font-size:12px">${g2.missing}칸 남음</span>`;
+    }
+    return;
+  }
+  if(inp.dataset&&inp.dataset.memoSid!=null){
+    const s=curSheet(); if(!s) return;
+    s.memos[inp.dataset.memoSid]=s.memos[inp.dataset.memoSid]||{};
+    s.memos[inp.dataset.memoSid][String(inp.dataset.memoCi)]=inp.value;
+  }
+  if(inp.dataset&&inp.dataset.fbSid!=null){
+    const s=curSheet(); if(!s) return;
+    s.feedback[inp.dataset.fbSid]=inp.value;
+  }
+});
+document.addEventListener('change',e=>{
+  if(e.target.closest&&e.target.closest('#grGridWrap')){ updateGradeProgress(); renderRail(); updateTabBadges(); }
+});
+document.addEventListener('keydown',e=>{
+  const inp=e.target;
+  if(!(inp.dataset&&inp.dataset.ci!=null&&inp.closest&&inp.closest('#grGridWrap'))) return;
+  const down=(e.key==='Enter'&&!e.shiftKey)||e.key==='ArrowDown';
+  const up=(e.key==='Enter'&&e.shiftKey)||e.key==='ArrowUp';
+  if(!down&&!up) return;
+  e.preventDefault();
+  const col=[...document.querySelectorAll(`#grGridWrap input[data-ci="${inp.dataset.ci}"]`)];
+  const i=col.indexOf(inp); const nx=col[i+(down?1:-1)];
+  if(nx){ nx.focus(); nx.select(); }
+});
+document.addEventListener('focusin',e=>{
+  if(e.target.dataset&&e.target.dataset.ci!=null&&e.target.closest&&e.target.closest('#grGridWrap')) e.target.select();
+});
+
+/* ── 학급 프로파일 ── */
+function renderClassProfile(){
+  const el=$('#grProfile'); if(!el) return;
+  const s=ensureSheet();
+  if(!s||!G().roster.length){ el.innerHTML='<div class="card"><div class="empty-note">채점표와 명단을 먼저 만들어 주세요.<br><br><button class="btn btn-primary btn-sm" onclick="showTab(\'grading\',\'setup\')">1. 명단·채점표로 →</button></div></div>'; return; }
+  const st=sheetStats(s);
+  const pickSel=`<div style="margin-bottom:10px"><select style="width:auto; min-width:260px" onchange="pickSheet(this.value); showTab('grading','profile')">${G().sheets.map(x=>`<option value="${x.id}" ${x.id===s.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></div>`;
+  if(!st.filled){
+    el.innerHTML=`<div class="card"><h3><span class="chip">프로파일</span>학급 준거 프로파일</h3>${pickSel}<div class="empty-note">아직 입력된 점수가 없습니다.<br><br><button class="btn btn-primary btn-sm" onclick="showTab('grading','input')">2. 점수 입력으로 →</button></div></div>`;
+    return;
+  }
+  const avgs=st.per.map((p,i)=>({name:s.crit[i][0], max:s.crit[i][1], avg:p.cnt? p.sum/p.cnt:0, rate:p.cnt? p.sum/p.cnt/s.crit[i][1]:0, cnt:p.cnt}));
+  const rated=avgs.filter(a=>a.cnt);
+  const weak=rated.slice().sort((a,b)=>a.rate-b.rate)[0], strong=rated.slice().sort((a,b)=>b.rate-a.rate)[0];
+  /* 학급 경향이라고 말하려면 표본이 어느 정도 쌓이고 준거 간 격차도 뚜렷해야 한다.
+     1명만 채점한 상태나 반올림하면 같아 보이는 차이로 수업 재설계를 권하지 않는다. */
+  const enough=st.complete>=5||(st.roster.length<=6&&st.complete===st.roster.length&&st.complete>=3);
+  const gap=(weak&&strong)? strong.rate-weak.rate : 0;
+  const gapNote = rated.length<2 ? ''
+    : !enough ? `<div class="callout warn" style="font-size:12.5px">아직 <b>${st.complete}명</b>만 채점을 마쳐 학급 경향을 말하기는 이릅니다. 더 채점하면 약한 준거를 짚어 드립니다.</div>`
+    : gap>=0.15 ? `<div class="callout info">⚠️ 현재 채점을 마친 ${st.complete}명 기준으로는 <b>「${esc(weak.name)}」</b>(${Math.round(weak.rate*100)}%)의 달성률이 가장 낮고, 💪 <b>「${esc(strong.name)}」</b>(${Math.round(strong.rate*100)}%)이 가장 높습니다. ③ 차시 수업안에서 낮은 준거를 겨냥한 활동을 보강해 보세요.
+      <button class="btn btn-soft btn-sm" style="margin-left:6px" onclick="showStep('lesson')">③ 차시 수업안으로 ›</button></div>`
+    : `<div class="callout good">준거별 달성률이 고르게 나왔습니다 — 특별히 뒤처지는 준거가 보이지 않습니다.</div>`;
+  const bars=avgs.map(a=>{
+    const pctv=Math.round(a.rate*100);
+    const cls=a.rate>=0.75?'b-green':a.rate>=0.45?'b-amber':'b-gray';
+    return `<div style="margin-bottom:10px"><div style="display:flex; align-items:baseline; gap:8px; font-size:13px; margin-bottom:3px">
+      <b style="color:var(--navy)">${esc(a.name)}</b>
+      <span class="badge ${cls}">${a.cnt? pctv+'%':'미채점'}</span>
+      <span style="color:#94a3b8; font-size:12px; margin-left:auto">평균 ${a.cnt? a.avg.toFixed(1):'—'} / ${a.max}점</span></div>
+      <div class="pbar"><div style="width:${a.cnt?pctv:0}%"></div></div></div>`;
+  }).join('');
+  /* 총점 분포 — 원점수 5구간 (등급 환산 아님) */
+  const buckets=[0,0,0,0,0];
+  st.totals.forEach(t=>{ const r=st.max? t/st.max:0; const i=Math.min(4,Math.floor(r*5)); buckets[i]++; });
+  const bmax=Math.max(1,...buckets);
+  const labels=['0~20%','20~40%','40~60%','60~80%','80~100%'];
+  const dist=`<div style="display:flex; align-items:flex-end; gap:10px; height:120px; padding:0 4px">`+
+    buckets.map((b,i)=>`<div style="flex:1; text-align:center"><div style="font-size:12px; font-weight:800; color:var(--navy); margin-bottom:3px">${b||''}</div>
+      <div style="height:${Math.round(b/bmax*80)}px; min-height:${b?4:0}px; background:linear-gradient(180deg,var(--blue),var(--teal)); border-radius:6px 6px 0 0"></div>
+      <div style="font-size:10.5px; color:#94a3b8; margin-top:4px">${labels[i]}</div></div>`).join('')+`</div>`;
+  const iaCheck=(s.kind==='ia')? `<div class="card"><h3><span class="chip">제출 대비</span>조정(moderation) 준비 점검</h3>
+    <div style="font-size:13.5px; line-height:1.9">
+      <div>${st.notScored.length?'⬜':'✅'} 전원 채점 완료 ${st.notScored.length?`<span style="color:#b45309; font-weight:700">— 미채점 ${st.notScored.length}명: ${st.notScored.slice(0,12).map(x=>esc(x.label)).join(', ')}${st.notScored.length>12?' 외':''}</span> <button class="btn btn-ghost btn-sm" onclick="showTab('grading','input')">입력하러 가기 ›</button>`:''}</div>
+      <div>${st.memoMissing.length?'⬜':'✅'} 점수 근거 메모 ${st.memoMissing.length?`<span style="color:#b45309; font-weight:700">— 메모 없음 ${st.memoMissing.length}명: ${st.memoMissing.slice(0,12).map(x=>esc(x.label)).join(', ')}${st.memoMissing.length>12?' 외':''}</span>`:''}</div>
+    </div>
+    <p class="hint" style="margin-top:8px">표본 검토(moderation)에 대비해 모든 학생의 점수 근거를 남겨 두면 안전합니다.</p></div>`:'';
+  el.innerHTML=`<div class="card"><h3><span class="chip">프로파일</span>학급 준거 프로파일</h3>${pickSel}
+    <p class="hint" style="margin-bottom:10px">${esc(s.title)} · 채점 완료 ${st.complete}/${st.roster.length}명 기준 (입력된 점수만 평균)</p>
+    ${bars}
+    ${gapNote}
+  </div>
+  <div class="card"><h3><span class="chip">분포</span>총점 분포 (원점수 기준)</h3>
+    ${st.totals.length? dist : '<div class="empty-note">전 준거를 다 채운 학생이 아직 없습니다.</div>'}
+    <p class="hint" style="margin-top:8px">채점을 마친 ${st.totals.length}명의 원점수 분포입니다. 7등급·A~E 환산은 제공하지 않습니다 — 등급 경계는 시험 세션마다 IB가 새로 정하므로 어떤 환산표도 정확할 수 없습니다.</p>
+  </div>
+  ${iaCheck}
+  <div class="card"><h3><span class="chip">내보내기</span>학급 프로파일 문서</h3>
+    <button class="btn btn-primary btn-sm" onclick="exportProfileDoc()">📊 학급 프로파일 → Word</button>
+    <p class="hint" style="margin-top:8px">학생은 익명 라벨로만 표기됩니다. 조정 전 가채점 기준의 참고 자료입니다.</p>
+  </div>`;
+}
+
+/* ── 피드백 문장 ──
+   전부 자체 문구입니다. 팩에서 가져오는 것은 준거 이름·만점뿐이며 공식 가이드의 수준 기술은 참조하지 않습니다.
+   구간(0.75/0.45)은 문장 선택을 위한 자체 기준일 뿐 IB의 등급·수준과 무관합니다.
+   구간 이름(상/중/하)은 화면·출력물에 쓰지 않습니다(프로파일 막대 색만 같은 임계값을 공유). */
+const FB_BANDS={
+  /* 문장은 「준거명 점수/만점 — 」 뒤에 이어 붙으므로 준거명으로 시작하지 않는다 */
+  crit:{
+    hi:['이 과제가 요구하는 바를 안정적으로 해냈습니다. 어떤 선택이 좋은 결과로 이어졌는지 한 문장으로 정리해 두면, 다음 과제에서도 같은 강점을 재현할 수 있습니다.',
+        '이번 결과물의 분명한 강점입니다. 이 강점을 유지하면서, 상대적으로 아쉬운 다른 영역에 시간을 더 배분해 보세요.',
+        '높은 완성도를 보여 주었습니다. 여기서 쓴 방법을 친구에게 설명해 본다면 이해가 한층 단단해질 것입니다.'],
+    mid:['기본 틀은 갖추어져 있습니다. 교사 메모가 가리키는 한두 지점을 손보면 다음 단계로 올라갈 수 있습니다.',
+         '좋은 시도와 아쉬운 부분이 함께 보입니다. 잘된 부분이 왜 잘됐는지를 기준 삼아, 나머지를 같은 방식으로 다듬어 보세요.',
+         '방향은 맞지만 마무리가 덜 되었습니다. 제출 전에 이 영역만 따로 점검하는 습관을 들이면 안정적으로 좋아집니다.'],
+    lo:['아직 어려움이 보입니다. 다음 과제 전에 이 영역만 집중해서 연습할 기회를 만들고, 필요하면 개별 점검 시간을 함께 잡읍시다.',
+        '이번 결과물에는 충분히 드러나지 않았습니다. 과제의 어느 부분에서 이 영역이 요구되는지부터 함께 확인하면 출발점이 잡힙니다.',
+        '출발이 늦었을 뿐, 지금부터 보완하면 됩니다. 교사 메모의 첫 번째 항목부터 순서대로 시도해 보세요.']
+  },
+  /* {t}=채점표 이름. 제목이 어떤 글자로 끝나도 조사가 어긋나지 않도록 「」+에/에서 형태로만 쓴다 */
+  holistic:{
+    hi:['이번 「{t}」에서 과제가 요구하는 바를 전반적으로 안정적으로 충족했습니다. 스스로 가장 잘했다고 생각하는 지점을 기록해 두세요.'],
+    mid:['이번 「{t}」의 전체 흐름은 잡혀 있고, 몇 군데를 다듬으면 완성도가 크게 오릅니다. 교사 메모의 지점을 중심으로 보완해 보세요.'],
+    lo:['이번 「{t}」에는 아직 채워야 할 부분이 남아 있습니다. 과제가 무엇을 요구하는지부터 다시 확인하고, 개별 상담에서 계획을 함께 세웁시다.']
+  },
+  none:'이 항목은 이번에 평가하지 않았습니다.'
+};
+function bandOf(r){ return r>=0.75?'hi':(r>=0.45?'mid':'lo'); }
+function feedbackDraftFor(s,sid,ri){
+  const sc=s.scores[sid]||{}, mm=s.memos[sid]||{};
+  /* 같은 구간이 여러 준거에 걸리면 문장이 겹쳐 보이므로, 구간별로 변형을 순서대로 돌려 쓴다 */
+  const used={hi:0,mid:0,lo:0};
+  const lines=s.crit.map((c,i)=>{
+    const v=sc[String(i)];
+    const memo=String(mm[String(i)]||'').trim();
+    if(typeof v!=='number') return `「${c[0]}」 — ${FB_BANDS.none}`;
+    const set=s.holistic? FB_BANDS.holistic : FB_BANDS.crit;
+    const b=bandOf(v/(c[1]||1));
+    const txt=pick(set[b],(ri||0)+(used[b]++)).replace('{c}',c[0]).replace('{t}',s.title);
+    return `${s.holistic?'':`「${c[0]}」 ${v}/${c[1]} — `}${s.holistic?`${v}/${c[1]}점. ${txt}`:txt}${memo?` (교사 메모: ${memo})`:''}`;
+  });
+  return lines.join('\n');
+}
+function makeAllDrafts(){
+  const s=curSheet(); if(!s){toast('채점표를 먼저 선택하세요.'); return;}
+  snapshot();
+  let n=0;
+  G().roster.forEach((stu,ri)=>{
+    const sc=s.scores[stu.id]||{};
+    if(!Object.keys(sc).length) return;
+    if(String(s.feedback[stu.id]||'').trim()) return;
+    s.feedback[stu.id]=feedbackDraftFor(s,stu.id,ri); n++;
+  });
+  renderFeedbackTab(); updateTabBadges();
+  toast(n? `${n}명의 피드백 초안을 만들었습니다. 반드시 읽고 고쳐서 내보내세요.`:'새로 만들 초안이 없습니다 (이미 작성됨 또는 미채점).');
+}
+function redraftOne(sid){
+  const s=curSheet(); if(!s) return;
+  if(String(s.feedback[sid]||'').trim()&&!confirm('이 학생의 피드백을 초안으로 다시 덮어쓸까요? 고쳐 쓴 내용이 사라집니다.')) return;
+  snapshot();
+  const ri=G().roster.findIndex(x=>x.id===sid);
+  s.feedback[sid]=feedbackDraftFor(s,sid,ri<0?0:ri);
+  renderFeedbackTab();
+}
+function renderFeedbackTab(){
+  const el=$('#grFeedback'); if(!el) return;
+  const s=ensureSheet(), g=G();
+  if(!s||!g.roster.length){ el.innerHTML='<div class="card"><div class="empty-note">채점표와 명단을 먼저 만들어 주세요.<br><br><button class="btn btn-primary btn-sm" onclick="showTab(\'grading\',\'setup\')">1. 명단·채점표로 →</button></div></div>'; return; }
+  const pickSel=`<div style="margin-bottom:10px"><select style="width:auto; min-width:260px" onchange="pickSheet(this.value); showTab('grading','feedback')">${g.sheets.map(x=>`<option value="${x.id}" ${x.id===s.id?'selected':''}>${esc(x.title)}</option>`).join('')}</select></div>`;
+  /* 펼쳐 둔 학생은 다시 그린 뒤에도 펼쳐 둔다 — 초안 생성 버튼이 그 안에 있다 */
+  const openIds=new Set([...document.querySelectorAll('#grFeedback details[open]')].map(d=>d.dataset.sid));
+  const items=g.roster.map((stu,ri)=>{
+    const sc=s.scores[stu.id]||{};
+    const gsc=studentScore(s,stu.id);
+    const fb=s.feedback[stu.id]||'';
+    const op=openIds.has(stu.id)?' open':'';
+    if(!gsc.any) return `<details data-sid="${stu.id}"${op} style="border:1px solid var(--line); border-radius:10px; padding:8px 12px; margin-bottom:7px; background:#fbfcfd">
+      <summary style="font-weight:700; color:#94a3b8; cursor:pointer">${esc(stu.label)} <span class="badge b-gray">미채점</span></summary>
+      <p class="hint" style="margin:8px 0 0">채점을 마치면 초안을 만들 수 있어요.</p></details>`;
+    return `<details data-sid="${stu.id}"${op} style="border:1px solid var(--line); border-radius:10px; padding:8px 12px; margin-bottom:7px; background:#fff">
+      <summary style="font-weight:700; color:var(--navy); cursor:pointer">${esc(stu.label)} ${gsc.complete?`<span class="badge b-blue">${gsc.tot}/${sheetMax(s)}</span>`:`<span class="badge b-amber">미완성 · ${gsc.missing}개 준거 미입력</span>`} ${fb.trim()?'<span class="badge b-green">작성됨</span>':'<span class="badge b-amber">초안 없음</span>'}</summary>
+      <table class="tbl" style="margin:8px 0"><tr><th>기준</th><th style="text-align:right">점수</th><th>교사 메모</th></tr>
+      ${s.crit.map((c,i)=>`<tr><td>${esc(c[0])}</td><td class="num-cell" style="white-space:nowrap">${typeof sc[String(i)]==='number'?`${sc[String(i)]} / ${c[1]}`:'—'}</td><td style="font-size:12.5px; color:var(--ink2)">${esc((s.memos[stu.id]||{})[String(i)]||'')}</td></tr>`).join('')}</table>
+      <textarea data-fb-sid="${stu.id}" placeholder="피드백 문장 — 위의 「전체 초안 생성」을 누르거나 직접 쓰세요" style="min-height:110px">${esc(fb)}</textarea>
+      <div style="display:flex; gap:6px; margin-top:6px; flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="redraftOne('${stu.id}')">이 학생 초안 다시 만들기</button>
+        <button class="btn btn-soft btn-sm" onclick="exportFeedbackDoc('${stu.id}')">📝 이 학생만 → Word</button>
+      </div></details>`;
+  }).join('');
+  el.innerHTML=`<div class="card"><h3><span class="chip">피드백</span>학생별 피드백 문장</h3>${pickSel}
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px">
+      <button class="btn btn-primary btn-sm" onclick="makeAllDrafts()">✍️ 전체 초안 생성 (빈 칸만)</button>
+      <button class="btn btn-soft btn-sm" onclick="goAI('feedback')">🤖 AI로 다듬기 프롬프트</button>
+    </div>
+    <div class="callout info" style="font-size:12.5px">초안은 점수 구간에 맞춰 자동 조립한 <b>출발점</b>입니다 — 반드시 선생님이 읽고 고쳐서 내보내세요. 준거별 근거 메모를 써 두면 초안에 함께 들어갑니다.</div>
+    ${items}
+  </div>
+  <div class="card"><h3><span class="chip">내보내기</span>피드백지 출력</h3>
+    <label style="display:flex; align-items:center; gap:7px; font-size:13px; color:var(--ink2); margin-bottom:10px"><input type="checkbox" id="gr-noMemo" style="width:auto; accent-color:var(--blue)"> 준거별 <b>근거 메모 칸을 빼고</b> 인쇄 (메모를 조정·기록용으로만 쓸 때) — 피드백 문장 안에 메모를 인용해 두었다면 그 문장은 그대로 나갑니다</label>
+    <button class="btn btn-primary btn-sm" onclick="exportFeedbackDoc()">📝 피드백지 전체 → Word</button>
+    <p class="hint" style="margin-top:8px">학생 1명당 1쪽으로 나옵니다. 학생 라벨이 그대로 인쇄되며, 「선생님의 가채점이며 최종 IB 성적이 아니다」라는 안내가 함께 나갑니다. 근거 메모를 켜 두면 학생도 그 내용을 읽게 됩니다.</p>
+  </div>`;
+}
+
+/* ── Word 내보내기 ── */
+function nameRiskConfirm(what){
+  const hits=nameRiskScan();
+  if(!hits.length) return true;
+  return confirm(`실명처럼 보이는 표현이 ${hits.length}곳 있습니다:\n· ${hits.slice(0,6).join('\n· ')}${hits.length>6?`\n· 외 ${hits.length-6}곳`:''}\n\n${what||'이 내용'}에 그대로 남습니다. 가명이라면 그대로 진행해도 됩니다. 계속할까요?`);
+}
+const GR_FOOT_FB='<div class="pfoot">IB티처스 수업설계 스튜디오로 작성 · 본 점수는 교사의 가채점으로 최종 IB 성적이 아니며, 내부평가는 IB 조정(moderation)을 거쳐 달라질 수 있습니다 · 등급 환산은 제공하지 않습니다 · 채점 기준은 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>';
+const GR_FOOT_PF='<div class="pfoot">IB티처스 수업설계 스튜디오로 작성 · 학생은 교사가 지정한 라벨로 표기됩니다(번호·가명 사용 권장) · 준거별 평균·분포는 교사 가채점 기준의 참고 자료이며 IB 조정 전 수치입니다 · 등급·경계 추정에 사용하지 마세요 · 본 도구는 IBO와 무관합니다.</div>';
+function exportFeedbackDoc(sid){
+  const s=curSheet(); if(!s){toast('채점표를 먼저 선택하세요.'); return;}
+  const g=G();
+  const list=sid? g.roster.filter(x=>x.id===sid) : g.roster.filter(x=>Object.keys(s.scores[x.id]||{}).length);
+  if(!list.length){ toast('채점된 학생이 없습니다.'); return; }
+  if(!nameRiskConfirm('학생에게 나눠 줄 피드백지')) return;
+  const withMemo=!($('#gr-noMemo')||{}).checked;
+  const pk=SUBJECTS[s.subject]||SUBJ();
+  const cname=(pk.courses[s.course]&&pk.courses[s.course].name)||'';
+  const P=[];
+  list.forEach((stu,idx)=>{
+    const sc=s.scores[stu.id]||{}, mm=s.memos[stu.id]||{};
+    const gsc=studentScore(s,stu.id);
+    if(idx) P.push('<br style="page-break-before:always">');
+    P.push(`<h1>${esc(cname)} ${esc(s.level)} — ${esc(s.title)}${s.kind==='exam'?' (모의·연습 채점)':''}</h1>
+      <p class="pmeta">학생(라벨): ${esc(stu.label)} · 실시일: ${esc(s.date||'____')} · 교사: ${esc(state.meta.teacher||'')}</p>
+      <p><b>이 점수는 학습을 돕기 위한 선생님의 평가이며, 최종 IB 성적이 아닙니다.</b></p>
+      <table><tr><th style="width:34%">기준</th><th style="width:14%">점수</th>${withMemo?'<th>교사 메모</th>':''}</tr>
+      ${s.crit.map((c,i)=>`<tr><td>${esc(c[0])}</td><td>${typeof sc[String(i)]==='number'?`${sc[String(i)]} / ${c[1]}`:'—'}</td>${withMemo?`<td>${esc(mm[String(i)]||'')}</td>`:''}</tr>`).join('')}
+      <tr><td><b>합계</b></td><td><b>${gsc.complete? `${gsc.tot} / ${sheetMax(s)}` : `${gsc.tot}점`}</b></td>${withMemo?`<td>${gsc.complete?'':`아직 채점하지 않은 준거가 ${gsc.missing}개 있어 총점이 확정되지 않았습니다.`}</td>`:''}</tr></table>
+      ${gsc.complete||withMemo?'':`<p>아직 채점하지 않은 준거가 ${gsc.missing}개 있어 총점이 확정되지 않았습니다.</p>`}
+      <h2>피드백</h2><p>${esc(s.feedback[stu.id]||'')}</p>
+      <h2>학생 소감·질문</h2><table><tr><td><br><br><br></td></tr></table>
+      <p class="pmeta">확인: 학생 ______________ · 교사 ______________</p>${GR_FOOT_FB}`);
+  });
+  downloadDoc(P.join(''),`피드백지_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}_${sid?list[0].label:'전체'}.doc`);
+}
+function exportProfileDoc(){
+  const s=curSheet(); if(!s){toast('채점표를 먼저 선택하세요.'); return;}
+  const st=sheetStats(s);
+  if(!st.filled){ toast('입력된 점수가 없습니다.'); return; }
+  if(!nameRiskConfirm('학급 프로파일 문서')) return;
+  const pk=SUBJECTS[s.subject]||SUBJ();
+  const cname=(pk.courses[s.course]&&pk.courses[s.course].name)||'';
+  const bar=r=>'▇'.repeat(Math.round(r*20))||'·';
+  const buckets=[0,0,0,0,0];
+  st.totals.forEach(t=>{ const r=st.max? t/st.max:0; buckets[Math.min(4,Math.floor(r*5))]++; });
+  const labels=['0~20%','20~40%','40~60%','60~80%','80~100%'];
+  const P=[`<h1>${esc(cname)} ${esc(s.level)} — ${esc(s.title)} 학급 프로파일</h1>
+    <p class="pmeta">채점 완료 ${st.complete}/${st.roster.length}명 · 실시일: ${esc(s.date||'____')} · 교사: ${esc(state.meta.teacher||'')} · 학교: ${esc(state.meta.school||'')}</p>
+    <h2>준거별 학급 평균</h2>
+    <table><tr><th style="width:32%">기준</th><th style="width:10%">만점</th><th style="width:12%">학급 평균</th><th style="width:10%">달성률</th><th>분포</th></tr>
+    ${st.per.map((p,i)=>{const c=s.crit[i], avg=p.cnt?p.sum/p.cnt:0, r=p.cnt?avg/(c[1]||1):0;
+      return `<tr><td>${esc(c[0])}</td><td>${c[1]}</td><td>${p.cnt?avg.toFixed(1):'—'}</td><td>${p.cnt?Math.round(r*100)+'%':'—'}</td><td>${p.cnt?bar(r):''}</td></tr>`;}).join('')}</table>
+    <h2>총점 분포 (원점수 기준)</h2>
+    <table><tr><th>구간</th>${labels.map(l=>`<th>${l}</th>`).join('')}</tr><tr><td><b>인원</b></td>${buckets.map(b=>`<td>${b}</td>`).join('')}</tr></table>
+    <p class="pmeta">채점을 마친 ${st.totals.length}명 기준 · 등급 환산은 제공하지 않습니다.</p>
+    ${st.notScored.length?`<h2>미채점 학생 (익명 라벨)</h2><p>${st.notScored.map(x=>esc(x.label)).join(', ')}</p>`:''}
+    ${st.memoMissing.length?`<h2>점수 근거 메모가 없는 학생</h2><p>${st.memoMissing.map(x=>esc(x.label)).join(', ')}</p>`:''}
+    <h2>교사 코멘트 — 다음 수업에 반영할 점</h2><table><tr><td><br><br><br></td></tr></table>
+    ${GR_FOOT_PF}`];
+  downloadDoc(P.join(''),`학급프로파일_${String(s.title).replace(/[\\/:*?"<>|]/g,'')}.doc`);
+}
+
+/* ── ⑤ 전체 렌더 ── */
+function renderGradingUI(){
+  if(!$('#panel-grading')) return;
+  const us=$('#gr-unit');
+  if(us){ const prev=us.value; /* 목록을 다시 채워도 고르던 단원은 유지 */
+    us.innerHTML='<option value="">(코스 공통 — 단원 미지정)</option>'+state.outline.units.map((x,i)=>`<option value="${x.id}">${esc(x.title||('단원 '+(i+1)))}</option>`).join('');
+    if(prev&&[...us.options].some(o=>o.value===prev)) us.value=prev; }
+  ensureSheet();
+  renderRoster(); renderSheetList(); renderNewSheetForm(); renderSheetPicker(); renderScoreGrid();
+  if(uiTab.grading==='profile') renderClassProfile();
+  if(uiTab.grading==='feedback') renderFeedbackTab();
+  renderRail(); updateTabBadges();
+}
+
 /* 홈 진행 현황판 */
 function goUnitStep(uid2,step,tab){
   ['#up-unitSel','#ls-unitSel','#ai-unitSel','#pr-unitSel','#unitCtxSel'].forEach(s=>{const el=$(s); if(el&&[...el.options].some(o=>o.value===uid2)) el.value=uid2;});
@@ -1955,7 +2690,14 @@ function renderHomeBoard(){
       const ls=state.lessons.filter(l=>l.unitId===x.id).length; const tgt=unitLessons(x);
       const s3=(tgt>0&&ls>=tgt)?'full':ls>0?'part':'none';
       const s4=(String(p.formative||'').trim()&&String(p.summative||'').trim())?'full':(String(p.formative||'').trim()||String(p.summative||'').trim())?'part':'none';
-      return `<tr><td><b>${esc(x.title||'무제')}</b><br><span style="color:#94a3b8; font-size:11px">Y${x.year} · ${x.hours||0}${hoursSuffix()}</span></td>${D(s1,x.id,'course','units','내용·평가·시수 입력')}${D(s2,x.id,'unit','inquiry','플래너 '+filled+'칸 작성됨')}${D(s3,x.id,'lesson',null,ls+'/'+tgt+'차시')}${D(s4,x.id,'assess',null,'형성·총괄평가')}<td style="text-align:center"><span class="badge b-gray" title="준비 중">🔒</span></td></tr>`;
+      /* ⑤ 채점 — 이 단원에 연결된 채점표 기준 */
+      const gsh=G().sheets.filter(s=>s.unitId===x.id);
+      const gst=gsh.map(sheetStats);
+      const s5=!gsh.length?'none':(gst.every(t=>t.roster.length&&!t.notScored.length)?'full':(gst.some(t=>t.filled)?'part':'none'));
+      const g5cell=gsh.length
+        ? `<td style="text-align:center; cursor:pointer" onclick="openSheet('${gsh[0].id}'); showStep('grading','input')" title="가채점·피드백 (조정 전) — 채점표 ${gsh.length}개"><span class="badge ${s5==='full'?'b-green':s5==='part'?'b-amber':'b-gray'}">${s5==='full'?'●':s5==='part'?'◐':'○'}</span></td>`
+        : `<td style="text-align:center; cursor:pointer" onclick="showStep('grading','setup')" title="이 단원에 연결된 채점표가 없습니다 — ⑤에서 만들 수 있습니다"><span class="badge b-gray">○</span></td>`;
+      return `<tr><td><b>${esc(x.title||'무제')}</b><br><span style="color:#94a3b8; font-size:11px">Y${x.year} · ${x.hours||0}${hoursSuffix()}</span></td>${D(s1,x.id,'course','units','내용·평가·시수 입력')}${D(s2,x.id,'unit','inquiry','플래너 '+filled+'칸 작성됨')}${D(s3,x.id,'lesson',null,ls+'/'+tgt+'차시')}${D(s4,x.id,'assess',null,'형성·총괄평가')}${g5cell}</tr>`;
     }).join('');
     el.innerHTML=`<table class="tbl"><tr><th>단원</th><th style="text-align:center">①아웃라인</th><th style="text-align:center">②플래너</th><th style="text-align:center">③차시</th><th style="text-align:center">④평가</th><th style="text-align:center">⑤채점</th></tr>${rows}</table>
     <p class="hint" style="margin-top:8px">● 충족 · ◐ 진행 중 · ○ 시작 전 — 칸을 누르면 해당 단원·단계로 바로 이동합니다.</p>`;
@@ -1968,7 +2710,9 @@ function renderHomeBoard(){
       ['내부평가 일정(소개·단계·마감)',[o.iaIntro,o.iaDue,o.iaStages].filter(v=>!String(v||'').trim()).length,'ia'],
       ['연계·자료(TOK·ATL·국제적 소양·학습자상·자료)',[o.tok,o.atl,o.im,o.lp,o.resources].filter(v=>!String(v||'').trim()).length+((o.lpChecks||[]).length?0:1),'links']
     ];
+    const gs=gradingSummary();
     hc.innerHTML=items.map(it=>`<div style="display:flex; align-items:center; gap:8px; padding:6px 2px; font-size:13.5px"><span>${it[1]?'⬜':'✅'}</span><span style="${it[1]?'font-weight:700; color:#b45309':''}">${esc(it[0])}</span><span class="hint" style="margin:0">${it[1]?'미작성 '+it[1]+'곳':''}</span><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="showStep('course','${it[2]}')">열기 ›</button></div>`).join('')+
+    `<div style="display:flex; align-items:center; gap:8px; padding:6px 2px; font-size:13.5px"><span>${gs.ready?'✅':'⬜'}</span><span style="${gs.ready?'':'font-weight:700; color:#b45309'}">⑤ 채점·피드백 (IA 등 코스 공통)</span><span class="hint" style="margin:0">${!gs.sheets? '채점표 없음' : !gs.roster? '학생 명단 없음' : gs.notScored? `채점표 ${gs.sheets}개 · 미채점 ${gs.notScored}명` : `채점표 ${gs.sheets}개 · 전원 완료`}</span><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="showStep('grading')">열기 ›</button></div>`+
     `<div style="margin-top:8px"><button class="btn btn-soft btn-sm" onclick="showStep('export','check')">제출 전 13항목 점검 전체 보기 ›</button></div>`;
   }
 }
@@ -1985,6 +2729,7 @@ function showStep(name,tab){
   if(name==='unit') loadPlanForm();
   if(name==='export') renderChecklist();
   if(name==='assess') renderAssessMap();
+  if(name==='grading') renderGradingUI();
   if(name==='home') renderHomeBoard();
   if(tab) showTab(name,tab); else if(document.querySelector(`.tabbar[data-tabs="${name}"]`)) showTab(name);
   const ctx=$('#unitCtx');
@@ -3213,7 +3958,7 @@ const SUBJECTS={
 };
 function renderSubjectUI(){
   const p=SUBJ();
-  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.8`;
+  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.9`;
   const sel=$('#subjectSel');
   if(sel){ const keys=Object.keys(SUBJECTS);
     sel.style.display=keys.length>1?'':'none';
@@ -3228,13 +3973,14 @@ function renderSubjectUI(){
 }
 $('#subjectSel').onchange=e=>{
   const ns=e.target.value; if(ns===state.meta.subject) return;
-  if((state.outline.units.length||state.lessons.length) && !confirm('과목을 바꾸면 단원 구성·유닛플래너·차시안이 새로 시작됩니다.\n(상단 되돌리기로 복구 가능) 계속할까요?')){ e.target.value=state.meta.subject; return; }
+  if((state.outline.units.length||state.lessons.length) && !confirm('과목을 바꾸면 단원 구성·유닛플래너·차시안이 새로 시작됩니다.\n(⑤ 채점표와 학생 명단은 지워지지 않고 보관됩니다 — 다만 채점표에 걸어 둔 단원 연결은 해제됩니다)\n(상단 되돌리기로 복구 가능) 계속할까요?')){ e.target.value=state.meta.subject; return; }
   snapshot();
   state.meta.subject=ns; state.meta.course=SUBJ().defaultCourse;
   state.outline.units=[]; state.plans={}; state.lessons=[];
   state.outline.iaIntro=''; state.outline.iaDue=''; state.outline.iaStages='';
+  /* ⑤ 채점표·명단은 지우지 않는다 — 점수는 다시 만들 수 없는 기록이고, 준거를 스냅숏으로 갖고 있어 과목이 바뀌어도 안전하다 */
   renderSubjectUI(); setCourse(state.meta.course); setLevel(state.meta.level);
-  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist();
+  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist(); renderGradingUI();
   toast(`${SUBJ().short} 모드로 전환했습니다.${CUR().verified===false?' ※ 이 과정은 자체 정리 초안 — 공식 가이드와 대조하세요.':''}`);
 };
 
@@ -3252,6 +3998,7 @@ $('#unitCtxSel').addEventListener('change',e=>{
   if($('#panel-assess').classList.contains('on')) renderAssessMap();
 });
 initTabs();
+renderGradingUI();
 renderRail();
 </script>
 </body>

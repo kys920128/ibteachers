@@ -2,5 +2,6 @@ CLAUDE.md
 docs/
 data/
 guides/
+.claude/
 *.pdf
 *.zip

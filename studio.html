@@ -694,7 +694,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
         <span id="pp-parseNote" class="hint" style="margin-left:8px"></span>
       </details>
       <div id="paperList" style="margin-top:14px"></div>
-      <p class="hint" style="margin-top:8px">문항은 <b>선생님 수업용 자작 문항</b>으로 만들어집니다 — IB 기출 문항을 그대로 옮기지 않습니다. 출제 전 공식 가이드의 시험 형식과 대조하세요.</p>
+      <p class="hint" style="margin-top:8px">프롬프트는 <b>기출·저작권 지문을 옮기지 말라고 요청</b>하지만, 붙여넣은 결과가 실제로 그러한지는 도구가 확인할 수 없습니다 — <b>배포 전 선생님이 문항을 검토</b>하시고, 시험 형식은 공식 가이드와 대조하세요.</p>
     </div>
     <div class="card">
       <h3><span class="chip">빈 문항 틀</span>내용 없이 틀만 만들기 <span class="eng">Question frame</span></h3>
@@ -1373,7 +1373,11 @@ function buildPrompt(){
     const styleSel=$('#pp-style'); const styleTxt=styleSel? (styleSel.options[styleSel.selectedIndex]||{}).text||'' : '';
     const ex=String(($('#pp-extra')||{}).value||'').trim();
     const subs=u2.subs.length? u2.subs.join('\n  · ') : '(학습 내용 미선택 — 토픽 전체에서 출제)';
-    return `${head}\n\n## 과제\n아래 단원으로 **연습용 문제지와 마크스킴**을 함께 만들어 주세요.\n\n- 대상 단원: ${u2.title||'무제'} (${topicName(u2.topic)}, Year ${u2.year})\n- 이 단원의 학습 내용:\n  · ${subs}\n- 문항 수: ${n}개 · 총점 약 ${tot}점 · 형식: ${styleTxt||'단원 평가'}${ex?`\n- 추가 조건: ${ex}`:''}\n\n## 반드시 지킬 것\n1. **IB 기출 문항을 그대로 옮기지 마십시오.** 위 학습 내용에 맞는 문항을 새로 지어 주세요. 공식 시험지·마크스킴의 문장을 기억에서 인용·복원하지 마십시오.\n2. 문항은 위에 적힌 **학습 내용 범위 안에서만** 출제하십시오. 이 단원에서 아직 배우지 않은 개념을 쓰지 마십시오.\n3. 마크스킴은 **IB식 마크 코드**로 쓰십시오 — M(방법)·A(정확도)·R(추론). 각 마크는 1점 단위로 쪼개고, 무엇을 보고 주는지 한 줄로 적으십시오.\n4. **최소 한 문항은 (a)의 답이 (b)에 쓰이는 구조**로 만들고, (b)의 해당 마크에 \`"ft": true\`(이월 채점)를 표시하십시오. 이월 채점은 앞을 틀려도 자기 값으로 정확히 계산했으면 주는 마크입니다.\n5. 문항마다 \`topic\`에 **그 문항이 물은 학습 내용**을 위 목록의 표현으로 적으십시오. 나중에 문항 분석에서 "어느 내용이 약한가"로 쓰입니다.\n6. 각 문항의 \`marks\`는 그 문항 \`ms\` 배열의 \`pts\` 합과 **반드시 일치**해야 합니다.\n${LANGLINE()}\n\n## 출력 형식 — 아래 JSON **하나만** 코드블록으로 출력하십시오 (설명 문장은 코드블록 밖에)\n\`\`\`json\n{\n  "title": "문제지 제목",\n  "items": [\n    {\n      "no": "1",\n      "text": "문항 전문. (a) (b) 소문항이 있으면 줄바꿈으로 구분해 한 문자열에 담을 것.",\n      "marks": 6,\n      "topic": "이 문항이 물은 학습 내용",\n      "ms": [\n        {"code":"M1","label":"어떤 방법을 썼는가","pts":1,"ft":false},\n        {"code":"A1","label":"무엇이 정확한가","pts":1,"ft":false},\n        {"code":"A2","label":"최종 답","pts":2,"ft":true}\n      ]\n    }\n  ]\n}\n\`\`\`\n\n수식은 일반 텍스트로 쓰십시오(예: (a+b)/c, x^2, Σ(r=1부터 n까지)). 별도의 수식 편집기 문법을 쓰지 마십시오.`;
+    /* 이월 채점은 앞 답이 뒤로 이어지는 계산 과목에서만 요구한다 — 논술형에 강요하면 없는 구조를 지어낸다 */
+    const ftRule=FT_SUBJECTS.includes(state.meta.subject)
+      ? '**최소 한 문항은 (a)의 답이 (b)에 쓰이는 구조**로 만들고, (b)의 해당 마크에 "ft": true(이월 채점)를 표시하십시오 — 앞을 틀려도 자기 값으로 정확히 계산했으면 주는 마크입니다.'
+      : '앞 답이 뒤로 이어지는 문항이 있다면 그 마크에만 "ft": true를 표시하고, 없으면 표시하지 마십시오.';
+    return `${head}\n\n## 과제\n아래 단원으로 **연습용 문제지와 마크스킴**을 함께 만들어 주세요.\n\n- 대상 단원: ${u2.title||'무제'} (${topicName(u2.topic)}, Year ${u2.year})\n- 이 단원의 학습 내용:\n  · ${subs}\n- 문항 수: ${n}개 · 총점 약 ${tot}점 · 형식: ${styleTxt||'단원 평가'}${ex?`\n- 추가 조건: ${ex}`:''}\n\n## 반드시 지킬 것\n1. **IB 기출 문항을 그대로 옮기지 마십시오.** 위 학습 내용에 맞는 문항을 새로 지어 주세요. 공식 시험지·마크스킴의 문장을 기억에서 인용·복원하지 마십시오.\n2. **저작권이 있는 지문·작품을 본문에 넣지 마십시오.** 시·소설·기사 등 남의 글이 필요한 문항이라면 지문 전문 대신 \`(교사가 수업에서 다룬 작품의 해당 부분을 여기에 붙여 주세요)\` 같은 자리표시자를 쓰고 문항만 지으십시오. 짧은 예문이 꼭 필요하면 직접 창작한 문장을 쓰십시오.\n2. 문항은 위에 적힌 **학습 내용 범위 안에서만** 출제하십시오. 이 단원에서 아직 배우지 않은 개념을 쓰지 마십시오.\n3. 마크스킴은 이 과목의 채점 방식에 맞게 쓰되, 코드는 **M(방법)·A(정확도)·R(추론)** 중에서 고르십시오. 각 마크는 무엇을 보고 주는지 한 줄로 적고, 점수를 잘게 쪼개십시오.\n4. ${ftRule}\n5. 문항마다 \`topic\`에 **그 문항이 물은 학습 내용**을 위 목록의 표현으로 적으십시오. 나중에 문항 분석에서 "어느 내용이 약한가"로 쓰입니다. **학생 이름이나 특정 학생을 가리키는 표현을 쓰지 마십시오.**\n6. 각 문항의 \`marks\`는 그 문항 \`ms\` 배열의 \`pts\` 합과 **반드시 일치**해야 합니다.\n7. **IB 등급(1~7)이나 등급 경계를 만들지 마십시오.** 등급 경계는 시험 시행마다 IB가 새로 정하므로 어떤 환산도 정확할 수 없습니다. 원점수와 배점까지만 쓰십시오.\n8. \`text\`는 **반드시 하나의 문자열**이어야 합니다. 소문항은 객체나 배열로 쪼개지 말고 줄바꿈으로 구분해 한 문자열에 담으십시오.\n${LANGLINE()}\n\n## 출력 형식 — 아래 JSON **하나만** 코드블록으로 출력하십시오 (설명 문장은 코드블록 밖에)\n\`\`\`json\n{\n  "title": "문제지 제목",\n  "items": [\n    {\n      "no": "1",\n      "text": "문항 전문. (a) (b) 소문항이 있으면 줄바꿈으로 구분해 한 문자열에 담을 것.",\n      "marks": 6,\n      "topic": "이 문항이 물은 학습 내용",\n      "ms": [\n        {"code":"M1","label":"어떤 방법을 썼는가","pts":1,"ft":false},\n        {"code":"A1","label":"무엇이 정확한가","pts":1,"ft":false},\n        {"code":"A2","label":"최종 답","pts":2,"ft":true}\n      ]\n    }\n  ]\n}\n\`\`\`\n\n수식은 일반 텍스트로 쓰십시오(예: (a+b)/c, x^2, Σ(r=1부터 n까지)). 별도의 수식 편집기 문법을 쓰지 마십시오.`;
   }
   if(type==='feedback'){
     const s=curSheet();
@@ -1400,7 +1404,7 @@ function mathIaPrompt(head,u,extra){
 }
 $('#ai-type').onchange=()=>{
   const t=$('#ai-type').value;
-  $('#ai-unitWrap').style.display=(t==='outline'||t==='feedback'||t==='paper')?'none':'block';
+  $('#ai-unitWrap').style.display=(t==='outline'||t==='feedback')?'none':'block';
   $('#ai-extraWrap').style.display=(t==='lesson'||t==='ia'||t==='feedback')?'block':'none';
   const w=$('#aiFbWarn'); if(w) w.style.display=(t==='feedback')?'block':'none';
 };
@@ -2033,8 +2037,8 @@ window.addEventListener('beforeunload',e=>{if(state.outline.units.length||G().sh
 
 /* ═══════════════ 샘플 데이터 ═══════════════ */
 $('#btnSample').onclick=()=>{
-  const hasWork=state.outline.units.length||G().sheets.length||G().roster.length;
-  if(hasWork&&!confirm(`현재 내용을 지우고 샘플을 불러올까요?${G().sheets.length||G().roster.length?'\n⑤ 채점 데이터(명단·채점표·점수·메모)도 함께 지워집니다.':''}\n(상단 되돌리기로 복구 가능)`))return;
+  const hasWork=state.outline.units.length||G().sheets.length||G().roster.length||(state.papers||[]).length;
+  if(hasWork&&!confirm(`현재 내용을 지우고 샘플을 불러올까요?${(state.papers||[]).length?'\n④ 만들어 둔 예시 문제지도 함께 지워집니다.':''}${G().sheets.length||G().roster.length?'\n⑤ 채점 데이터(명단·채점표·점수·메모)도 함께 지워집니다.':''}\n(상단 되돌리기로 복구 가능)`))return;
   snapshot();
   uidSeq=1;
   state={meta:{subject:'math',course:'AA',level:'SL',school:'한국IB고등학교(샘플)',code:'0000',teacher:'김영우',years:'2027.3 ~ 2029.2',training:'DP Mathematics: AA Cat.1 / 2026.01',date:'2026.08.07',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
@@ -2239,6 +2243,15 @@ function looksLikeName(text){
 function nameRiskScan(){
   const g=G(), hits=[];
   g.roster.forEach(s=>{ if(looksLikeName(s.label)) hits.push(`학생 라벨 「${s.label}」`); });
+  /* 문제지 문항·「물은 내용」도 문서로 나간다 — 문항 분석표에 그대로 실린다 */
+  (state.papers||[]).forEach(pp=>{
+    (pp.items||[]).forEach(it=>{
+      if(looksLikeName(it.topic)) hits.push(`「${pp.title}」 ${it.no}번의 「물은 내용」`);
+      if(looksLikeName(it.text)) hits.push(`「${pp.title}」 ${it.no}번 문항 내용`);
+    });
+  });
+  g.sheets.forEach(sh=>{ (sh.topics||[]).forEach((t,i)=>{
+    if(looksLikeName(t)) hits.push(`「${sh.title}」 ${i+1}번 문항의 「물은 내용」`); }); });
   g.sheets.forEach(s=>{
     g.roster.forEach(st=>{
       Object.values(s.memos[st.id]||{}).forEach(m=>{ if(looksLikeName(m)) hits.push(`「${s.title}」 ${st.label}의 근거 메모`); });
@@ -2677,13 +2690,25 @@ function renderClassProfile(){
    설계 요지: 도구가 문제지를 만들면 마크스킴도 이미 갖고 있다.
    그래서 채점표를 만들 때 문항 칸·배점·「물은 내용」을 자동으로 채울 수 있고,
    교사가 마크스킴을 다시 타이핑할 필요가 없다 — 이것이 ④→⑤ 고리의 핵심이다. */
-const PAPER_STYLES=[
-  ['unit','단원 평가 (종합)'],
-  ['quiz','쪽지시험 (짧게)'],
-  ['nocalc','계산기 없이 (Paper 1 형식)'],
-  ['calc','계산기 사용 (Paper 2 형식)'],
-  ['exit','출구티켓 (1~2문항)']
-];
+/* 이월 채점(follow-through)이 실제로 성립하는 과목 — 앞 문항의 수치가 뒤로 이어지는 계산 과목.
+   논술형 과목에 강요하면 없는 구조를 지어내게 된다. */
+const FT_SUBJECTS=['math','bio','chem','phys'];
+/* 시험 형식은 과목마다 다르다. 「계산기 없이 Paper 1」은 수학에만 있는 구분이고,
+   TOK에는 필기시험 자체가 없다(전시회·에세이). 과목 팩의 공식 평가 항목을 우선 쓴다. */
+const PAPER_STYLES_COMMON=[['unit','단원 평가 (종합)'],['quiz','쪽지시험 (짧게)'],['exit','출구티켓 (1~2문항)']];
+const PAPER_STYLES_BY_SUBJECT={
+  math:[['nocalc','계산기 없이 (시험 1 형식)'],['calc','계산기 사용 (시험 2 형식)']],
+  bio:[['mcq','객관식 중심 (시험 1 형식)'],['data','자료 해석·서술 (시험 2 형식)']],
+  chem:[['mcq','객관식 중심 (시험 1 형식)'],['data','자료 해석·서술 (시험 2 형식)']],
+  phys:[['mcq','객관식 중심 (시험 1 형식)'],['data','자료 해석·서술 (시험 2 형식)']],
+  korean:[['analysis','발췌 분석 (시험 1 형식)'],['essay','비교 에세이 (시험 2 형식)']],
+  engb:[['writing','텍스트 유형 작문 (시험 1 형식)'],['reading','독해·듣기 (시험 2 형식)']],
+  hist:[['source','사료 기반 (시험 1 형식)'],['essay','주제 서술 (시험 2·3 형식)']],
+  tok:[['discussion','지식 질문 토론 과제'],['mini','미니 에세이 (400단어)']]
+};
+function paperStyles(){
+  return [...(PAPER_STYLES_BY_SUBJECT[state.meta.subject]||[]), ...PAPER_STYLES_COMMON];
+}
 function paperMax(pp){ return (pp.items||[]).reduce((a,it)=>a+(Number(it.marks)||0),0); }
 function msPts(it){ return (it.ms||[]).reduce((a,m)=>a+(Number(m.pts)||0),0); }
 /* 배점과 마크 합이 어긋나면 채점표가 조용히 틀어진다 — 저장 시점에 잡아 알려 준다 */
@@ -2694,8 +2719,16 @@ function paperWarnings(pp){
     if(!it.ms.length) w.push(`${label}번: 마크스킴이 비어 있습니다`);
     else if(msPts(it)!==Number(it.marks)) w.push(`${label}번: 배점 ${it.marks}점과 마크 합계 ${msPts(it)}점이 다릅니다`);
     if(!String(it.text||'').trim()) w.push(`${label}번: 문항 내용이 비어 있습니다`);
+    /* 파서가 손댄 곳은 반드시 드러낸다 — 조용히 통과하면 교사가 원문과 대조할 기회를 잃는다 */
+    if(it.textFixed) w.push(`${label}번: 문항 전문이 문자열이 아니어서 소문항을 이어 붙였습니다 — 원문과 대조하세요`);
+    if(it.declaredMarks) w.push(`${label}번: AI가 적은 배점은 ${it.declaredMarks}점인데 마크 합은 ${msPts(it)}점입니다 — 마크 합을 채점 만점으로 씁니다`);
+    if(it.msTruncated) w.push(`${label}번: 마크 항목이 너무 많아 ${it.msTruncated}개를 잘랐습니다`);
+    if(/\[object Object\]/.test(String(it.text||''))) w.push(`${label}번: 문항 내용이 깨져 있습니다 — 다시 붙여넣어 주세요`);
   });
-  if(!(pp.items||[]).some(it=>(it.ms||[]).some(m=>m.ft))) w.push('이월 채점(ft) 마크가 하나도 없습니다 — 앞 답이 뒤로 이어지는 문항이 있으면 표시해 두세요');
+  /* 이월 채점은 수학·과학처럼 앞 답이 뒤로 이어지는 과목에서만 의미가 있다.
+     논술형 과목에까지 요구하면 없는 구조를 억지로 만들게 된다. */
+  if(FT_SUBJECTS.includes(pp.subject) && !(pp.items||[]).some(it=>(it.ms||[]).some(m=>m.ft)))
+    w.push('이월 채점(ft) 마크가 하나도 없습니다 — 앞 답이 뒤로 이어지는 문항이 있으면 표시해 두세요');
   return w;
 }
 function goPaperAI(){
@@ -2713,14 +2746,41 @@ function goPaperAI(){
 function extractJson(raw){
   const t=String(raw||'').trim();
   if(!t) return null;
-  const fence=t.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const cands=[];
-  if(fence) cands.push(fence[1]);
+  /* 코드블록이 여러 개 오는 일이 흔하다(설명용 예시 + 실제 결과).
+     첫 번째를 무조건 고르면 예시가 문제지로 저장된다 — 전부 파싱해 문항이 가장 많은 것을 고른다. */
+  const fences=[...t.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)].map(m=>m[1]);
+  cands.push(...fences);
   const first=t.indexOf('{'), last=t.lastIndexOf('}');
   if(first>=0&&last>first) cands.push(t.slice(first,last+1));
   cands.push(t);
-  for(const c of cands){ try{ const o=JSON.parse(c.trim()); if(o&&typeof o==='object') return o; }catch(e){} }
-  return null;
+  let best=null, bestN=-1;
+  for(const c of cands){
+    let o=null;
+    try{ o=JSON.parse(c.trim()); }
+    catch(e){
+      /* 후행 쉼표·// 주석은 사람이 손댄 붙여넣기에서 자주 나온다 — 한 번만 관대하게 재시도 */
+      try{ o=JSON.parse(c.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'').replace(/,(\s*[}\]])/g,'$1').trim()); }catch(e2){}
+    }
+    if(!o||typeof o!=='object') continue;
+    const n=Array.isArray(o.items)? o.items.length : 0;
+    if(n>bestN){ best=o; bestN=n; }
+  }
+  return best;
+}
+/* AI가 소문항을 객체·배열로 쪼개 보내는 일이 잦다 — String()에 맡기면 문항 전문이
+   「[object Object]」로 조용히 사라진다. 구조를 펴서 살리고, 손댄 사실은 경고로 남긴다. */
+function flatText(v,d){
+  d=d||0;
+  if(v==null) return '';
+  if(typeof v==='string') return v;
+  if(typeof v==='number'||typeof v==='boolean') return String(v);
+  if(d>3||typeof v!=='object') return '';
+  if(Array.isArray(v)) return v.map(x=>flatText(x,d+1)).filter(x=>x.trim()).join(String.fromCharCode(10));
+  return Object.keys(v).map(k=>{
+    const t=flatText(v[k],d+1);
+    return t.trim()? (/^[a-z0-9]{1,3}$/i.test(k)? `(${k}) ${t}` : t) : '';
+  }).filter(Boolean).join(String.fromCharCode(10));
 }
 function savePaperFromPaste(){
   const ta=$('#pp-paste'), note=$('#pp-parseNote');
@@ -2729,21 +2789,37 @@ function savePaperFromPaste(){
   if(!obj) return fail('JSON을 찾지 못했습니다. AI 답변의 코드블록을 통째로 붙여넣어 주세요.');
   const rawItems=Array.isArray(obj.items)?obj.items:[];
   if(!rawItems.length) return fail('items 배열이 비어 있습니다.');
+  const MS_CAP=24;
   const items=rawItems.slice(0,40).map((it,i)=>{
-    const ms=(Array.isArray(it.ms)?it.ms:[]).slice(0,12).map(m=>({
-      code:String(m&&m.code||'').slice(0,8)||'A1',
-      label:String(m&&m.label||'').slice(0,200),
-      pts:Math.max(0,Math.min(20,Number(m&&m.pts)||1)),
-      ft:!!(m&&m.ft)
-    }));
+    const rawMs=Array.isArray(it.ms)?it.ms:[];
+    const cut=Math.max(0,rawMs.length-MS_CAP);
+    const ms=rawMs.slice(0,MS_CAP).map(m=>{
+      /* Number(0)||1 은 0을 1로 만든다 — 0점 항목(AG 등)이 배점을 부풀린다 */
+      const raw=(m&&m.pts);
+      const n=Number(raw);
+      const ok=(raw!=null&&raw!==''&&Number.isFinite(n));
+      return {
+        code:flatText(m&&m.code).slice(0,8)||'A1',
+        label:flatText(m&&m.label).slice(0,200),
+        pts:ok? Math.max(0,Math.min(20,n)) : 1,
+        ft:!!(m&&m.ft)
+      };
+    });
     const declared=Number(it&&it.marks);
     const sum=ms.reduce((a,m)=>a+m.pts,0);
+    const rawText=(it&&it.text);
+    const textFixed=(rawText!=null&&typeof rawText!=='string');
+    /* 채점 칸의 만점은 실제로 줄 수 있는 마크의 합이어야 한다 — 그래야 만점이 받을 수 있는 점수가 된다.
+       선언값과 다르면 마크 합을 쓰고, 어긋났다는 사실은 경고로 남긴다. */
+    const marks=(sum>0? sum : (declared>0? declared : 1));
     return {
-      no:String(it&&it.no||(i+1)).slice(0,10),
-      text:String(it&&it.text||'').slice(0,4000),
-      /* 배점이 없거나 마크 합과 다르면 마크 합을 신뢰한다 — 채점 칸의 만점이 되기 때문 */
-      marks:(declared>0? declared : sum)||1,
-      topic:String(it&&it.topic||'').slice(0,120),
+      no:flatText(it&&it.no).slice(0,10)||String(i+1),
+      text:flatText(rawText).slice(0,4000),
+      marks,
+      topic:flatText(it&&it.topic).slice(0,120),
+      ...(textFixed?{textFixed:true}:{}),
+      ...(declared>0&&sum>0&&declared!==sum?{declaredMarks:declared}:{}),
+      ...(cut?{msTruncated:cut}:{}),
       ms
     };
   });
@@ -2775,7 +2851,10 @@ function renderPapers(){
     if(cur&&[...us.options].some(o=>o.value===cur)) us.value=cur;
   }
   const ss=$('#pp-style');
-  if(ss&&!ss.options.length) ss.innerHTML=PAPER_STYLES.map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('');
+  if(ss){ const sig=state.meta.subject; if(ss.dataset.sig!==sig){
+    ss.dataset.sig=sig;
+    ss.innerHTML=paperStyles().map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('');
+  }}
   const list=state.papers||[];
   if(!list.length){ el.innerHTML='<div class="empty-note">아직 만든 문제지가 없습니다. 단원을 고르고 「문제지 생성 프롬프트 만들기」를 누르세요.</div>'; return; }
   el.innerHTML=list.map(pp=>{
@@ -2796,7 +2875,7 @@ function renderPapers(){
           <button class="btn btn-danger btn-sm" onclick="delPaper('${pp.id}')">삭제</button>
         </span>
       </div>
-      <div style="font-size:12.5px; color:#94a3b8; margin-bottom:6px">${u?esc(u.title||'단원'):'단원 미지정'}${pp.source==='ai'?' · AI 초안':''}</div>
+      <div style="font-size:12.5px; color:#94a3b8; margin-bottom:6px">${u?esc(u.title||'단원'):'단원 미지정'}${pp.source==='ai'?' · AI 초안':''}${pp.subject!==state.meta.subject?` · <span class="badge b-gray">${esc((SUBJECTS[pp.subject]&&SUBJECTS[pp.subject].short)||pp.subject)}</span>`:''}</div>
       ${w.length?`<div class="callout warn" style="margin:6px 0; font-size:12.5px">${w.map(x=>esc(x)).join('<br>')}</div>`:''}
       <details class="sub-picker"><summary>문항 ${pp.items.length}개 미리보기</summary>
         ${pp.items.map(it=>`<div style="margin:8px 0; padding-bottom:8px; border-bottom:1px solid #eef2f7">
@@ -2819,11 +2898,11 @@ function exportPaperDoc(id){
   const P=[`<h1>${esc(cname)} ${esc(pp.level)} — ${esc(pp.title)}</h1>
     <p class="pmeta">${u?`단원: ${esc(u.title||'')} · `:''}문항 ${pp.items.length}개 · 총 ${paperMax(pp)}점 · 교사: ${esc(state.meta.teacher||'')}</p>
     <p class="pmeta">학생(번호·익명 라벨): ______________     날짜: ______________</p>
-    <p><b>이 문제지는 수업용 자작 문항입니다 — IB 기출 문항이 아닙니다.</b></p>`];
+    <p><b>수업용 연습 문제지입니다. 출제 전 교사 검토가 필요합니다.</b></p>`];
   pp.items.forEach(it=>{
     P.push(`<h2>${esc(it.no)}. [${it.marks}점]</h2><p>${esc(it.text)}</p>${box(Math.ceil(it.marks*1.4)+2)}`);
   });
-  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 만든 연습 문제지 · 문항은 자작이며 IB 기출이 아닙니다 · 시험 형식·규정은 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`);
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 만든 연습 문제지 · 도구는 자작 문항을 만들도록 요청하지만 결과물의 출처는 검증하지 않습니다 — 배포 전 교사가 확인하세요 · 시험 형식·규정은 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`);
   downloadDoc(P.join(''),`문제지_${String(pp.title).replace(/[\\/:*?"<>|]/g,'')}.docx`);
 }
 function exportPaperMsDoc(id){
@@ -2844,7 +2923,7 @@ function exportPaperMsDoc(id){
     <h2>문항별 물은 내용</h2>
     <table><tr><th style="width:14%">문항</th><th style="width:12%">배점</th><th>물은 학습 내용</th></tr>
     ${pp.items.map(it=>`<tr><td>${esc(it.no)}</td><td>${it.marks}</td><td>${esc(it.topic||'')}</td></tr>`).join('')}</table>
-    <div class="pfoot">IB티처스로 만든 자작 마크스킴 · IB 공식 마크스킴이 아닙니다 · 채점 세부는 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`];
+    <div class="pfoot">IB티처스로 만든 연습용 마크스킴 · IB 공식 마크스킴이 아닙니다 · 채점 세부는 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`];
   downloadDoc(P.join(''),`마크스킴_${String(pp.title).replace(/[\\/:*?"<>|]/g,'')}.docx`);
 }
 /* ④ → ⑤ 고리 — 문제지의 문항이 그대로 채점 칸이 되고, 「물은 내용」까지 옮겨진다 */
@@ -4408,7 +4487,7 @@ function renderSubjectUI(){
 }
 $('#subjectSel').onchange=e=>{
   const ns=e.target.value; if(ns===state.meta.subject) return;
-  if((state.outline.units.length||state.lessons.length) && !confirm('과목을 바꾸면 단원 구성·유닛플래너·차시안이 새로 시작됩니다.\n(⑤ 채점표와 학생 명단은 지워지지 않고 보관됩니다 — 다만 채점표에 걸어 둔 단원 연결은 해제됩니다)\n(상단 되돌리기로 복구 가능) 계속할까요?')){ e.target.value=state.meta.subject; return; }
+  if((state.outline.units.length||state.lessons.length) && !confirm('과목을 바꾸면 단원 구성·유닛플래너·차시안이 새로 시작됩니다.\n(④ 문제지와 ⑤ 채점표·학생 명단은 지워지지 않고 보관됩니다 — 다만 걸어 둔 단원 연결은 해제됩니다)\n(상단 되돌리기로 복구 가능) 계속할까요?')){ e.target.value=state.meta.subject; return; }
   snapshot();
   state.meta.subject=ns; state.meta.course=SUBJ().defaultCourse;
   state.outline.units=[]; state.plans={}; state.lessons=[];

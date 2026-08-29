@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IB티처스 — 한국 IB 교사를 위한 수업설계 스튜디오</title>
-<meta name="description" content="DP 코스아웃라인·유닛플래너·차시 수업안을 공식 양식 구조 그대로, 한국어로. 기존 Word 문서를 넣으면 자동 인식됩니다. 한국 IB 교사가 만든 도구입니다.">
+<meta name="description" content="DP 코스아웃라인·유닛플래너·차시 수업안부터 예시 문제지와 채점까지, 공식 양식 구조 그대로 한국어로. 기존 Word 문서를 넣으면 자동 인식됩니다. 한국 IB 교사가 만든 도구입니다.">
 <link rel="canonical" href="https://ibteachers.kr/">
 <meta name="naver-site-verification" content="315acedb8cd1877475901dda5431652175f395fe" />
 <meta name="google-site-verification" content="MDerY2Kl9HafIoS1g6Q8Ca9TWCMJjOYQ4GXTkv6KFuQ" />
 <meta property="og:title" content="IB티처스 — 한국 IB 교사를 위한 수업설계 스튜디오">
-<meta property="og:description" content="코스아웃라인부터 차시 수업안까지, 몇 주 걸리던 일을 몇 시간으로.">
+<meta property="og:description" content="코스아웃라인부터 채점까지, 몇 주 걸리던 일을 몇 시간으로.">
 <meta property="og:url" content="https://ibteachers.kr/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="IB티처스">
@@ -32,7 +32,7 @@
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Web",
   "inLanguage": "ko",
-  "description": "한국 IB 교사를 위한 수업설계 스튜디오. DP 코스아웃라인·유닛플래너·차시 수업안을 공식 양식 구조 그대로 한국어로 작성하고 Word·PDF로 내보냅니다.",
+  "description": "한국 IB 교사를 위한 수업설계 스튜디오. DP 코스아웃라인·유닛플래너·차시 수업안을 공식 양식 구조 그대로 한국어로 작성하고, 단원에 맞는 예시 문제지와 마크스킴을 만들어 채점·문항 분석까지 이어집니다. Word·PDF로 내보냅니다.",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "KRW"}
 }
 </script>
@@ -113,7 +113,8 @@ section.alt{background:var(--bg)}
 @media (max-width:820px){ .feat{grid-template-columns:1fr} }
 
 /* steps */
-.steps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; counter-reset:step}
+.steps{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; counter-reset:step}
+@media (max-width:1000px){ .steps{grid-template-columns:repeat(2,1fr)} }
 .step{background:#fff; border:1px solid var(--line); border-radius:14px; padding:26px; position:relative}
 .step::before{counter-increment:step; content:counter(step); position:absolute; top:-16px; left:22px; width:34px; height:34px; border-radius:10px; background:var(--navy); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:15px}
 .step h4{font-size:16px; font-weight:800; color:var(--navy); margin:10px 0 6px}
@@ -160,8 +161,8 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
 <header class="hero">
   <div class="wrap">
     <div class="badge">한국 IB 교사가, 한국 IB 교사를 위해 만들었습니다</div>
-    <h1>코스아웃라인부터 차시 수업안까지,<br><em>몇 주 걸리던 일을 몇 시간으로.</em></h1>
-    <p class="sub">IB DP 공식 양식 구조 그대로의 코스아웃라인·유닛플래너·수업안을 한국어로 작성하고, 이미 만들어 둔 Word 문서는 넣는 순간 자동으로 인식됩니다.</p>
+    <h1>코스아웃라인부터 채점까지,<br><em>몇 주 걸리던 일을 몇 시간으로.</em></h1>
+    <p class="sub">IB DP 공식 양식 구조 그대로의 코스아웃라인·유닛플래너·수업안을 한국어로 작성하고, 단원에 맞는 예시 문제지를 만들어 채점하면 무엇을 다시 가르칠지까지 나옵니다.</p>
     <div class="btns">
       <a class="btn btn-primary" href="#pilot">파일럿 신청하기 (1분)</a>
       <a class="btn btn-ghost" href="studio.html">도구 먼저 써보기</a>
@@ -175,8 +176,8 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
           <div class="on">1&nbsp; 코스 아웃라인</div>
           <div>2&nbsp; 유닛 플래너</div>
           <div>3&nbsp; 차시 수업안</div>
-          <div>4&nbsp; AI 초안 만들기</div>
-          <div>5&nbsp; 가져오기·내보내기</div>
+          <div>4&nbsp; 평가 설계</div>
+          <div>5&nbsp; 채점·피드백</div>
         </div>
         <div class="main">
           <h5>✅ 자동 인식 완료 — 내 코스아웃라인.docx · <span class="ok">공식 IB 양식으로 인식됨</span></h5>
@@ -216,10 +217,10 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
     </div>
     <div class="feat">
       <div class="f-card"><div class="ico">📄</div><h3>기존 문서 자동 인식</h3><p>이미 작성한 코스아웃라인(Word)을 넣으면 단원·시수·평가·IA 일정·TOK 연계까지 자동으로 읽어 도구에 올려줍니다. 영어 문서도 그대로.</p><div class="pt">공식 IB 양식 정밀 인식 + 일반 표 형식 지원</div></div>
-      <div class="f-card"><div class="ico">🧭</div><h3>여덟 과목의 공식 실라버스 내장</h3><p>수학·국어 A·역사·TOK·영어 B·생물·화학·물리의 공식 항목 번호 체계와 권장 시수가 내장되어, 클릭만으로 가이드와 정렬된 아웃라인이 만들어집니다.</p><div class="pt">시수 자동 검산 · 제출 전 13항목 체크리스트</div></div>
+      <div class="f-card"><div class="ico">🧭</div><h3>여덟 과목의 공식 실라버스 내장</h3><p>수학·국어 A·역사·TOK·영어 B·생물·화학·물리의 공식 항목 번호 체계와 권장 시수가 내장되어, 클릭만으로 가이드와 정렬된 아웃라인이 만들어집니다.</p><div class="pt">시수 자동 검산 · 시험 구조표 · 루브릭 틀 · 제출 전 13항목 체크리스트</div></div>
       <div class="f-card"><div class="ico">🧩</div><h3>유닛플래너·차시 수업안 초안</h3><p>탐구질문·전이목표·평가·ATL·TOK 연계를 토픽별 예시은행이 채워주고, 차시 수업안은 도입-전개-정리 흐름으로 생성됩니다.</p><div class="pt">개념기반·백워드 설계 원칙 반영</div></div>
-      <div class="f-card"><div class="ico">📊</div><h3>평가 설계</h3><p>단원별 평가를 한 장의 지도로 모아 보고, 과목별 공식 시험 구조에 맞춘 루브릭 틀과 문항 틀을 Word로 내보냅니다.</p><div class="pt">수준 기술은 빈칸 — 공식 가이드와 대조해 직접 작성</div></div>
-      <div class="f-card"><div class="ico">🧮</div><h3>채점·피드백 도우미</h3><p>준거별 점수와 근거 메모를 넣으면 우리 반이 어느 준거에서 약한지 한눈에 보이고, 학생별 피드백지가 Word로 나옵니다.</p><div class="pt">학생은 번호·가명으로만 · 계산은 브라우저 안에서만</div></div>
+      <div class="f-card"><div class="ico">📝</div><h3>단원에 맞는 예시 문제지</h3><p>단원을 고르면 그 단원의 실라버스 항목에 맞는 <b>문항과 마크스킴</b>을 함께 만듭니다. 학생용 답안지와 교사용 마크스킴이 Word로 나가고, 그대로 채점표가 됩니다.</p><div class="pt">M·A·R 마크 코드 · 이월 채점 표시 · 수업용 자작 문항</div></div>
+      <div class="f-card"><div class="ico">🧮</div><h3>채점하면 무엇을 다시 가르칠지 나옵니다</h3><p>준거별·문항별로 점수를 넣으면 우리 반이 어디서 무너졌는지 정답률 낮은 순으로 보여 주고, 그 문항이 물은 내용을 짚어 줍니다. 학생별 피드백지도 Word로.</p><div class="pt">학생은 번호·가명으로만 · 계산은 브라우저 안에서만</div></div>
       <div class="f-card"><div class="ico">📤</div><h3>Word·PDF로 바로 제출</h3><p>완성본은 IB 제출 양식과 유사한 표 형식의 Word·PDF로 내보냅니다. 협의회 공유도, 코디네이터 제출도 한 번에.</p><div class="pt">JSON 프로젝트 파일로 이어서 작업</div></div>
     </div>
   </div>
@@ -229,12 +230,13 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
   <div class="wrap">
     <div class="sec-head">
       <div class="kicker">사용 방법</div>
-      <h2>세 단계면 충분합니다</h2>
+      <h2>설계에서 채점까지, 한 흐름으로</h2>
     </div>
     <div class="steps">
       <div class="step"><h4>가져오거나, 새로 시작</h4><p>기존 Word 아웃라인을 끌어다 놓거나, '공식 토픽 자동 구성'으로 골격을 만듭니다.</p></div>
       <div class="step"><h4>다듬고, 생성</h4><p>시수 대시보드로 배분을 맞추고, 단원별 유닛플래너와 차시 수업안 초안을 생성해 우리 반에 맞게 고칩니다.</p></div>
-      <div class="step"><h4>점검하고, 제출</h4><p>제출 전 자동 체크리스트로 빠진 곳을 확인하고 Word·PDF로 내보냅니다.</p></div>
+      <div class="step"><h4>출제하고, 채점</h4><p>단원에 맞는 문제지와 마크스킴을 만들어 답안지를 뽑고, 점수를 넣으면 어느 문항이 약했는지 나옵니다.</p></div>
+      <div class="step"><h4>다음 수업으로</h4><p>약한 문항이 물은 내용이 그대로 다음 차시 계획이 됩니다. 제출 문서는 Word·PDF로.</p></div>
     </div>
   </div>
 </section>
@@ -262,6 +264,7 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
     <details class="faq"><summary>IB 공식 도구인가요?</summary><p>아니요. IB티처스는 IBO(International Baccalaureate Organization)와 무관한 독립 도구이며, IBO의 승인·보증을 받지 않았습니다. 다만 공식 양식의 '구조'와 공식 가이드의 항목 번호 체계를 충실히 따르며, 최종 제출 전에는 반드시 소속 학교의 최신 공식 가이드와 대조하시기 바랍니다.</p></details>
     <details class="faq"><summary>어떤 과목을 지원하나요?</summary><p>IB티처스는 IB 학교 교사의 행정 부담을 줄이고 수업과 평가의 질을 높이자는 현장의 고민에서 출발했습니다. 현재 <b>DP 수학</b>(AA/AI), <b>국어 A</b>(언어와 문학·문학), <b>역사</b>(2028년 개정 기준), <b>TOK</b>, <b>영어 B</b>, <b>생물</b>(2028년 개정 기준), <b>화학</b>, <b>물리</b> — 여덟 과목을 공식 가이드와 대조된 데이터로 지원합니다. 추가 과목도 순차 확장 중이며, 코스아웃라인·유닛플래너의 공통 구조는 지금도 어떤 과목에나 쓸 수 있습니다. MYP·PYP 플래너도 로드맵에 있습니다.</p></details>
     <details class="faq"><summary>작성한 내용은 어디에 저장되나요?</summary><p>선생님이 작성한 내용은 서버로 전송되지 않습니다(방문 통계만 수집합니다). 모든 내용은 선생님 브라우저 안에서만 처리되고, 프로젝트 파일(JSON)로 내려받아 보관합니다. (클라우드 저장은 정식 버전에서 제공 예정)</p></details>
+    <details class="faq"><summary>예시 문제지는 IB 기출 문항인가요?</summary><p>아닙니다. <b>선생님 수업용으로 새로 지은 자작 문항</b>입니다. 도구는 선택한 단원의 실라버스 항목을 근거로 문항을 만들도록 요청하고, IB 공식 시험지·마크스킴의 문장을 옮기지 않도록 명시합니다. 만들어진 문항과 마크스킴은 <b>초안</b>이므로 출제 전에 선생님이 검토하시고, 시험 형식·배점은 최신 공식 가이드와 대조하세요. 마크스킴은 M(방법)·A(정확도)·R(추론) 코드로 나오고, 앞 문항의 답이 뒤로 이어지는 <b>이월 채점</b> 마크도 표시됩니다.</p></details>
     <details class="faq"><summary>채점 기능을 쓰면 학생 정보가 저장되나요?</summary><p>학생 <b>이름을 적는 칸을 따로 두지 않았습니다.</b> 채점 도우미는 번호·가명 같은 라벨 하나로만 학생을 구분하도록 설계했고, 실명처럼 보이는 라벨이나 메모가 있으면 경고하고 내보내기 전에 한 번 더 확인합니다(기술적으로 막지는 못합니다). 점수와 근거 메모는 다른 내용과 마찬가지로 서버에 전송되지 않고 선생님 브라우저 안에서만 계산됩니다. 다만 저장(JSON) 파일에는 점수도 함께 담기므로, 그 파일은 학급 평가 자료로 취급해 보관하시기 바랍니다. 참고로 교사가 매긴 점수는 가채점이며, 내부평가는 IB 조정(moderation)을 거쳐 달라질 수 있어 7등급 환산은 제공하지 않습니다.</p></details>
     <details class="faq"><summary>영어로 수업하는 과목도 쓸 수 있나요?</summary><p>네. 문서 작성 언어를 English로 바꾸면 초안과 AI 프롬프트가 영어로 생성되고, 영어로 된 기존 문서도 자동 인식됩니다.</p></details>
   </div>

@@ -553,6 +553,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
           <option value="lesson">차시 수업안 상세 설계</option>
           <option value="outline">코스 아웃라인 검토(제출 관점)</option>
           <option value="ia">IA 탐구 주제 아이디어</option>
+          <option value="paper">예시 문제지 + 마크스킴 만들기</option>
           <option value="feedback">채점 결과 → 피드백 문장 다듬기</option>
         </select></div>
         <div class="field" id="ai-unitWrap"><label class="f-label">대상 단원</label><select id="ai-unitSel"></select></div>
@@ -673,8 +674,31 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <div id="rubricBox"></div>
     </div>
     <div class="card">
-      <h3><span class="chip">문항 틀</span>평가 문항 틀 만들기 <span class="eng">Question frame</span></h3>
-      <p class="hint" style="margin-bottom:8px">시험 구조에 맞는 문항 틀을 Word로 내보냅니다 — <b>문항 내용은 빈칸</b>이고, 형식 메모·배점 칸·채점 기준 메모가 준비된 상태로 시작합니다.</p>
+      <h3><span class="chip">문제지</span>예시 문제지 만들기 <span class="eng">Practice paper</span></h3>
+      <div class="callout info" style="margin-top:0">단원을 고르면 그 단원의 <b>실라버스 항목에 맞는 문항과 마크스킴</b>을 함께 만듭니다. 만든 문제지는 <b>답안지(학생용)·마크스킴(교사용) Word</b>로 나가고, <b>⑤ 채점표로 바로 넘길 수</b> 있습니다 — 문항 칸·배점·「물은 내용」이 자동으로 채워집니다.</div>
+      <div class="grid3">
+        <div class="field"><label class="f-label">대상 단원</label><select id="pp-unit"></select></div>
+        <div class="field"><label class="f-label">문항 수</label><input id="pp-count" type="number" value="5" min="1" max="20"></div>
+        <div class="field"><label class="f-label">총점 (대략)</label><input id="pp-total" type="number" value="30" min="5" max="200"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label class="f-label">시험 형식</label><select id="pp-style"></select></div>
+        <div class="field"><label class="f-label">추가 조건 (선택)</label><input id="pp-extra" placeholder="예: 계산기 없이 풀 수 있게, 이월 채점 문항 1개 포함"></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="goPaperAI()">🤖 문제지 생성 프롬프트 만들기</button>
+      <details class="sub-picker" style="margin-top:12px">
+        <summary>AI가 만든 결과를 여기에 붙여넣기 →</summary>
+        <p class="hint" style="margin:8px 0">claude.ai가 준 <b>JSON 블록을 통째로</b> 붙여넣고 「문제지로 저장」을 누르세요. 앞뒤 설명 문장이 섞여 있어도 괜찮습니다.</p>
+        <textarea id="pp-paste" rows="5" placeholder='{"title":"...","items":[{"no":"1","text":"...","marks":6,"topic":"...","ms":[{"code":"M1","label":"...","pts":1}]}]}'></textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="savePaperFromPaste()">📥 문제지로 저장</button>
+        <span id="pp-parseNote" class="hint" style="margin-left:8px"></span>
+      </details>
+      <div id="paperList" style="margin-top:14px"></div>
+      <p class="hint" style="margin-top:8px">문항은 <b>선생님 수업용 자작 문항</b>으로 만들어집니다 — IB 기출 문항을 그대로 옮기지 않습니다. 출제 전 공식 가이드의 시험 형식과 대조하세요.</p>
+    </div>
+    <div class="card">
+      <h3><span class="chip">빈 문항 틀</span>내용 없이 틀만 만들기 <span class="eng">Question frame</span></h3>
+      <p class="hint" style="margin-bottom:8px">문항을 직접 쓰실 때 쓰는 빈 양식입니다 — <b>문항 내용은 빈칸</b>이고, 형식 메모·배점 칸·채점 기준 메모가 준비된 상태로 시작합니다.</p>
       <div class="grid3">
         <div class="field"><label class="f-label">평가 항목</label><select id="qfExam"></select></div>
         <div class="field"><label class="f-label">대상 단원 (선택)</label><select id="qfUnit"></select></div>
@@ -916,6 +940,10 @@ let state={
   meta:{subject:'math',course:'AA',level:'SL',school:'',code:'',teacher:'',years:'',training:'',date:'',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
   outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:'',atl:'',im:'',lp:'',lpChecks:[],resources:''},
   plans:{}, lessons:[],
+  /* ④ 예시 문제지 — 문항과 마크스킴을 함께 보관한다.
+     문제지를 도구가 만들면 마크스킴도 이미 갖고 있으므로, 채점표를 만들 때
+     문항 칸·배점·「물은 내용」이 전부 자동으로 채워진다(⑤로 이어지는 고리). */
+  papers:[],
   /* ⑤ 채점·피드백 — roster(익명 라벨 명단) + sheets(채점표, 준거는 생성 시점 스냅숏) */
   grading:{v:1,roster:[],sheets:[]}
 };
@@ -1337,6 +1365,16 @@ function buildPrompt(){
   if(type==='outline'){
     return `${head}\n- TOK 연계: ${state.outline.tok||'(미작성)'}\n- ATL: ${state.outline.atl||'(미작성)'}\n- 국제적 소양: ${state.outline.im||'(미작성)'}\n- 학습자상: ${(state.outline.lpChecks||[]).join(', ')||'(미선택)'} / ${state.outline.lp||''}\n- 자료: ${state.outline.resources||'(미작성)'}\n\n## 과제\n위 코스 아웃라인을 IB 인증 제출 관점에서 냉정하게 검토해 주세요.\n\n## 검토 기준\n1. 시수: Year 1/2 배분의 균형, 공식 권장 시수 대비 과부족${TK()?`, ${TK().name} ${TK().sl}시간 확보 여부(검산 포함)`:''}\n2. 단원 배열의 논리(선수 학습 관계, ${state.meta.course} ${state.meta.level} 특성 반영)\n3. IA 일정의 현실성(소개 시점, 초안 피드백 1회, 마감이 외부평가와 충돌하지 않는지)\n4. 평가 도구가 실제 시험 구조(${SUBJ().assess[state.meta.course][state.meta.level].map(r=>r[0]).join('/')})와 정렬되는지\n5. TOK·ATL·국제적 소양·학습자상 서술이 '토픽 하나를 골라 구체적으로'라는 양식 요구를 충족하는지\n6. 전체적으로 심사자가 지적할 만한 약점 Top 5\n\n## 출력 형식\n항목별 진단(양호/보완/미흡) 표 + 구체적 수정 제안(수정 전→후 예시 포함) + 총평.\n${LANGLINE()}`;
   }
+  if(type==='paper'){
+    const pu=$('#pp-unit'), u2=(pu&&pu.value)? getUnit(pu.value):u;
+    if(!u2) return null;
+    const n=Math.max(1,Math.min(20,Number(($('#pp-count')||{}).value)||5));
+    const tot=Math.max(5,Math.min(200,Number(($('#pp-total')||{}).value)||30));
+    const styleSel=$('#pp-style'); const styleTxt=styleSel? (styleSel.options[styleSel.selectedIndex]||{}).text||'' : '';
+    const ex=String(($('#pp-extra')||{}).value||'').trim();
+    const subs=u2.subs.length? u2.subs.join('\n  · ') : '(학습 내용 미선택 — 토픽 전체에서 출제)';
+    return `${head}\n\n## 과제\n아래 단원으로 **연습용 문제지와 마크스킴**을 함께 만들어 주세요.\n\n- 대상 단원: ${u2.title||'무제'} (${topicName(u2.topic)}, Year ${u2.year})\n- 이 단원의 학습 내용:\n  · ${subs}\n- 문항 수: ${n}개 · 총점 약 ${tot}점 · 형식: ${styleTxt||'단원 평가'}${ex?`\n- 추가 조건: ${ex}`:''}\n\n## 반드시 지킬 것\n1. **IB 기출 문항을 그대로 옮기지 마십시오.** 위 학습 내용에 맞는 문항을 새로 지어 주세요. 공식 시험지·마크스킴의 문장을 기억에서 인용·복원하지 마십시오.\n2. 문항은 위에 적힌 **학습 내용 범위 안에서만** 출제하십시오. 이 단원에서 아직 배우지 않은 개념을 쓰지 마십시오.\n3. 마크스킴은 **IB식 마크 코드**로 쓰십시오 — M(방법)·A(정확도)·R(추론). 각 마크는 1점 단위로 쪼개고, 무엇을 보고 주는지 한 줄로 적으십시오.\n4. **최소 한 문항은 (a)의 답이 (b)에 쓰이는 구조**로 만들고, (b)의 해당 마크에 \`"ft": true\`(이월 채점)를 표시하십시오. 이월 채점은 앞을 틀려도 자기 값으로 정확히 계산했으면 주는 마크입니다.\n5. 문항마다 \`topic\`에 **그 문항이 물은 학습 내용**을 위 목록의 표현으로 적으십시오. 나중에 문항 분석에서 "어느 내용이 약한가"로 쓰입니다.\n6. 각 문항의 \`marks\`는 그 문항 \`ms\` 배열의 \`pts\` 합과 **반드시 일치**해야 합니다.\n${LANGLINE()}\n\n## 출력 형식 — 아래 JSON **하나만** 코드블록으로 출력하십시오 (설명 문장은 코드블록 밖에)\n\`\`\`json\n{\n  "title": "문제지 제목",\n  "items": [\n    {\n      "no": "1",\n      "text": "문항 전문. (a) (b) 소문항이 있으면 줄바꿈으로 구분해 한 문자열에 담을 것.",\n      "marks": 6,\n      "topic": "이 문항이 물은 학습 내용",\n      "ms": [\n        {"code":"M1","label":"어떤 방법을 썼는가","pts":1,"ft":false},\n        {"code":"A1","label":"무엇이 정확한가","pts":1,"ft":false},\n        {"code":"A2","label":"최종 답","pts":2,"ft":true}\n      ]\n    }\n  ]\n}\n\`\`\`\n\n수식은 일반 텍스트로 쓰십시오(예: (a+b)/c, x^2, Σ(r=1부터 n까지)). 별도의 수식 편집기 문법을 쓰지 마십시오.`;
+  }
   if(type==='feedback'){
     const s=curSheet();
     if(!s) return null;
@@ -1362,13 +1400,14 @@ function mathIaPrompt(head,u,extra){
 }
 $('#ai-type').onchange=()=>{
   const t=$('#ai-type').value;
-  $('#ai-unitWrap').style.display=(t==='outline'||t==='feedback')?'none':'block';
+  $('#ai-unitWrap').style.display=(t==='outline'||t==='feedback'||t==='paper')?'none':'block';
   $('#ai-extraWrap').style.display=(t==='lesson'||t==='ia'||t==='feedback')?'block':'none';
   const w=$('#aiFbWarn'); if(w) w.style.display=(t==='feedback')?'block':'none';
 };
 $('#btnAiGen').onclick=()=>{
   const p=buildPrompt();
   if(p===null&&$('#ai-type').value==='feedback'){toast('먼저 ⑤ 채점·피드백에서 채점표를 만들고 점수를 입력하세요.'); return;}
+  if(p===null&&$('#ai-type').value==='paper'){toast('먼저 ④ 평가 설계에서 대상 단원을 고르세요.'); showStep('assess'); return;}
   if(p===null){toast('대상 단원을 먼저 선택하세요 (① 코스 아웃라인에서 단원 구성 필요).'); return;}
   $('#aiResultCard').style.display='block'; $('#aiPromptBox').textContent=p;
   revealAndScroll($('#aiResultCard'));
@@ -1591,13 +1630,18 @@ function applyState(d){
   /* 열어 둔 채점표가 복원본에도 있으면 그대로 유지 — 되돌리기 후 다른 표로 옮겨가면 남의 점수를 덮어쓴다 */
   gradingUI.sheetId=state.grading.sheets.some(s=>s.id===gradingUI.sheetId)? gradingUI.sheetId : null;
   gradingUI.openMemo=null;
+  /* ④ 문제지 하위호환 — 구 파일에는 papers가 없음 */
+  state.papers=(state.papers||[]).map(pp=>({unitId:'',date:'',note:'',source:'',...pp,
+    items:(pp.items||[]).map(it=>({no:'',text:'',marks:0,topic:'',ms:[],...it,
+      ms:(it.ms||[]).map(mk=>({code:'',label:'',pts:1,ft:false,...mk}))}))}));
   let maxSeq=1; const scanId=x=>{const n=parseInt(String(x&&x.id).replace('u',''))||0; if(n>=maxSeq)maxSeq=n+1;};
   (state.outline.units||[]).forEach(scanId); (state.lessons||[]).forEach(scanId);
   state.grading.roster.forEach(scanId); state.grading.sheets.forEach(scanId);
+  state.papers.forEach(scanId);
   uidSeq=maxSeq;
   renderSubjectUI();
   setCourse(SUBJ().courses[state.meta.course]? state.meta.course : SUBJ().defaultCourse); setLevel(state.meta.level||'SL');
-  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist(); renderGradingUI();
+  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist(); renderGradingUI(); renderPapers();
 }
 function loadJsonFile(file){
   const rd=new FileReader();
@@ -1985,7 +2029,7 @@ function renderChecklist(){
    items.map(i=>`<div style="display:flex;gap:8px;padding:4px 2px;font-size:13.5px;align-items:baseline"><span>${i[1]?'✅':'⬜'}</span><span style="${i[1]?'':'color:#b45309;font-weight:700'}">${i[0]}</span><span class="hint" style="margin:0">${i[2]||''}</span></div>`).join('')+
    `<p class="hint" style="margin-top:8px">체크리스트는 형식 요건 자동 점검입니다. 내용의 질은 ④ AI 검토 프롬프트로 진단하세요.</p>`;
 }
-window.addEventListener('beforeunload',e=>{if(state.outline.units.length||G().sheets.length||G().roster.length){e.preventDefault(); e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(state.outline.units.length||G().sheets.length||G().roster.length||(state.papers||[]).length){e.preventDefault(); e.returnValue='';}});
 
 /* ═══════════════ 샘플 데이터 ═══════════════ */
 $('#btnSample').onclick=()=>{
@@ -1995,7 +2039,7 @@ $('#btnSample').onclick=()=>{
   uidSeq=1;
   state={meta:{subject:'math',course:'AA',level:'SL',school:'한국IB고등학교(샘플)',code:'0000',teacher:'김영우',years:'2027.3 ~ 2029.2',training:'DP Mathematics: AA Cat.1 / 2026.01',date:'2026.08.07',lessonMin:50,perWeek:4,lang:'한국어',docLang:'한국어',hoursUnit:'시간'},
    outline:{units:[],iaIntro:'',iaDue:'',iaStages:'',tok:OUTLINE_EX.tok.replace('예: ',''),atl:OUTLINE_EX.atl.replace('예: ',''),im:OUTLINE_EX.im.replace('예: ',''),lp:'탐구하는 사람: 모든 단원을 탐구 질문으로 열고 닫는다. 사고하는 사람: 풀이 전략 비교 토론을 정례화한다. 도전하는 사람: 도전 문제와 IA에서 안전지대를 벗어난 시도를 격려하고 실패를 성찰로 연결한다.',lpChecks:['탐구하는 사람','사고하는 사람','도전하는 사람'],resources:'Haese Mathematics AA SL 교과서, 공학용 그래픽 계산기(TI-Nspire) 1인 1대, Desmos·GeoGebra, 토픽별 기출 문항 세트, 교육청 IB 자료실 번역 자료, 학교 수학탐구실'},
-   plans:{}, lessons:[], grading:{v:1,roster:[],sheets:[]}};
+   plans:{}, lessons:[], papers:[], grading:{v:1,roster:[],sheets:[]}};
   const c=SYLLABUS.AA;
   state.outline.units=[
     makeUnit(1,1,'단원 1. 수와 대수 — 패턴에서 일반화로',19,[...c.topics[0].slItems]),
@@ -2629,6 +2673,200 @@ function renderClassProfile(){
   </div>`;
 }
 
+/* ═══════════════ ④ 예시 문제지 (문항 + 마크스킴) ═══════════════
+   설계 요지: 도구가 문제지를 만들면 마크스킴도 이미 갖고 있다.
+   그래서 채점표를 만들 때 문항 칸·배점·「물은 내용」을 자동으로 채울 수 있고,
+   교사가 마크스킴을 다시 타이핑할 필요가 없다 — 이것이 ④→⑤ 고리의 핵심이다. */
+const PAPER_STYLES=[
+  ['unit','단원 평가 (종합)'],
+  ['quiz','쪽지시험 (짧게)'],
+  ['nocalc','계산기 없이 (Paper 1 형식)'],
+  ['calc','계산기 사용 (Paper 2 형식)'],
+  ['exit','출구티켓 (1~2문항)']
+];
+function paperMax(pp){ return (pp.items||[]).reduce((a,it)=>a+(Number(it.marks)||0),0); }
+function msPts(it){ return (it.ms||[]).reduce((a,m)=>a+(Number(m.pts)||0),0); }
+/* 배점과 마크 합이 어긋나면 채점표가 조용히 틀어진다 — 저장 시점에 잡아 알려 준다 */
+function paperWarnings(pp){
+  const w=[];
+  (pp.items||[]).forEach((it,i)=>{
+    const label=it.no||String(i+1);
+    if(!it.ms.length) w.push(`${label}번: 마크스킴이 비어 있습니다`);
+    else if(msPts(it)!==Number(it.marks)) w.push(`${label}번: 배점 ${it.marks}점과 마크 합계 ${msPts(it)}점이 다릅니다`);
+    if(!String(it.text||'').trim()) w.push(`${label}번: 문항 내용이 비어 있습니다`);
+  });
+  if(!(pp.items||[]).some(it=>(it.ms||[]).some(m=>m.ft))) w.push('이월 채점(ft) 마크가 하나도 없습니다 — 앞 답이 뒤로 이어지는 문항이 있으면 표시해 두세요');
+  return w;
+}
+function goPaperAI(){
+  const pu=$('#pp-unit');
+  if(!pu||!pu.value){ toast('먼저 대상 단원을 고르세요 (① 코스 아웃라인에서 단원 구성 필요).'); return; }
+  $('#ai-type').value='paper'; $('#ai-type').onchange();
+  const ai=$('#ai-unitSel'); if(ai&&[...ai.options].some(o=>o.value===pu.value)) ai.value=pu.value;
+  showStep('ai');
+  const p=buildPrompt();
+  if(p===null){ toast('대상 단원을 찾을 수 없습니다.'); return; }
+  $('#aiResultCard').style.display='block'; $('#aiPromptBox').textContent=p;
+  revealAndScroll($('#aiResultCard'));
+}
+/* 붙여넣기는 사람이 하는 일이라 지저분하다 — 코드블록·설명 문장이 섞여 와도 JSON만 찾아낸다 */
+function extractJson(raw){
+  const t=String(raw||'').trim();
+  if(!t) return null;
+  const fence=t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const cands=[];
+  if(fence) cands.push(fence[1]);
+  const first=t.indexOf('{'), last=t.lastIndexOf('}');
+  if(first>=0&&last>first) cands.push(t.slice(first,last+1));
+  cands.push(t);
+  for(const c of cands){ try{ const o=JSON.parse(c.trim()); if(o&&typeof o==='object') return o; }catch(e){} }
+  return null;
+}
+function savePaperFromPaste(){
+  const ta=$('#pp-paste'), note=$('#pp-parseNote');
+  const obj=extractJson(ta&&ta.value);
+  const fail=m=>{ if(note){note.innerHTML=`<b style="color:var(--red)">${esc(m)}</b>`;} toast(m); };
+  if(!obj) return fail('JSON을 찾지 못했습니다. AI 답변의 코드블록을 통째로 붙여넣어 주세요.');
+  const rawItems=Array.isArray(obj.items)?obj.items:[];
+  if(!rawItems.length) return fail('items 배열이 비어 있습니다.');
+  const items=rawItems.slice(0,40).map((it,i)=>{
+    const ms=(Array.isArray(it.ms)?it.ms:[]).slice(0,12).map(m=>({
+      code:String(m&&m.code||'').slice(0,8)||'A1',
+      label:String(m&&m.label||'').slice(0,200),
+      pts:Math.max(0,Math.min(20,Number(m&&m.pts)||1)),
+      ft:!!(m&&m.ft)
+    }));
+    const declared=Number(it&&it.marks);
+    const sum=ms.reduce((a,m)=>a+m.pts,0);
+    return {
+      no:String(it&&it.no||(i+1)).slice(0,10),
+      text:String(it&&it.text||'').slice(0,4000),
+      /* 배점이 없거나 마크 합과 다르면 마크 합을 신뢰한다 — 채점 칸의 만점이 되기 때문 */
+      marks:(declared>0? declared : sum)||1,
+      topic:String(it&&it.topic||'').slice(0,120),
+      ms
+    };
+  });
+  const pu=$('#pp-unit'); const u=pu&&pu.value? getUnit(pu.value):null;
+  snapshot();
+  const pp={ id:uid(), title:String(obj.title||'').slice(0,120)||`${(u&&u.title)||'단원'} 연습 문제지`,
+    unitId:(u&&u.id)||'', subject:state.meta.subject, course:state.meta.course, level:state.meta.level,
+    date:'', note:String(obj.note||'').slice(0,500), source:'ai', items };
+  state.papers.push(pp);
+  if(ta) ta.value='';
+  const w=paperWarnings(pp);
+  if(note) note.innerHTML=w.length? `<b style="color:var(--amber)">저장했습니다 — 확인할 점 ${w.length}가지</b>` : '<b style="color:var(--green)">저장했습니다 ✓</b>';
+  renderPapers(); renderRail();
+  toast(`「${pp.title}」 저장 — 문항 ${items.length}개 · 총 ${paperMax(pp)}점${w.length?` (확인할 점 ${w.length}가지)`:''}`);
+}
+function delPaper(id){
+  const pp=state.papers.find(x=>x.id===id); if(!pp) return;
+  if(!confirm(`「${pp.title}」 문제지를 지울까요? 문항과 마크스킴이 모두 사라집니다.\n(이미 만든 채점표는 지워지지 않습니다 · 상단 되돌리기로 복구 가능)`)) return;
+  snapshot();
+  state.papers=state.papers.filter(x=>x.id!==id);
+  renderPapers(); renderRail();
+}
+function renderPapers(){
+  const el=$('#paperList'); if(!el) return;
+  const us=$('#pp-unit');
+  if(us){ const cur=us.value;
+    us.innerHTML=state.outline.units.map((x,i)=>`<option value="${x.id}">${esc(x.title||('단원 '+(i+1)))}</option>`).join('')
+      || '<option value="">(단원 없음 — ①에서 먼저 구성)</option>';
+    if(cur&&[...us.options].some(o=>o.value===cur)) us.value=cur;
+  }
+  const ss=$('#pp-style');
+  if(ss&&!ss.options.length) ss.innerHTML=PAPER_STYLES.map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('');
+  const list=state.papers||[];
+  if(!list.length){ el.innerHTML='<div class="empty-note">아직 만든 문제지가 없습니다. 단원을 고르고 「문제지 생성 프롬프트 만들기」를 누르세요.</div>'; return; }
+  el.innerHTML=list.map(pp=>{
+    const u=pp.unitId? state.outline.units.find(x=>x.id===pp.unitId):null;
+    const w=paperWarnings(pp);
+    const ft=(pp.items||[]).some(it=>(it.ms||[]).some(m=>m.ft));
+    return `<div class="unit-card" style="margin-bottom:10px">
+      <div class="uc-head">
+        <b style="color:var(--navy)">${esc(pp.title)}</b>
+        <span class="badge b-blue">문항 ${pp.items.length}</span>
+        <span class="badge b-gray">${paperMax(pp)}점</span>
+        ${ft?'<span class="badge b-green" title="앞 답이 뒤로 이어지는 이월 채점 마크가 있습니다">이월 채점 포함</span>':''}
+        ${w.length?`<span class="badge b-amber" title="${esc(w.join(' / '))}">확인 ${w.length}</span>`:''}
+        <span class="sp">
+          <button class="btn btn-soft btn-sm" onclick="exportPaperDoc('${pp.id}')">📝 답안지</button>
+          <button class="btn btn-soft btn-sm" onclick="exportPaperMsDoc('${pp.id}')">📋 마크스킴</button>
+          <button class="btn btn-primary btn-sm" onclick="sheetFromPaper('${pp.id}')">⑤ 채점표로 →</button>
+          <button class="btn btn-danger btn-sm" onclick="delPaper('${pp.id}')">삭제</button>
+        </span>
+      </div>
+      <div style="font-size:12.5px; color:#94a3b8; margin-bottom:6px">${u?esc(u.title||'단원'):'단원 미지정'}${pp.source==='ai'?' · AI 초안':''}</div>
+      ${w.length?`<div class="callout warn" style="margin:6px 0; font-size:12.5px">${w.map(x=>esc(x)).join('<br>')}</div>`:''}
+      <details class="sub-picker"><summary>문항 ${pp.items.length}개 미리보기</summary>
+        ${pp.items.map(it=>`<div style="margin:8px 0; padding-bottom:8px; border-bottom:1px solid #eef2f7">
+          <div style="font-size:13px"><b>${esc(it.no)}.</b> [${it.marks}점] ${esc(String(it.text).slice(0,220))}${String(it.text).length>220?'…':''}</div>
+          ${it.topic?`<div style="font-size:11.5px; color:#94a3b8; margin-top:3px">물은 내용: ${esc(it.topic)}</div>`:''}
+          <div style="font-size:11.5px; color:var(--ink2); margin-top:3px">${it.ms.map(m=>`${esc(m.code)}${m.ft?'ft':''} ${esc(m.label)} (${m.pts})`).join(' · ')||'<span style="color:var(--amber)">마크스킴 없음</span>'}</div>
+        </div>`).join('')}
+      </details>
+    </div>`;
+  }).join('');
+}
+/* 학생용 답안지 — 문항 아래에 손으로 풀 칸을 둔다.
+   답안 칸 위치를 우리가 정해 두면 나중에 채점 보조를 붙일 때 문항 분할이 필요 없다. */
+function exportPaperDoc(id){
+  const pp=(state.papers||[]).find(x=>x.id===id); if(!pp){toast('문제지를 찾을 수 없습니다.'); return;}
+  const pk=SUBJECTS[pp.subject]||SUBJ();
+  const cname=(pk.courses[pp.course]&&pk.courses[pp.course].name)||'';
+  const u=pp.unitId? state.outline.units.find(x=>x.id===pp.unitId):null;
+  const box=n=>`<table><tr><td>${'<br>'.repeat(Math.max(3,Math.min(14,n)))}</td></tr></table>`;
+  const P=[`<h1>${esc(cname)} ${esc(pp.level)} — ${esc(pp.title)}</h1>
+    <p class="pmeta">${u?`단원: ${esc(u.title||'')} · `:''}문항 ${pp.items.length}개 · 총 ${paperMax(pp)}점 · 교사: ${esc(state.meta.teacher||'')}</p>
+    <p class="pmeta">학생(번호·익명 라벨): ______________     날짜: ______________</p>
+    <p><b>이 문제지는 수업용 자작 문항입니다 — IB 기출 문항이 아닙니다.</b></p>`];
+  pp.items.forEach(it=>{
+    P.push(`<h2>${esc(it.no)}. [${it.marks}점]</h2><p>${esc(it.text)}</p>${box(Math.ceil(it.marks*1.4)+2)}`);
+  });
+  P.push(`<div class="pfoot">IB티처스 수업설계 스튜디오로 만든 연습 문제지 · 문항은 자작이며 IB 기출이 아닙니다 · 시험 형식·규정은 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`);
+  downloadDoc(P.join(''),`문제지_${String(pp.title).replace(/[\\/:*?"<>|]/g,'')}.docx`);
+}
+function exportPaperMsDoc(id){
+  const pp=(state.papers||[]).find(x=>x.id===id); if(!pp){toast('문제지를 찾을 수 없습니다.'); return;}
+  const pk=SUBJECTS[pp.subject]||SUBJ();
+  const cname=(pk.courses[pp.course]&&pk.courses[pp.course].name)||'';
+  const rows=[];
+  pp.items.forEach(it=>{
+    it.ms.forEach((m,mi)=>{
+      rows.push(`<tr><td>${mi===0?esc(it.no):''}</td><td>${esc(m.code)}${m.ft?'<b>ft</b>':''}</td><td>${esc(m.label)}</td><td>${m.pts}</td></tr>`);
+    });
+    if(!it.ms.length) rows.push(`<tr><td>${esc(it.no)}</td><td>—</td><td>(마크스킴 미작성)</td><td>${it.marks}</td></tr>`);
+  });
+  const P=[`<h1>${esc(cname)} ${esc(pp.level)} — ${esc(pp.title)} 마크스킴 (교사용)</h1>
+    <p class="pmeta">문항 ${pp.items.length}개 · 총 ${paperMax(pp)}점 · 교사: ${esc(state.meta.teacher||'')}</p>
+    <p>M = 방법 마크 · A = 정확도 마크 · R = 추론 마크 · <b>ft</b> = 이월 채점(앞 문항에서 학생이 얻은 자기 값을 기준으로 채점)</p>
+    <table><tr><th style="width:10%">문항</th><th style="width:12%">마크</th><th>무엇을 보고 주는가</th><th style="width:10%">배점</th></tr>${rows.join('')}</table>
+    <h2>문항별 물은 내용</h2>
+    <table><tr><th style="width:14%">문항</th><th style="width:12%">배점</th><th>물은 학습 내용</th></tr>
+    ${pp.items.map(it=>`<tr><td>${esc(it.no)}</td><td>${it.marks}</td><td>${esc(it.topic||'')}</td></tr>`).join('')}</table>
+    <div class="pfoot">IB티처스로 만든 자작 마크스킴 · IB 공식 마크스킴이 아닙니다 · 채점 세부는 최신 공식 가이드와 대조하세요 · 본 도구는 IBO와 무관합니다.</div>`];
+  downloadDoc(P.join(''),`마크스킴_${String(pp.title).replace(/[\\/:*?"<>|]/g,'')}.docx`);
+}
+/* ④ → ⑤ 고리 — 문제지의 문항이 그대로 채점 칸이 되고, 「물은 내용」까지 옮겨진다 */
+function sheetFromPaper(id){
+  const pp=(state.papers||[]).find(x=>x.id===id); if(!pp){toast('문제지를 찾을 수 없습니다.'); return;}
+  const g=G();
+  if(!g.roster.length){ toast('먼저 ⑤에서 학생 명단을 만들어 주세요.'); showStep('grading','setup'); return; }
+  if(!pp.items.length){ toast('문항이 없습니다.'); return; }
+  snapshot();
+  const s={ id:uid(), title:pp.title, kind:'items',
+    subject:pp.subject, course:pp.course, level:pp.level,
+    critLabel:'문항별 배점', holistic:false,
+    crit:pp.items.map(it=>[`${it.no}번`, Math.max(1,Number(it.marks)||1)]),
+    itemMode:true, topics:pp.items.map(it=>it.topic||''),
+    paperId:pp.id,
+    unitId:pp.unitId||'', date:'',
+    scores:{}, memos:{}, feedback:{} };
+  g.sheets.push(s); gradingUI.sheetId=s.id;
+  renderGradingUI(); showStep('grading','input');
+  toast(`「${pp.title}」 채점표를 만들었습니다 — 문항 ${s.crit.length}개, 「물은 내용」까지 옮겨졌습니다.`);
+}
+
 /* ── 문항 분석(QLA) — 문항별 채점표에서만 ──
    문항별로 점수를 넣는 수고에 대한 보상. '어느 문항에서 무너졌나'를 정답률 낮은 순으로 세우고,
    문항마다 학습 내용 꼬리표를 달면 다음 수업에서 무엇을 다시 가르칠지가 바로 나온다. */
@@ -2925,7 +3163,7 @@ function showStep(name,tab){
   $$('.step-panel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+name));
   if(name==='unit') loadPlanForm();
   if(name==='export') renderChecklist();
-  if(name==='assess') renderAssessMap();
+  if(name==='assess'){ renderAssessMap(); renderPapers(); }
   if(name==='grading') renderGradingUI();
   if(name==='home') renderHomeBoard();
   if(tab) showTab(name,tab); else if(document.querySelector(`.tabbar[data-tabs="${name}"]`)) showTab(name);
@@ -4177,7 +4415,7 @@ $('#subjectSel').onchange=e=>{
   state.outline.iaIntro=''; state.outline.iaDue=''; state.outline.iaStages='';
   /* ⑤ 채점표·명단은 지우지 않는다 — 점수는 다시 만들 수 없는 기록이고, 준거를 스냅숏으로 갖고 있어 과목이 바뀌어도 안전하다 */
   renderSubjectUI(); setCourse(state.meta.course); setLevel(state.meta.level);
-  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist(); renderGradingUI();
+  refreshStaticFields(); renderUnitList(); renderLessonList(); renderChecklist(); renderGradingUI(); renderPapers();
   toast(`${SUBJ().short} 모드로 전환했습니다.${CUR().verified===false?' ※ 이 과정은 자체 정리 초안 — 공식 가이드와 대조하세요.':''}`);
 };
 

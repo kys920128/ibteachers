@@ -68,6 +68,13 @@ nav .cta{margin-left:8px}
 .hero p.sub{font-size:clamp(16px,2.2vw,19px); color:var(--ink2); margin:20px auto 34px; max-width:640px}
 .hero .btns{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
 .hero .note{margin-top:16px; font-size:13px; color:#8b98a9}
+.flow{display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:22px; font-size:13.5px}
+.flow span{background:#fff; border:1px solid var(--line); border-radius:99px; padding:6px 14px; color:var(--navy); font-weight:700}
+.flow span b{color:var(--blue); margin-right:4px}
+.flow i{font-style:normal; color:#9aa7b8; font-weight:800}
+@media (max-width:640px){ .flow{flex-direction:column; gap:4px} .flow i{transform:rotate(90deg); line-height:1} }
+[id]{scroll-margin-top:72px}
+body{word-break:keep-all; overflow-wrap:break-word}
 
 /* mock browser */
 .mock{max-width:880px; margin:54px auto 0; background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:0 24px 60px rgba(16,42,84,.14); overflow:hidden; text-align:left}
@@ -146,11 +153,18 @@ details.faq p{margin-top:10px; font-size:14.5px; color:var(--ink2)}
 .cta-band{background:linear-gradient(135deg,var(--navy) 0%,#1e4a7a 100%); color:#fff; text-align:center; padding:70px 22px; border-radius:0}
 .cta-band h2{font-size:clamp(24px,3.4vw,34px); font-weight:900; letter-spacing:-.02em}
 .cta-band p{opacity:.85; margin:14px 0 30px; font-size:16px}
+.cta-band .consent{max-width:640px; margin:22px auto 0; font-size:12.5px; line-height:1.75; opacity:.78; text-align:left; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); border-radius:12px; padding:12px 16px}
+.cta-band .consent b{color:#fff}
+.cta-band .consent a, .cta-band .fb a{color:#fff; text-decoration:underline; font-weight:700}
+.cta-band .fb{margin-top:14px; font-size:13px; opacity:.8}
 
 /* footer */
 footer{background:#0f2338; color:#9fb2c8; padding:40px 0; font-size:13px}
 footer .wrap{display:flex; flex-wrap:wrap; gap:18px; align-items:center; justify-content:space-between}
 footer .disc{max-width:620px; line-height:1.7; opacity:.8}
+footer .meta{opacity:.85; line-height:1.9}
+footer .meta a.pp{color:#fff; font-weight:800}
+footer .meta a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -173,10 +187,15 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
     <h1>코스아웃라인부터 채점까지,<br><em>몇 주 걸리던 일을 몇 시간으로.</em></h1>
     <p class="sub">IB DP 공식 양식 구조 그대로의 코스아웃라인·유닛플래너·수업안을 한국어로 작성하고, 단원에 맞는 예시 문제지를 만들어 채점하면 무엇을 다시 가르칠지까지 나옵니다.</p>
     <div class="btns">
-      <a class="btn btn-primary" href="#pilot">파일럿 신청하기 (1분)</a>
-      <a class="btn btn-ghost" href="studio.html">도구 먼저 써보기</a>
+      <a class="btn btn-primary" href="studio.html">바로 써 보기 →</a>
+      <a class="btn btn-ghost" href="#news">업데이트 소식 받기</a>
     </div>
-    <div class="note">설치 없이 브라우저에서 바로 · 지금은 무료 파일럿 기간 — 함께 만들 선생님을 찾습니다</div>
+    <div class="flow" aria-label="작업 흐름">
+      <span><b>①</b>설계 · 아웃라인·플래너·수업안</span><i>→</i>
+      <span><b>②</b>출제 · 문제지·마크스킴</span><i>→</i>
+      <span><b>③</b>채점 · 문항 분석·피드백</span>
+    </div>
+    <div class="note">설치·가입 없이 브라우저에서 바로 시작합니다</div>
 
     <div class="mock">
       <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
@@ -288,8 +307,8 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
       <h2>자주 묻는 질문</h2>
     </div>
     <details class="faq"><summary>IB 공식 도구인가요?</summary><p>아니요. IB티처스는 IBO(International Baccalaureate Organization)와 무관한 독립 도구이며, IBO의 승인·보증을 받지 않았습니다. 다만 공식 양식의 '구조'와 공식 가이드의 항목 번호 체계를 충실히 따르며, 최종 제출 전에는 반드시 소속 학교의 최신 공식 가이드와 대조하시기 바랍니다.</p></details>
-    <details class="faq"><summary>어떤 과목을 지원하나요?</summary><p>IB티처스는 IB 학교 교사의 행정 부담을 줄이고 수업과 평가의 질을 높이자는 현장의 고민에서 출발했습니다. 현재 <b>DP 수학</b>(AA/AI), <b>국어 A</b>(언어와 문학·문학), <b>역사</b>(2028년 개정 기준), <b>TOK</b>, <b>영어 B</b>, <b>생물</b>(2028년 개정 기준), <b>화학</b>, <b>물리</b> — 여덟 과목을 공식 가이드와 대조된 데이터로 지원합니다. 추가 과목도 순차 확장 중이며, 코스아웃라인·유닛플래너의 공통 구조는 지금도 어떤 과목에나 쓸 수 있습니다. MYP·PYP 플래너도 로드맵에 있습니다.</p></details>
-    <details class="faq"><summary>작성한 내용은 어디에 저장되나요?</summary><p>선생님이 작성한 내용은 서버로 전송되지 않습니다(방문 통계만 수집합니다). 모든 내용은 선생님 브라우저 안에서만 처리되고, 프로젝트 파일(JSON)로 내려받아 보관합니다. (클라우드 저장은 정식 버전에서 제공 예정)</p></details>
+    <details class="faq"><summary>어떤 과목을 지원하나요?</summary><p>IB티처스는 IB 학교 교사의 행정 부담을 줄이고 수업과 평가의 질을 높이자는 현장의 고민에서 출발했습니다. 현재 <b>DP 수학</b>(AA/AI), <b>국어 A</b>(언어와 문학·문학), <b>역사</b>(2028년 개정 기준), <b>TOK</b>, <b>영어 B</b>, <b>생물</b>, <b>화학</b>, <b>물리</b> — 여덟 과목을 공식 가이드와 대조된 데이터로 지원합니다. 추가 과목도 순차 확장 중이며, 코스아웃라인·유닛플래너의 공통 구조는 지금도 어떤 과목에나 쓸 수 있습니다. MYP·PYP 플래너도 로드맵에 있습니다.</p></details>
+    <details class="faq"><summary>작성한 내용은 어디에 저장되나요?</summary><p>선생님이 작성한 내용은 서버로 전송되지 않습니다(익명 방문 통계만 수집합니다). 모든 내용은 선생님 브라우저 안에서만 처리되고, 프로젝트 파일(JSON)로 내려받아 보관합니다. 가입도 필요 없습니다. 자세한 내용은 <a href="privacy.html" style="color:var(--blue); font-weight:700">개인정보 처리방침</a>에 있습니다.</p></details>
     <details class="faq"><summary>예시 문제지는 IB 기출 문항인가요?</summary><p>기출을 옮기지 않도록 만들어져 있습니다. 도구는 선택한 단원의 실라버스 항목을 근거로 <b>새 문항</b>을 짓도록 요청하고, IB 공식 시험지·마크스킴의 문장과 저작권 있는 지문을 옮기지 말라고 명시합니다. 다만 <b>도구가 결과물의 출처까지 확인하지는 못하므로</b>, 배포 전 선생님의 검토가 필요합니다. 만들어진 문항과 마크스킴은 <b>초안</b>이므로 출제 전에 선생님이 검토하시고, 시험 형식·배점은 최신 공식 가이드와 대조하세요. 마크스킴은 M(방법)·A(정확도)·R(추론) 코드로 나오고, 앞 문항의 답이 뒤로 이어지는 <b>이월 채점</b> 마크도 표시됩니다.</p></details>
     <details class="faq"><summary>AI가 채점도 해 주나요?</summary><p><b>보조합니다(베타).</b> 도구가 문제지의 마크스킴으로 채점 프롬프트를 만들어 주면, 선생님이 그것을 <b>선생님의 claude.ai 대화</b>에 붙여넣고 답안 스캔을 첨부합니다. AI는 각 마크를 "줬다/안 줬다"로 판정만 하고, <b>점수 합산은 도구가, 최종 확정은 선생님이</b> 합니다 — 확신이 없는 판정은 점수를 쓰지 않고 근거 메모로만 남습니다. 이 도구 자체는 아무것도 전송하지 않으며, 답안 스캔을 외부 AI에 올릴지는 전적으로 선생님의 선택입니다. 학생 답안의 개인정보 책임은 학교에 있으므로 <b>학교 방침을 먼저 확인하고, 이름이 보이지 않게 번호만</b> 스캔하시길 안내하고 있습니다.</p></details>
     <details class="faq"><summary>채점 기능을 쓰면 학생 정보가 저장되나요?</summary><p>학생 <b>이름을 적는 칸을 따로 두지 않았습니다.</b> 채점 도우미는 번호·가명 같은 라벨 하나로만 학생을 구분하도록 설계했고, 실명처럼 보이는 라벨이나 메모가 있으면 경고하고 내보내기 전에 한 번 더 확인합니다(기술적으로 막지는 못합니다). 점수와 근거 메모는 다른 내용과 마찬가지로 서버에 전송되지 않고 선생님 브라우저 안에서만 계산됩니다. 다만 저장(JSON) 파일에는 점수도 함께 담기므로, 그 파일은 학급 평가 자료로 취급해 보관하시기 바랍니다. 참고로 교사가 매긴 점수는 가채점이며, 내부평가는 IB 조정(moderation)을 거쳐 달라질 수 있어 7등급 환산은 제공하지 않습니다.</p></details>
@@ -297,18 +316,19 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
   </div>
 </section>
 
-<div class="cta-band" id="pilot">
-  <h2>파일럿 교사를 찾습니다</h2>
-  <p>실제 수업에 2주만 써보고 의견을 들려주세요. 여러분의 피드백이 다음 버전이 됩니다.</p>
-  <p style="display:inline-block; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:12px 22px; font-size:14.5px; margin:0 0 28px; line-height:1.8">
-    <b>파일럿 참여 혜택</b><br>
-    ✓ 신기능 우선 체험 &nbsp;·&nbsp; ✓ 요청 기능 우선 반영 &nbsp;·&nbsp; ✓ 정식 버전 유료 전환 시 파일럿 우대(무료·할인) &nbsp;·&nbsp; ✓ 1:1 지원
-  </p>
+<div class="cta-band" id="news">
+  <span id="pilot"></span>
+  <h2>새 기능 소식을 받아 보세요</h2>
+  <p>새 과목이나 새 기능이 나오면 이메일로 짧게 알려 드립니다.<br>신청은 선택입니다. 신청하지 않아도 도구는 지금처럼 가입 없이 쓸 수 있습니다.</p>
   <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
-    <a class="btn btn-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSf_lb8K3pYgnRmClYYbpL-nlxf22UbRjylMhsmwb0kIK4Eq0Q/viewform" target="_blank" rel="noopener" style="background:#fff; color:var(--navy)">파일럿 신청하기 (1분)</a>
-    <a class="btn" href="studio.html" style="border:1.5px solid rgba(255,255,255,.4); color:#fff">도구 먼저 써보기</a>
+    <a class="btn btn-primary" id="newsForm" href="https://docs.google.com/forms/d/e/1FAIpQLSe13zPqgXQE7l_gKC04syLsZoM_aY1ZxEoH3qN6YEy-xIPdsQ/viewform" target="_blank" rel="noopener" style="background:#fff; color:var(--navy)">업데이트 소식 받기 (이메일만)</a>
+    <a class="btn" href="studio.html" style="border:1.5px solid rgba(255,255,255,.4); color:#fff">바로 써 보기</a>
   </div>
-  <div style="margin-top:14px; font-size:12.5px; opacity:.65">신청 정보는 파일럿 운영 연락에만 사용하며 종료 후 파기합니다.</div>
+  <div class="consent">
+    <b>받는 정보</b> 이메일 주소 한 가지 · <b>쓰는 곳</b> IB티처스 업데이트 소식 발송 · <b>보관 기간</b> 수신 거부를 요청하실 때까지(요청하시면 지체 없이 삭제) · <b>거부할 권리</b> 동의하지 않으셔도 되며, 이 경우 소식만 받지 않을 뿐 도구 이용에는 아무 제한이 없습니다.<br>
+    신청 폼은 Google 설문지로 받으며 응답은 Google의 해외 서버(미국 등)에 보관됩니다. 자세한 내용은 <a href="privacy.html">개인정보 처리방침</a>을 확인하세요.
+  </div>
+  <div class="fb">쓰다가 불편한 점이나 필요한 기능은 <a href="mailto:whitesky0143@gmail.com?subject=%5BIB%ED%8B%B0%EC%B2%98%EC%8A%A4%5D%20%EC%9D%98%EA%B2%AC">이메일</a>로 알려 주세요.</div>
 </div>
 
 <footer>
@@ -317,7 +337,7 @@ footer .disc{max-width:620px; line-height:1.7; opacity:.8}
       <div style="font-weight:800; color:#fff; margin-bottom:6px">IB티처스 <span style="font-weight:500; opacity:.6">IBteachers</span></div>
       <div class="disc">본 서비스는 IBO(International Baccalaureate Organization)와 무관한 독립 서비스이며, IBO의 승인·보증을 받지 않았습니다. 'IB'는 해당 기관의 상표이며, 본 사이트에서는 대상 교육과정을 설명하기 위한 목적으로만 사용됩니다. 생성된 문서는 제출 전 최신 공식 가이드와 대조가 필요합니다.</div>
     </div>
-    <div style="opacity:.7">© 2026 IB티처스 · 문의: whitesky0143@gmail.com</div>
+    <div class="meta"><a class="pp" href="privacy.html">개인정보 처리방침</a><br>© 2026 IB티처스 · 문의: <a href="mailto:whitesky0143@gmail.com">whitesky0143@gmail.com</a></div>
   </div>
 </footer>
 

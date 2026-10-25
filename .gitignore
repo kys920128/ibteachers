@@ -7,3 +7,6 @@ guides/
 *.zip
 grading/
 Claude outputs/
+node_modules/
+.vercel/
+.env*

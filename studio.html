@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.11)</title>
+<title>IB티처스 · IB 수업설계 스튜디오 (프로토타입 v0.12)</title>
 <meta name="description" content="IB DP 코스아웃라인·유닛플래너·차시 수업안을 브라우저에서 바로 작성하고 Word·PDF로 내보내는 도구. 설치·가입 없이 무료.">
 <link rel="canonical" href="https://ibteachers.kr/studio.html">
 <meta property="og:title" content="IB티처스 스튜디오 — IB 수업설계 도구">
@@ -210,7 +210,7 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
   <div class="brand">
     <div class="logo">IB</div>
     <div>
-      <h1>IB티처스 <span class="ver" id="verLabel">IB 수업설계 스튜디오 · v0.11</span></h1>
+      <h1>IB티처스 <span class="ver" id="verLabel">IB 수업설계 스튜디오 · v0.12</span></h1>
     </div>
   </div>
   <div class="top-controls">
@@ -793,25 +793,41 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       <b>학생 답안 스캔을 외부 AI(claude.ai)에 올리는 일은 선생님 브라우저 밖으로의 전송입니다.</b>
       학생 답안의 개인정보처리자는 교사 개인이 아니라 <b>학교</b>이므로, 실제 학생 답안을 올리기 전에 학교 방침(필요 시 학교장 확인·보호자 동의)을 먼저 확인하세요.
       스캔은 <b>이름이 보이지 않게, 번호만</b> 보이도록 하세요 — 이 도구가 만드는 답안지는 매 쪽에 번호 칸이 있습니다.
-      이 화면 자체는 아무것도 전송하지 않습니다 — 전송 여부와 시점은 전적으로 선생님이 정합니다.
+      이 화면은 <b>「AI로 채점」 버튼을 누를 때만</b> 선택한 스캔, 문항·마크스킴, 명단의 라벨(번호·가명) 목록을 IB티처스 서버를 거쳐 Anthropic(미국)에 보냅니다(접근 코드는 IB티처스 서버에서 확인에만 쓰고 원문을 저장하지 않습니다) — 그 전에는 아무것도 전송하지 않으며, 보낼지·언제 보낼지는 전적으로 선생님이 정합니다. <b>명단 라벨에 이름이 있으면 그대로 전송되므로</b> 번호·가명인지 확인하세요(실명처럼 보이면 보내기 전에 경고합니다). 서버는 답안·판정 내용을 저장하지 않고 호출마다 사용 기록(시각·접근 코드 식별자·성공 여부·파일 수·용량·문항 수·학생 수·토큰 수·추정 비용)만 남기며, 접근 코드는 이 브라우저에만 기억되고 작업 파일(JSON)에는 담기지 않습니다.
     </div>
     <div class="card">
       <h3><span class="chip">흐름</span>스캔 답안 → AI 판정 → 채점표 <span class="eng">AI-assisted marking (beta)</span></h3>
       <p class="hint" style="margin-bottom:6px">④에서 만든 문제지(마크스킴 포함)와 연결된 <b>문항별 채점표</b>에서 쓸 수 있습니다. AI에게 점수를 묻지 않습니다 — <b>마크를 "줬다/안 줬다" 판정만 받고, 합산은 이 도구가, 확정은 선생님이</b> 합니다.</p>
       <ol style="margin-left:18px; font-size:13.5px; line-height:1.8">
-        <li>아래에서 채점표를 고르고 <b>「채점 프롬프트 만들기」</b> → 복사</li>
-        <li><b>claude.ai</b>에 새 대화를 열어 프롬프트를 붙여넣고 <b>답안 스캔(사진·PDF)을 함께 첨부</b></li>
-        <li>AI가 준 <b>JSON 결과</b>를 아래 칸에 붙여넣고 「판정 결과 읽기」</li>
+        <li>아래에서 채점표를 고릅니다</li>
+        <li><b>A. 바로 채점</b> — 접근 코드를 넣고 답안 스캔(학생별 PDF·사진)을 고른 뒤 <b>「AI로 채점」</b> 한 번 &nbsp;·&nbsp; 또는 <b>B. 직접</b> — 프롬프트를 복사해 <b>claude.ai</b>에 붙여넣고 결과 JSON을 가져오기</li>
         <li>학생별 제안 점수를 확인하고 <b>「채점표에 반영」</b> → 2. 점수 입력에서 최종 확인·수정</li>
       </ol>
     </div>
     <div class="card">
-      <h3><span class="chip">1</span>채점 프롬프트</h3>
-      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px">
-        <div class="field" style="margin:0; min-width:280px"><label class="f-label">채점표 (④ 문제지와 연결된 문항별 채점표)</label><select id="aigSheetSel"></select></div>
-        <button class="btn btn-primary btn-sm" onclick="buildAiGradingPrompt()">🤖 채점 프롬프트 만들기</button>
-      </div>
+      <h3><span class="chip">1</span>채점표 고르기</h3>
+      <div class="field" style="margin:0; max-width:440px"><label class="f-label">채점표 (④ 문제지와 연결된 문항별 채점표)</label><select id="aigSheetSel"></select></div>
       <div id="aigSheetNote" class="hint"></div>
+    </div>
+    <div class="card" id="aigDirectCard">
+      <h3><span class="chip">A</span>바로 채점 — 버튼 한 번 <span class="badge b-blue" style="padding:0 6px">서버 연결</span></h3>
+      <p class="hint" style="margin-bottom:8px">IB티처스 서버가 Claude에 보내 판정을 받아옵니다. <b>접근 코드</b>가 있는 학교만 쓸 수 있습니다(인제고 선생님은 김영우 선생님께). 스캔은 <b>학생별 파일</b>(예: <code>07.pdf</code>)이 가장 정확합니다 — 파일 이름의 숫자를 학생 번호로 읽고, 아래 표에서 고칠 수 있습니다. 파일 크기에 따라 수십 초에서 몇 분 걸립니다.</p>
+      <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-bottom:10px">
+        <div class="field" style="margin:0; min-width:220px"><label class="f-label">접근 코드</label><input id="aigCode" type="text" autocomplete="off" spellcheck="false" placeholder="예: INJE-XXXX-XXXX" oninput="aigSaveCode()"></div>
+        <div class="field" style="margin:0; flex:1; min-width:260px"><label class="f-label">답안 스캔 (PDF·JPG·PNG — 여러 파일 가능, PDF는 3MB 이하)</label><input id="aigFiles" type="file" multiple accept="application/pdf,image/jpeg,image/png,image/webp" onchange="aigFilesChosen()"></div>
+      </div>
+      <div id="aigFileList"></div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px">
+        <button class="btn btn-primary btn-sm" id="aigRunBtn" onclick="runAiGrading()">⚡ AI로 채점</button>
+        <button class="btn btn-ghost btn-sm" id="aigStopBtn" style="display:none" onclick="aigUI.abort=true; this.textContent='중단 중…'">중단</button>
+        <span id="aigQuota" class="hint" style="margin:0"></span>
+      </div>
+      <div id="aigRunLog" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h3><span class="chip">B</span>직접 — 프롬프트 복사 → claude.ai → 결과 붙여넣기 <span class="eng">no server</span></h3>
+      <p class="hint" style="margin-bottom:8px">서버를 거치지 않습니다. 접근 코드가 없거나, 직접 대화하면서 채점하고 싶을 때 쓰세요.</p>
+      <button class="btn btn-primary btn-sm" onclick="buildAiGradingPrompt()">🤖 채점 프롬프트 만들기</button>
       <div id="aigPromptCard" style="display:none">
         <div style="display:flex; align-items:center; margin:8px 0 6px"><b style="font-size:13px">완성된 프롬프트</b><button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="copyAiGradingPrompt()">📋 전체 복사</button></div>
         <div class="prompt-box" id="aigPromptBox"></div>
@@ -819,8 +835,8 @@ details.gloss p{font-size:13.5px; color:var(--ink2); margin-top:7px}
       </div>
     </div>
     <div class="card">
-      <h3><span class="chip">2</span>판정 결과 붙여넣기</h3>
-      <div class="field"><label class="f-label">AI 답변의 JSON 결과 (코드블록 통째로 붙여넣어도 됩니다)</label><textarea id="aigPaste" rows="6" placeholder='{"students":[{"label":"07","items":[{"no":"1","marks":[{"given":true,"why":"..."}]}]}]}'></textarea></div>
+      <h3><span class="chip">2</span>판정 결과 확인 → 채점표에 반영</h3>
+      <div class="field"><label class="f-label">B 방식일 때 — AI 답변의 JSON 결과 (코드블록 통째로 붙여넣어도 됩니다). A 방식은 자동으로 아래에 표가 뜹니다</label><textarea id="aigPaste" rows="6" placeholder='{"students":[{"label":"07","items":[{"no":"1","marks":[{"given":true,"why":"..."}]}]}]}'></textarea></div>
       <button class="btn btn-primary btn-sm" onclick="parseAiGrading()">판정 결과 읽기</button>
       <div id="aigPreview" style="margin-top:10px"></div>
     </div>
@@ -3055,9 +3071,11 @@ function sheetFromPaper(id){
 /* ── AI 채점 도우미 (베타) — 스캔 답안의 마크 판정을 받아 채점표에 반영 ──
    원칙(docs/AI채점보조-설계.md): AI에게 점수를 묻지 않는다. 마크별 「부여/미부여/판정불가」와
    근거만 받고, 합산은 이 코드가 한다. 판정불가가 섞인 문항은 점수를 쓰지 않고 교사에게 넘긴다.
-   서버·API 없음 — 기존 「프롬프트 복사 → claude.ai → 결과 붙여넣기」 방식 그대로라 전송 여부는
-   전적으로 교사가 정한다. 반영 전 snapshot()으로 되돌릴 수 있고, 근거는 「AI:」 메모로 남는다. */
-let aigUI={parsed:null, sheetId:null};
+   두 경로: A(서버) — 접근 코드가 있으면 /api/ai가 Claude에 보내고 판정 JSON을 받아온다(버튼을 누를 때만 전송).
+   B(붙여넣기) — 프롬프트 복사 → claude.ai → 결과 붙여넣기, 서버를 거치지 않는다.
+   두 경로 모두 같은 JSON 모양이라 parseAiGradingObj → 검토 표 → applyAiGrading으로 합류한다.
+   반영 전 snapshot()으로 되돌릴 수 있고, 근거는 「AI:」 메모로 남는다. */
+let aigUI={parsed:null, sheetId:null, files:[], running:false, abort:false, quota:null};
 
 function aigEligibleSheets(){
   return G().sheets.filter(s=>s.kind==='items'&&s.paperId&&(state.papers||[]).some(p=>p.id===s.paperId));
@@ -3075,6 +3093,7 @@ function renderAiGradingTab(){
   if(prev&&[...sel.options].some(o=>o.value===prev)) sel.value=prev;
   if(note) note.innerHTML=list.length? '' :
     `아직 쓸 수 있는 채점표가 없습니다. <b>④ 평가 설계에서 문제지(마크스킴 포함)를 만들고</b>, 문제지 카드의 「⑤ 채점표로 →」를 누르면 여기서 쓸 수 있는 채점표가 생깁니다. <button class="btn btn-ghost btn-sm" onclick="showStep('assess')">④ 평가 설계로 ›</button>`;
+  aigLoadCode(); renderAigFileList(); aigShowQuota(aigUI.quota);
 }
 
 function buildAiGradingPrompt(){
@@ -3151,14 +3170,19 @@ function copyAiGradingPrompt(){
 
 function parseAiGrading(){
   const box=$('#aigPreview'); if(!box) return;
-  const s=G().sheets.find(x=>x.id===(($('#aigSheetSel')||{}).value));
-  if(!s){ toast('채점표를 먼저 고르세요.'); return; }
-  const pp=aigPaper(s);
-  if(!pp||s.crit.length!==pp.items.length){ toast('이 채점표와 연결된 문제지를 찾을 수 없습니다.'); return; }
   const obj=extractJson(($('#aigPaste')||{}).value, o=>Array.isArray(o.students)? o.students.length : 0);
   if(!obj||!Array.isArray(obj.students)||!obj.students.length){
     box.innerHTML='<div class="callout warn">JSON에서 students 배열을 찾지 못했습니다. AI 답변의 코드블록을 통째로 붙여넣어 주세요.</div>'; return;
   }
+  parseAiGradingObj(obj);
+}
+/* A(서버)·B(붙여넣기) 두 경로가 같은 검토 표로 모인다 — 판정 JSON의 모양이 같으므로 */
+function parseAiGradingObj(obj, sheetId){
+  const box=$('#aigPreview'); if(!box) return false;
+  const s=G().sheets.find(x=>x.id===(sheetId||(($('#aigSheetSel')||{}).value)));
+  if(!s){ toast('채점표를 먼저 고르세요.'); return false; }
+  const pp=aigPaper(s);
+  if(!pp||s.crit.length!==pp.items.length){ toast('이 채점표와 연결된 문제지를 찾을 수 없습니다.'); return false; }
   const g=G(); const issues=[];
   const rows=obj.students.slice(0,80).map(stu=>{
     const label=flatText(stu&&stu.label).slice(0,12)||'?';
@@ -3192,6 +3216,7 @@ function parseAiGrading(){
   rows.forEach(r=>{ if(r.sid){ if(seen[r.sid]) issues.push(`번호 「${r.label}」: 결과에 같은 학생이 두 번 있습니다 — 뒤의 판정으로 반영됩니다`); seen[r.sid]=1; } });
   aigUI.parsed={rows, issues, sheetId:s.id, sig:aigSig(s,pp)};
   renderAigPreview();
+  return true;
 }
 
 function renderAigPreview(){
@@ -3251,6 +3276,136 @@ function applyAiGrading(){
   aigUI.parsed=null; const ta=$('#aigPaste'); if(ta) ta.value='';
   renderGradingUI(); showTab('grading','input');
   toast(`반영했습니다 — 점수 ${nScore}칸${nHold?`, 교사 확인 필요 ${nHold}칸(근거는 📝 메모에)`:''}. 최종 확정은 선생님 몫입니다.`);
+}
+
+
+/* ── A. 바로 채점 — IB티처스 서버(/api/ai)를 거쳐 Claude에 보내고 판정 JSON을 받는다 ──
+   서버가 돌려주는 JSON은 B(붙여넣기) 경로와 같은 모양이라 parseAiGradingObj → 검토 표 → 반영으로 합류한다.
+   보내는 것: 접근 코드, 문항·마크스킴, 명단 라벨(번호), 선택한 스캔 파일. 보내지 않는 것: 점수·메모·이름·그 밖의 작업 내용.
+   접근 코드는 localStorage에만 두고 작업 파일(JSON)에는 넣지 않는다. */
+const AIG_MAX_FILE=3*1024*1024; /* 원본 기준. base64로 ×4/3 커져 서버 요청 상한(4.5MB) 안에 들어오는 선 */
+function aigSaveCode(){ try{ localStorage.setItem('ibt_ai_code', (($('#aigCode')||{}).value||'').trim()); }catch(e){} }
+function aigLoadCode(){ const el=$('#aigCode'); if(!el) return; try{ if(!el.value) el.value=localStorage.getItem('ibt_ai_code')||''; }catch(e){} }
+/* 파일 이름에서 학생 번호 추정: 「07.pdf」「12번 답안.jpg」「2학년3반07.pdf」→ 07/12/07. 날짜(2026-10-27)는 번호가 아니므로 먼저 지운다 */
+function aigGuessLabel(name){
+  const stem=String(name||'').replace(/\.[^.]+$/,'').replace(/\d{4}[-._]?\d{2}[-._]?\d{2}/g,' ');
+  const m=stem.match(/(\d{1,3})\s*번/); if(m) return m[1];
+  const g=stem.match(/(?<!\d)\d{1,3}(?!\d)/g); return g? g[g.length-1] : '';
+}
+function aigFileType(f){ const t=f.type||''; if(!t||t==='application/octet-stream') return /\.pdf$/i.test(f.name)? 'application/pdf' : t; return t; }
+function aigFilesChosen(){
+  const inp=$('#aigFiles'); const files=inp? [...inp.files] : [];
+  aigUI.files=files.map(f=>({file:f, name:f.name, type:aigFileType(f), size:f.size, label:aigGuessLabel(f.name), status:'', error:''}));
+  renderAigFileList();
+}
+function renderAigFileList(){
+  const el=$('#aigFileList'); if(!el) return;
+  const L=aigUI.files;
+  if(!L.length){ el.innerHTML=''; return; }
+  const rows=L.map((e,i)=>{
+    const big=e.type==='application/pdf'&&e.size>AIG_MAX_FILE;
+    const kind=e.type==='application/pdf'? 'PDF' : /^image\/(jpeg|png|webp)$/.test(e.type)? '사진(자동 축소)' : '지원 안 함';
+    const st=e.error? `<span class="badge b-amber">${esc(e.error)}</span>` : e.status? esc(e.status) : big? '<span class="badge b-amber">3MB 초과 — 해상도를 낮춰 다시 스캔</span>' : '';
+    return `<tr><td style="font-size:12.5px">${esc(e.name)}</td><td style="font-size:12px; color:#64748b; white-space:nowrap">${kind} · ${(e.size/1048576).toFixed(1)}MB</td><td><input type="text" value="${esc(e.label)}" placeholder="번호" style="width:64px; padding:3px 6px; font-size:12.5px" onchange="aigUI.files[${i}].label=this.value.trim()"></td><td style="font-size:12px">${st}</td></tr>`;
+  }).join('');
+  el.innerHTML=`<div style="overflow-x:auto"><table class="tbl" style="min-width:420px"><tr><th>파일</th><th>종류</th><th>학생 번호</th><th>상태</th></tr>${rows}</table></div>`;
+}
+/* PDF는 그대로, 사진은 긴 변 2000px·JPEG로 줄여서 보낸다 — 판독에 충분하고 요청 크기 상한(4MB) 안에 들어온다 */
+function aigReadFile(e){
+  return new Promise((resolve,reject)=>{
+    const f=e.file;
+    if(e.type==='application/pdf'){
+      const r=new FileReader();
+      r.onload=()=>resolve({name:f.name,type:'application/pdf',data:String(r.result).replace(/^data:[^,]*,/,'')});
+      r.onerror=()=>reject(new Error('파일을 읽지 못했습니다')); r.readAsDataURL(f); return;
+    }
+    if(!/^image\/(jpeg|png|webp)$/.test(e.type)){ reject(new Error('PDF·JPG·PNG·WEBP만 됩니다')); return; }
+    const url=URL.createObjectURL(f); const img=new Image();
+    img.onload=()=>{ URL.revokeObjectURL(url);
+      try{
+        const max=2000, sc=Math.min(1, max/Math.max(img.naturalWidth,img.naturalHeight));
+        const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.naturalWidth*sc)); c.height=Math.max(1,Math.round(img.naturalHeight*sc));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        resolve({name:f.name,type:'image/jpeg',data:c.toDataURL('image/jpeg',0.85).replace(/^data:[^,]*,/,'')});
+      }catch(err){ reject(new Error('사진을 줄이지 못했습니다 — PDF로 스캔해 주세요')); } };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('사진을 열지 못했습니다')); };
+    img.src=url;
+  });
+}
+function aigShowQuota(q){
+  const el=$('#aigQuota'); if(!el) return;
+  const warn=aigUI.ledgerFailed? ' · ⚠ 사용량 기록 실패 — 관리자에게 알려 주세요' : '';
+  if(!q||q.enabled===false){ aigUI.quota=null; el.textContent=warn.replace(/^ · /,''); return; }
+  aigUI.quota=q; el.textContent=`이번 달 사용 ${q.used}/${q.limit}회${warn}`;
+}
+async function runAiGrading(){
+  if(aigUI.running) return;
+  const sel=$('#aigSheetSel'); const s=G().sheets.find(x=>x.id===(sel&&sel.value));
+  if(!s){ toast('먼저 ④ 문제지와 연결된 채점표를 만들어 주세요.'); return; }
+  const pp=aigPaper(s);
+  if(!pp){ toast('이 채점표와 연결된 문제지를 찾을 수 없습니다 — 문제지가 삭제되었으면 다시 만들어 주세요.'); return; }
+  if(s.crit.length!==pp.items.length){ toast('채점표와 문제지의 문항 수가 다릅니다 — 문제지에서 채점표를 새로 만들어 주세요.'); return; }
+  const g=G(); if(!g.roster.length){ toast('먼저 「1. 명단·채점표」에서 학생 명단을 만들어 주세요.'); showTab('grading','setup'); return; }
+  const codeEl=$('#aigCode'); const code=((codeEl&&codeEl.value)||'').trim();
+  if(!code){ toast('접근 코드를 넣어 주세요.'); if(codeEl) codeEl.focus(); return; }
+  const L=aigUI.files.filter(e=>!(e.type==='application/pdf'&&e.size>AIG_MAX_FILE));
+  if(!L.length){ toast('답안 스캔 파일을 골라 주세요(PDF는 3MB 이하).'); return; }
+  const labels=g.roster.map(x=>x.label);
+  if(!nameRiskConfirm('서버를 거쳐 AI에 보낼 채점 요청(명단 라벨·문항 포함)')) return;
+  if(!confirm(`파일 ${L.length}개, 문항·마크스킴, 명단 라벨 ${labels.length}개를 IB티처스 서버를 거쳐 Anthropic(미국)에 보냅니다(접근 코드는 IB티처스 서버에서 확인에만 씁니다).\n스캔과 명단에 학생 이름이 없는지(번호·가명만) 확인했습니까?\n\n확인 = 보내기 · 취소 = 중단`)) return;
+  /* 시작 시점의 채점표를 못 박는다 — 몇 분 뒤 돌아온 판정은 이 채점표·이 문제지·이 명단일 때만 표로 띄운다 */
+  const bind={sheetId:s.id, paperId:s.paperId, sig:aigSig(s,pp), roster:labels.join('|')};
+  aigUI.sheetId=s.id; aigUI.running=true; aigUI.abort=false; aigUI.ledgerFailed=false;
+  const btn=$('#aigRunBtn'), stop=$('#aigStopBtn'), log=$('#aigRunLog');
+  /* 처리 중에는 채점표·파일·코드를 바꿀 수 없게 */
+  const lock=on=>['aigSheetSel','aigFiles','aigCode','aigRunBtn'].forEach(id=>{ const x=$('#'+id); if(x) x.disabled=on; });
+  lock(true); if(stop){ stop.style.display=''; stop.textContent='중단'; }
+  const students=[]; let done=0, failed=0, stopKind='';
+  try{
+    const paper={title:pp.title, items:pp.items.map(it=>({no:it.no,text:it.text,marks:it.marks,ms:(it.ms||[]).map(m=>({code:m.code,label:m.label,pts:m.pts,ft:!!m.ft}))}))};
+    for(let i=0;i<L.length;i++){
+      const e=L[i];
+      if(aigUI.abort){ e.status='중단'; renderAigFileList(); continue; }
+      e.status='읽는 중…'; e.error=''; renderAigFileList();
+      if(log) log.innerHTML=`<div class="callout info" style="font-size:12.5px">채점 중 ${i+1}/${L.length} — ${esc(e.name)} (파일 크기에 따라 수십 초~몇 분)</div>`;
+      let file; try{ file=await aigReadFile(e); }catch(err){ e.error=err.message; failed++; renderAigFileList(); continue; }
+      e.status='AI 판정 중…'; renderAigFileList();
+      let r=null, j=null;
+      try{
+        r=await fetch('/api/ai',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({code, task:'mark', payload:{paper, labels, hint:e.label, files:[file]}})});
+        try{ j=await r.json(); }catch(_){ j=null; }
+      }catch(err){ e.error='서버에 연결하지 못했습니다'; failed++; renderAigFileList(); continue; }
+      if(!j){ e.error=(r&&r.status===413)? '파일이 너무 큽니다(PDF 3MB 이하) — 해상도를 낮춰 다시 스캔' : `서버 오류(${r?r.status:'?'})`; failed++; renderAigFileList(); continue; }
+      if(j.ledger==='failed') aigUI.ledgerFailed=true;
+      if(j.quota) aigShowQuota(j.quota); else aigShowQuota(aigUI.quota);
+      if(!j.ok){
+        e.error=j.error||'오류'; failed++; renderAigFileList();
+        /* 코드·한도·설정 문제는 다음 파일도 똑같이 실패한다 — 바로 멈추고 이유를 크게 보여 준다 */
+        if(['auth','quota','credit','config','origin'].includes(j.kind)){ stopKind=j.kind; if(log) log.innerHTML=`<div class="callout warn" style="font-size:12.5px">${esc(j.error||'')}</div>`; break; }
+        continue;
+      }
+      const got=((j.result&&Array.isArray(j.result.students))? j.result.students : []).filter(st=>st&&typeof st==='object');
+      got.forEach(st=>{ if(!flatText(st.label).trim()&&e.label) st.label=e.label; });
+      students.push(...got);
+      e.status=got.length? `완료 — 학생 ${got.map(x=>flatText(x.label)).join(', ')}` : '완료 — 답안을 찾지 못함'; done++;
+      renderAigFileList();
+    }
+  }catch(err){
+    console.error(err); failed++;
+    if(log) log.innerHTML=`<div class="callout warn" style="font-size:12.5px">처리 중 오류가 났습니다 — 받은 결과까지는 아래에 보존합니다.</div>`; stopKind=stopKind||'client';
+  }finally{
+    aigUI.running=false; lock(false); if(stop) stop.style.display='none';
+  }
+  const ledgerNote=aigUI.ledgerFailed? ' · ⚠ 사용량 기록 실패 — 관리자에게 알려 주세요' : '';
+  if(log&&!stopKind) log.innerHTML=`<div class="callout ${failed||ledgerNote?'warn':'good'}" style="font-size:12.5px">끝났습니다 — 성공 ${done}개${failed?`, 실패 ${failed}개(위 표의 상태 참고)`:''}${aigUI.abort?' · 중단됨':''}${ledgerNote}</div>`;
+  if(!students.length){ if(!stopKind) toast('반영할 판정이 없습니다.'); return; }
+  aigUI.lastResult={students};
+  const cur=G().sheets.find(x=>x.id===bind.sheetId); const cpp=cur&&aigPaper(cur);
+  const same=cur&&cpp&&cur.paperId===bind.paperId&&aigSig(cur,cpp)===bind.sig&&G().roster.map(x=>x.label).join('|')===bind.roster;
+  if(same&&parseAiGradingObj({students}, bind.sheetId)){ revealAndScroll($('#aigPreview')); toast(`판정 ${students.length}명 — 아래 표에서 확인하고 「채점표에 반영」을 누르세요.`); return; }
+  /* 그사이 채점표·명단·작업 파일이 바뀌었으면 자동으로 붙이지 않는다 — 돈 내고 받은 판정은 2번 칸에 보존 */
+  const ta=$('#aigPaste'); if(ta) ta.value=JSON.stringify({students});
+  toast('채점하는 동안 채점표나 명단이 바뀌어 자동으로 붙이지 않았습니다 — 판정 결과를 2번 칸에 넣어 두었으니, 맞는 채점표를 고른 뒤 「판정 결과 읽기」를 누르세요.');
 }
 
 /* ── 문항 분석(QLA) — 문항별 채점표에서만 ──
@@ -5050,7 +5205,7 @@ const SUBJECTS={
 };
 function renderSubjectUI(){
   const p=SUBJ();
-  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.11`;
+  const v=$('#verLabel'); if(v) v.textContent=`IB 수업설계 스튜디오 · ${p.short} · v0.12`;
   /* 과목별 화면 문구 — 자리표시자·라벨 */
   const setPh=(sel,k)=>{const el=$(sel); if(el) el.placeholder=uiText(k);};
   setPh('#f-training','training'); setPh('#f-resources','resources'); setPh('#ls-note','note');

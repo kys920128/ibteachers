@@ -5,3 +5,5 @@ guides/
 .claude/
 *.pdf
 *.zip
+grading/
+Claude outputs/
